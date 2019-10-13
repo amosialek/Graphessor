@@ -1,0 +1,8 @@
+20.09.2019
+Jak poradzić sobie z kodami QR, strukturalnymi elementami? (epsilon=0, ale pomiędzy jest bardzo dużo zmian koloru)
+Czym są linie przerywane? - opcjonalne 
+Z czym się porównywać? Czy jest jakiś benchmark kompresji zdjęć w pracach naukowych? - Maciej Woźniak
+Czy są prace do których powinienem się odnieść jak chodzi o hipergrafy/gramatyki grafowe?
+gramatyki grafowe - można przychodzić
+następne spotkanie - około 20.10.2019
+
