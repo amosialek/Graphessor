@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
 
-add_library(Logic Image.cpp Image.hpp)
+add_library(Logic Image.cpp Image.hpp Productions.cpp)
 target_include_directories(Logic PUBLIC "${PROJECT_SOURCE_DIR}/src/logic")
+target_include_directories(Logic PUBLIC "${PROJECT_SOURCE_DIR}/src/models")

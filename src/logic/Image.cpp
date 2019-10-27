@@ -39,3 +39,8 @@ int Image::height()
 {
     return img.height();
 }
+
+std::tuple<int, int, int> Image::getPixel(int x, int y)
+{
+    return std::make_tuple(view[y * width() + x][0],view[y * width() + x][1],view[y * width() + x][2]);   
+}

@@ -7,5 +7,6 @@ Pixel::Pixel(int x, int y, int r, int g, int b)
     this->r=r;
     this->g=g;
     this->b=b;
-    this->Produce = [](){};
+    this->_break=0;
+    this->label='P';
 }
