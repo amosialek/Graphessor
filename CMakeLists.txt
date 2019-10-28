@@ -59,7 +59,7 @@ include(GoogleTest)
 add_executable(example example.cpp)
 add_subdirectory("${PROJECT_SOURCE_DIR}/test/logic")
 target_link_libraries(example gtest)
-
+target_link_libraries(example Models)
 target_link_libraries(example LogicTest)
 target_link_libraries(example Logic)
 # gtest_discover_tests(example)
