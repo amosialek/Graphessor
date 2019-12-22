@@ -1,0 +1,9 @@
+#ifndef __GRAPHESSORCONSTANTS_HPP__
+#define __GRAPHESSORCONSTANTS_HPP__
+
+#define NODELABEL_F "F"
+#define NODELABEL_P "P"
+#define NODELABEL_I "I"
+#define NODELABEL_B "B"
+
+#endif // __GRAPHESSORCONSTANTS_HPP__

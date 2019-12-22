@@ -1,4 +1,5 @@
 #include "Pixel.hpp"
+#include "GraphessorConstants.hpp"
 //#include <iostream>
 Pixel::Pixel(int x, int y, int r, int g, int b)
 {
@@ -7,8 +8,8 @@ Pixel::Pixel(int x, int y, int r, int g, int b)
     this->r=r;
     this->g=g;
     this->b=b;
-    this->_break=0;
-    this->label='P';
+    this->_break = 0;
+    this->label = NODELABEL_P;
 }
 
 Pixel::Pixel(int x, int y, std::string label)
