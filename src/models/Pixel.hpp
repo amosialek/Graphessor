@@ -6,9 +6,9 @@ class Pixel
 {
 
     public:
-        int r, g, b, x, y;
+        int r, g, b, x, y, breakLevel;
         std::string label;
-        bool _break;
+        bool _break, visited;
 
         Pixel(int x, int y, int r, int g, int b);
         Pixel(int x, int y, std::string label);
@@ -24,6 +24,7 @@ class Pixel
             this->b=other.b;
             this->_break=other._break;
             this->label=other.label;
+            this->breakLevel=other.breakLevel;
         };
 };
 #endif // __PIXEL_HPP__

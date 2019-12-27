@@ -3,6 +3,7 @@
 #include "GraphessorConstants.hpp"
 #include <linq.h>
 #include <algorithm>
+#include <queue>
 
 using namespace linq;
 
@@ -96,6 +97,7 @@ void P2(
                 for(int i=0;i<=3;i++)
                 {
                     auto newIEdge = add_vertex(*(new Pixel((x+graph[neighbours[i]].x)/2,(y+graph[neighbours[i]].y)/2, NODELABEL_I)), graph);
+                    graph[newIEdge].breakLevel = graph[e].breakLevel+1;
                     IEdgesToBeAdded.push_back(newIEdge);
                     add_edge(neighbours[i], newIEdge, graph);
                     add_edge(newPixel, newIEdge, graph);
@@ -116,7 +118,7 @@ void P2(
     listOfIEdges.erase(std::remove_if(listOfIEdges.begin(),listOfIEdges.end(),[IEdgesToBeDeleted](vertex_descriptor v){return IEdgesToBeDeleted.find(v) != IEdgesToBeDeleted.end();}),listOfIEdges.end());
 }
 
-std::vector<vertex_descriptor> getAdjacentVertices(vertex_descriptor v, MyGraph g)
+std::vector<vertex_descriptor> GetAdjacentVertices(vertex_descriptor v, MyGraph g)
 {
     std::vector<vertex_descriptor> result;
     
@@ -149,16 +151,16 @@ void P3(MyGraph& graph, std::vector<vertex_descriptor>& listOfBEdges, Image imag
     std::vector<vertex_descriptor> toBeAdded;
     std::vector<vertex_descriptor> leftPixels;
     std::vector<vertex_descriptor> rightPixels;
-    for(vertex_descriptor e : listOfBEdges)
+    for(vertex_descriptor BEdge : listOfBEdges)
     {
-        if(graph[e].label==NODELABEL_B)
+        if(graph[BEdge].label==NODELABEL_B)
         {
             leftPixels.clear();
             rightPixels.clear();
             neighbours.clear();
 
 
-            std::tie(currentNeighbour, endOfNeighbours) = adjacent_vertices(e, graph);
+            std::tie(currentNeighbour, endOfNeighbours) = adjacent_vertices(BEdge, graph);
             for(;currentNeighbour!=endOfNeighbours;++currentNeighbour)
             {
                 neighbours.push_back(*currentNeighbour);
@@ -170,27 +172,25 @@ void P3(MyGraph& graph, std::vector<vertex_descriptor>& listOfBEdges, Image imag
             }
             vertex_descriptor leftPixel = neighbours[0], rightPixel = neighbours[1];
             bool isVertical = graph[neighbours[0]].x==graph[neighbours[1]].x;
-            auto leftAdjacent = getAdjacentVertices(neighbours[0], graph);
-            auto rightAdjacent = getAdjacentVertices(neighbours[1], graph);
+            auto leftAdjacent = GetAdjacentVertices(neighbours[0], graph);
+            auto rightAdjacent = GetAdjacentVertices(neighbours[1], graph);
             auto leftIEdges = leftAdjacent | where([graph](vertex_descriptor v){return graph[v].label==NODELABEL_I;});
             auto rightIEdges = rightAdjacent | where([graph](vertex_descriptor v){return graph[v].label==NODELABEL_I;});
 
-            auto common2 = (leftIEdges | where([graph](vertex_descriptor v){return graph[v].label==NODELABEL_I;}) 
-                | intersect(rightIEdges | where([graph](vertex_descriptor v){return graph[v].label==NODELABEL_I;})));
+            auto common2 = (leftIEdges | intersect(rightIEdges));
             if(!common2.empty())
             {
-                vertex_descriptor tmpIEdge = common2 | first;
                 continue; //there is common IEdge between neighbour pixels, so this B cannot be used in P3 production
             }
             
             for(const auto &edge : leftIEdges)
             {
-                auto adjacentElems = getAdjacentVertices(edge, graph);
+                auto adjacentElems = GetAdjacentVertices(edge, graph);
                 leftPixels.insert(leftPixels.end(), adjacentElems.begin(), adjacentElems.end()); 
             }
             for(const auto &edge : rightIEdges)
             {
-                auto adjacentElems = getAdjacentVertices(edge, graph);
+                auto adjacentElems = GetAdjacentVertices(edge, graph);
                 rightPixels.insert(rightPixels.end(), adjacentElems.begin(), adjacentElems.end()); 
             }
             auto common = leftPixels | intersect(rightPixels);
@@ -200,11 +200,11 @@ void P3(MyGraph& graph, std::vector<vertex_descriptor>& listOfBEdges, Image imag
                 continue;
             }
             vertex_descriptor centerPixel = common | first;
-            auto adjacentVertices = getAdjacentVertices(centerPixel, graph);
+            auto adjacentVertices = GetAdjacentVertices(centerPixel, graph);
             vertex_descriptor leftI = leftIEdges | where([adjacentVertices](vertex_descriptor v){return adjacentVertices | contains(v);}) | first;
             vertex_descriptor rightI = rightIEdges | where([adjacentVertices](vertex_descriptor v){return adjacentVertices | contains(v);}) | first;
             auto FEdges =  adjacentVertices | where([graph](vertex_descriptor v){return graph[v].label==NODELABEL_F;});
-            auto FEdgesOrdered = LINQ(from(v, FEdges) orderby(GetDistance(graph[v], graph[e])));
+            auto FEdgesOrdered = LINQ(from(v, FEdges) orderby(GetDistance(graph[v], graph[BEdge])));
             auto FEdge =*(FEdgesOrdered.begin());
             int x=(graph[leftPixel].x + graph[rightPixel].x)/2,
                 y=(graph[leftPixel].y + graph[rightPixel].y)/2;
@@ -214,27 +214,72 @@ void P3(MyGraph& graph, std::vector<vertex_descriptor>& listOfBEdges, Image imag
             graph[newPixel].r = r;
             graph[newPixel].g = g;
             graph[newPixel].b = b;
-            add_edge(newPixel, e, graph);
+            add_edge(newPixel, BEdge, graph);
             add_edge(newPixel, FEdge, graph);
 
-            auto temp = getAdjacentVertices(leftPixel, graph);
-            auto leftIEdge =  temp | intersect(getAdjacentVertices(centerPixel,graph)) | first;
-            temp = getAdjacentVertices(rightPixel, graph);
-            auto rightIEdge = temp | intersect(getAdjacentVertices(centerPixel,graph)) | first;
+            auto temp = GetAdjacentVertices(leftPixel, graph);
+            auto leftIEdge =  temp | intersect(GetAdjacentVertices(centerPixel,graph)) | first;
+            temp = GetAdjacentVertices(rightPixel, graph);
+            auto rightIEdge = temp | intersect(GetAdjacentVertices(centerPixel,graph)) | first;
 
             add_edge(newPixel, leftIEdge, graph);
             add_edge(newPixel, rightIEdge, graph);
 
             auto newBEdge = add_vertex(*(new Pixel((graph[leftPixel].x+x)/2, (graph[leftPixel].y+y)/2, NODELABEL_B)), graph);
-            graph[e].x = (graph[rightPixel].x+x)/2;
-            graph[e].y = (graph[rightPixel].y+y)/2;
+            graph[BEdge].x = (graph[rightPixel].x+x)/2;
+            graph[BEdge].y = (graph[rightPixel].y+y)/2;
             
             add_edge(leftPixel, newBEdge,graph);
             add_edge(newPixel, newBEdge,graph);
 
-            remove_edge(e, leftPixel, graph);
+            remove_edge(BEdge, leftPixel, graph);
             toBeAdded.push_back(newBEdge);
         }
     }
     listOfBEdges.insert(listOfBEdges.end(), toBeAdded.begin(), toBeAdded.end());
+}
+
+std::queue<vertex_descriptor> toBeVisited;
+
+void P6(
+    MyGraph& graph, 
+    std::vector<vertex_descriptor>& listOfIEdges
+)
+{
+    for(auto IEdge: listOfIEdges)
+    {
+        graph[IEdge].visited=0;
+    }
+    for(auto IEdge: listOfIEdges)
+    {
+        if(graph[IEdge]._break and !graph[IEdge].visited)
+        {
+            std::vector<vertex_descriptor> adjacentEdges;
+            toBeVisited.push(IEdge);
+            while(!toBeVisited.empty()) //BFS through IEdges with break==0
+            {
+                auto currentIEdge = toBeVisited.front();
+                toBeVisited.pop();
+                auto adjacentVertices = GetAdjacentVertices(currentIEdge, graph);
+                for(auto v: adjacentVertices)
+                {
+                    auto adjacentEdgesTemp = GetAdjacentVertices(v, graph);
+                    adjacentEdges.insert(adjacentEdges.end(),adjacentEdgesTemp.begin(), adjacentEdgesTemp.end());
+                }
+                auto adjacentIEdges = adjacentEdges 
+                    | where([graph, currentIEdge](vertex_descriptor v){
+                        return true
+                            && graph[v].label==NODELABEL_I 
+                            && graph[v]._break==0 
+                            && graph[v].breakLevel<graph[currentIEdge].breakLevel;}
+                            );
+                for(auto a : adjacentIEdges)
+                {
+                    graph[a]._break=1;
+                    toBeVisited.push(a);
+                }
+            }
+        }
+    }
+
 }

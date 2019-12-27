@@ -9,6 +9,7 @@ Pixel::Pixel(int x, int y, int r, int g, int b)
     this->g=g;
     this->b=b;
     this->_break = 0;
+    this->breakLevel=0;
     this->label = NODELABEL_P;
 }
 
@@ -19,6 +20,7 @@ Pixel::Pixel(int x, int y, std::string label)
     this->r=this->g=this->b=-1;
     this->_break=0;
     this->label=label;
+    this->breakLevel=0;
 }
 
 Pixel::Pixel()
@@ -39,6 +41,7 @@ Pixel::Pixel(const Pixel& other)
     this->_break=other._break;
     this->label=other.label;
     //std::cout<<"copied Pixel"<<std::endl;
+    this->breakLevel=other.breakLevel;
 }
 
 Pixel::~Pixel(){}

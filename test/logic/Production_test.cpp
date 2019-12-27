@@ -59,6 +59,7 @@ TEST(P2Test, StartingProduction)
     auto p4 = boost::add_vertex(*(new Pixel(width-1,height-1,r,g,b)), graph);
     auto I = boost::add_vertex(*(new Pixel(width/2,height/2, NODELABEL_I)), graph);
     graph[I]._break = true;
+    graph[I].breakLevel = 3;
     boost::add_edge(p1,I,graph);
     boost::add_edge(p2,I,graph);
     boost::add_edge(p3,I,graph);
@@ -69,7 +70,11 @@ TEST(P2Test, StartingProduction)
     P2(graph,IEdges,*image);
     myEdgeWriter<MyGraph> w(graph);
     //boost::write_graphviz(cerr, graph,w );
-    EXPECT_EQ(1,1);
+    EXPECT_EQ(IEdges.size(),4);
+    for(auto IEdge : IEdges)
+    {
+        EXPECT_EQ(graph[IEdge].breakLevel,4);
+    }
 }
 
 TEST(P3Test, P3AfterP2AfterP1)
@@ -87,4 +92,32 @@ TEST(P3Test, P3AfterP2AfterP1)
     myEdgeWriter<MyGraph> w(graph);
     boost::write_graphviz(cerr, graph, w);
     EXPECT_EQ(1,1);
+}
+
+TEST(P6Test, OneOfTwo)
+{
+    auto image = new Image("./test_files/face.bmp"); 
+    MyGraph graph;
+    int r=0,g=0,b=0;
+    int width=10;
+    auto p1 = boost::add_vertex(*(new Pixel(-width,0,r,g,b)), graph);
+    auto p2 = boost::add_vertex(*(new Pixel(width,0,r,g,b)), graph);
+    auto IEdge1 = boost::add_vertex(*(new Pixel(-2*width,0,NODELABEL_I)), graph);
+    auto IEdge2 = boost::add_vertex(*(new Pixel(2*width, 0,NODELABEL_I)), graph);
+    auto IEdge = boost::add_vertex(*(new Pixel(0, 0, NODELABEL_I)), graph);
+    graph[IEdge]._break = true;
+    graph[IEdge].breakLevel=5;
+    graph[IEdge].breakLevel=4;
+    graph[IEdge2].breakLevel=5;
+    boost::add_edge(p1,IEdge,graph);
+    boost::add_edge(p2,IEdge,graph);
+    boost::add_edge(p1,IEdge1,graph);
+    boost::add_edge(p2,IEdge2,graph);
+    vector<vertex_descriptor> IEdges;
+    IEdges.push_back(IEdge);
+    IEdges.push_back(IEdge1);
+    IEdges.push_back(IEdge2);
+    P6(graph, IEdges);
+    EXPECT_EQ(graph[IEdge1]._break,1);
+    EXPECT_EQ(graph[IEdge2]._break,0);
 }
