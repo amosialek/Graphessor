@@ -5,5 +5,6 @@
 #define NODELABEL_P "P"
 #define NODELABEL_I "I"
 #define NODELABEL_B "B"
+#define NODELABEL_S "S"
 
 #endif // __GRAPHESSORCONSTANTS_HPP__

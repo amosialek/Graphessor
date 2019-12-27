@@ -2,6 +2,7 @@
 #include "Productions.hpp"
 #include "mygraph.hpp"
 #include "Pixel.hpp"
+#include "GraphessorConstants.hpp"
 
 #include <boost/graph/graphviz.hpp>
 using namespace std;
@@ -31,6 +32,16 @@ private:
 };
 
 
+TEST(P1Test, StartingProduction)
+{
+    auto image = new Image("./test_files/face.bmp"); 
+    vector<vertex_descriptor> IEdges;
+    vector<vertex_descriptor> BEdges;
+    MyGraph graph;
+    auto S = boost::add_vertex(*(new Pixel(0,0, NODELABEL_S)), graph);
+    P1(graph, S, IEdges, BEdges, *image);
+}
+
 TEST(P2Test, StartingProduction)
 {
     auto image = new Image("./test_files/face.bmp"); 
@@ -46,16 +57,34 @@ TEST(P2Test, StartingProduction)
     auto p3 = boost::add_vertex(*(new Pixel(0,height-1,r,g,b)), graph);
     std::tie(r,g,b) = image->getPixel(width-1, height-1);
     auto p4 = boost::add_vertex(*(new Pixel(width-1,height-1,r,g,b)), graph);
-    auto I = boost::add_vertex(*(new Pixel(width/2,height/2,"I")), graph);
+    auto I = boost::add_vertex(*(new Pixel(width/2,height/2, NODELABEL_I)), graph);
     graph[I]._break = true;
     boost::add_edge(p1,I,graph);
     boost::add_edge(p2,I,graph);
     boost::add_edge(p3,I,graph);
     boost::add_edge(p4,I,graph);
     vector<vertex_descriptor> IEdges;
+    vector<vertex_descriptor> BEdges;
     IEdges.push_back(I);
     P2(graph,IEdges,*image);
     myEdgeWriter<MyGraph> w(graph);
-    boost::write_graphviz(cerr, graph,w );
+    //boost::write_graphviz(cerr, graph,w );
+    EXPECT_EQ(1,1);
+}
+
+TEST(P3Test, P3AfterP2AfterP1)
+{
+    auto image = new Image("./test_files/face.bmp"); 
+    vector<vertex_descriptor> IEdges;
+    vector<vertex_descriptor> BEdges;
+    MyGraph graph;
+    auto S = boost::add_vertex(*(new Pixel(0,0, NODELABEL_S)), graph);
+    P1(graph, S, IEdges, BEdges, *image);
+    graph[S]._break=1;
+    P2(graph,IEdges, *image);
+    cout<<"BEDGES SIZE: "<<BEdges.size()<<endl;
+    P3(graph,BEdges,*image);
+    myEdgeWriter<MyGraph> w(graph);
+    boost::write_graphviz(cerr, graph, w);
     EXPECT_EQ(1,1);
 }
