@@ -64,7 +64,6 @@ void P2(
 {
     vertex_iterator currentEdge, lastEdge;
     std::tie(currentEdge, lastEdge) = vertices(graph);
-    std::cout<<(*currentEdge)<<std::endl;
 
     adjacency_iterator currentNeighbour, endOfNeighbours;
     std::vector<vertex_descriptor> neighbours;
@@ -144,7 +143,6 @@ void P3(MyGraph& graph, std::vector<vertex_descriptor>& listOfBEdges, Image imag
 {
     vertex_iterator currentEdge, lastEdge;
     std::tie(currentEdge, lastEdge) = vertices(graph);
-    std::cout<<(*currentEdge)<<std::endl;
 
     adjacency_iterator currentNeighbour, endOfNeighbours;
     std::vector<vertex_descriptor> neighbours;
@@ -153,7 +151,6 @@ void P3(MyGraph& graph, std::vector<vertex_descriptor>& listOfBEdges, Image imag
     std::vector<vertex_descriptor> rightPixels;
     for(vertex_descriptor e : listOfBEdges)
     {
-        std::cout<<"---------------------another B edge---------------------"<<std::endl;
         if(graph[e].label==NODELABEL_B)
         {
             leftPixels.clear();
@@ -172,8 +169,6 @@ void P3(MyGraph& graph, std::vector<vertex_descriptor>& listOfBEdges, Image imag
                 continue;
             }
             vertex_descriptor leftPixel = neighbours[0], rightPixel = neighbours[1];
-            std::cout<<"neighbours[0] "<<graph[neighbours[0]].x<<" "<<graph[neighbours[0]].y<<std::endl;
-            std::cout<<"neighbours[1] "<<graph[neighbours[1]].x<<" "<<graph[neighbours[1]].y<<std::endl;
             bool isVertical = graph[neighbours[0]].x==graph[neighbours[1]].x;
             auto leftAdjacent = getAdjacentVertices(neighbours[0], graph);
             auto rightAdjacent = getAdjacentVertices(neighbours[1], graph);
@@ -184,9 +179,7 @@ void P3(MyGraph& graph, std::vector<vertex_descriptor>& listOfBEdges, Image imag
                 | intersect(rightIEdges | where([graph](vertex_descriptor v){return graph[v].label==NODELABEL_I;})));
             if(!common2.empty())
             {
-                std::cout<<"commonIEdge"<<std::endl;
                 vertex_descriptor tmpIEdge = common2 | first;
-                std::cout<<"x: "<<graph[tmpIEdge].x<<", y: "<<graph[tmpIEdge].y<<std::endl;
                 continue; //there is common IEdge between neighbour pixels, so this B cannot be used in P3 production
             }
             
@@ -206,24 +199,13 @@ void P3(MyGraph& graph, std::vector<vertex_descriptor>& listOfBEdges, Image imag
                 std::cerr<<"P3: no common pixel found. Probably a bug."<<std::endl;
                 continue;
             }
-            std::cout<<"producing..."<<std::endl;
             vertex_descriptor centerPixel = common | first;
-            std::cout<<"center pixel "<<graph[centerPixel].x<<" "<<graph[centerPixel].y<<std::endl;
             auto adjacentVertices = getAdjacentVertices(centerPixel, graph);
             vertex_descriptor leftI = leftIEdges | where([adjacentVertices](vertex_descriptor v){return adjacentVertices | contains(v);}) | first;
             vertex_descriptor rightI = rightIEdges | where([adjacentVertices](vertex_descriptor v){return adjacentVertices | contains(v);}) | first;
             auto FEdges =  adjacentVertices | where([graph](vertex_descriptor v){return graph[v].label==NODELABEL_F;});
-            std::cout<<"FEdges.size() "<< (FEdges.end()==FEdges.begin()) <<std::endl;
             auto FEdgesOrdered = LINQ(from(v, FEdges) orderby(GetDistance(graph[v], graph[e])));
-            std::cout<<graph[*FEdgesOrdered.begin()].x<<" "<<graph[*FEdgesOrdered.begin()].y<<std::endl;;
-            for(const auto &it :FEdgesOrdered)
-            {
-                std::cout<<"graph[fedge]"<<graph[it].x<<" "<<graph[it].y<<" "<<GetDistance(graph[it],graph[e])<< std::endl;
-                
-            }
             auto FEdge =*(FEdgesOrdered.begin());
-            std::cout<<"chosen FEdge: "<<graph[FEdge].x<<" "<<graph[FEdge].y<<std::endl;
-            std::cout<<"tam"<<std::endl;
             int x=(graph[leftPixel].x + graph[rightPixel].x)/2,
                 y=(graph[leftPixel].y + graph[rightPixel].y)/2;
             auto newPixel = add_vertex(*(new Pixel(x, y, NODELABEL_P)), graph);
