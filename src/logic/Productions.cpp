@@ -12,7 +12,7 @@ void P1(
     vertex_descriptor S,
     std::vector<vertex_descriptor>& listOfIEdges,
     std::vector<vertex_descriptor>& listOfBEdges,
-    Image image)
+    Image& image)
 {
     int y = image.height(),
         x = image.width(),
@@ -61,7 +61,8 @@ void P1(
 void P2(
     MyGraph& graph, 
     std::vector<vertex_descriptor>& listOfIEdges,
-    Image image)
+    std::vector<vertex_descriptor>& listOfFEdges,
+    Image& image)
 {
     vertex_iterator currentEdge, lastEdge;
     std::tie(currentEdge, lastEdge) = vertices(graph);
@@ -111,6 +112,10 @@ void P2(
                 add_edge(newPixel, F21, graph);
                 auto F22 = add_vertex(*(new Pixel(x + dx/2, y, NODELABEL_F)), graph);              
                 add_edge(newPixel, F22, graph);
+                listOfFEdges.push_back(F11);
+                listOfFEdges.push_back(F12);
+                listOfFEdges.push_back(F21);
+                listOfFEdges.push_back(F22);
             }
         }
     }
@@ -131,6 +136,18 @@ std::vector<vertex_descriptor> GetAdjacentVertices(vertex_descriptor v, MyGraph 
     return result;
 }
 
+template <class T>
+std::vector<vertex_descriptor> GetAdjacentVertices(const T &vertices, MyGraph g)
+{
+    std::vector<vertex_descriptor> result;
+    for(auto v : vertices)
+    {
+        auto currentNeighbours = GetAdjacentVertices(v, g);
+        result.insert(result.end(),currentNeighbours.begin(), currentNeighbours.end());
+    }
+    return result;
+}
+
 const double GetDistance(const int x1,const int x2,const int y1,const int y2)//TODO: Consider long longs (for very large images)?
 {
     return (x1-x2)*(x1-x2)+(y1-y2)*(y1-y2);
@@ -141,7 +158,7 @@ const double GetDistance(const Pixel p1, const Pixel p2)
     return GetDistance(p1.x, p2.x, p1.y, p2.y);
 }
 
-void P3(MyGraph& graph, std::vector<vertex_descriptor>& listOfBEdges, Image image)
+void P3(MyGraph& graph, std::vector<vertex_descriptor>& listOfBEdges, Image& image)
 {
     vertex_iterator currentEdge, lastEdge;
     std::tie(currentEdge, lastEdge) = vertices(graph);
@@ -237,6 +254,83 @@ void P3(MyGraph& graph, std::vector<vertex_descriptor>& listOfBEdges, Image imag
         }
     }
     listOfBEdges.insert(listOfBEdges.end(), toBeAdded.begin(), toBeAdded.end());
+}
+
+void P4(MyGraph& graph, std::vector<vertex_descriptor>& listOfFEdges, Image& image)
+{
+    auto interestingEdges = listOfFEdges | where([graph](vertex_descriptor v){return GetAdjacentVertices(v,graph).size()==2;});
+    std::vector<vertex_descriptor> toBeAdded;
+    for (auto e : interestingEdges )
+    {
+        auto adjacentPixels = GetAdjacentVertices(e, graph);
+        bool isVertical = graph[adjacentPixels[0]].x==graph[adjacentPixels[1]].x;
+        int bound1 = isVertical 
+            ? std::min(graph[adjacentPixels[0]].y, graph[adjacentPixels[1]].y) 
+            : std::min(graph[adjacentPixels[0]].x, graph[adjacentPixels[1]].x);
+        int bound2 = isVertical 
+            ? std::max(graph[adjacentPixels[0]].y, graph[adjacentPixels[1]].y) 
+            : std::max(graph[adjacentPixels[0]].x, graph[adjacentPixels[1]].x); 
+        auto isInVerticalBounds = [graph, bound1, bound2](vertex_descriptor v){return graph[v].y>=bound1 and graph[v].y<=bound2;};
+        auto isInHorizontalBounds = [graph, bound1, bound2](vertex_descriptor v){return graph[v].x>=bound1 and graph[v].x<=bound2;};
+        auto isInBounds = [isVertical, isInHorizontalBounds, isInVerticalBounds](vertex_descriptor v){return (isVertical and isInVerticalBounds(v))or(!isVertical and isInHorizontalBounds(v));};
+        auto leftEdges = GetAdjacentVertices(adjacentPixels[0], graph);
+        auto leftIEdges = leftEdges | where([graph, isInBounds](vertex_descriptor v){return graph[v].label==NODELABEL_I and isInBounds(v);});
+        auto rightEdges = GetAdjacentVertices(adjacentPixels[1], graph);
+        auto rightIEdges = rightEdges | where([graph, isInBounds](vertex_descriptor v){return graph[v].label==NODELABEL_I and isInBounds(v);});
+        auto leftSecondPixels = GetAdjacentVertices(rightIEdges, graph);
+        auto rightSecondPixels = GetAdjacentVertices(rightIEdges, graph);
+        auto leftSecondPixelsInRange = leftSecondPixels | where([graph, isInBounds](vertex_descriptor v){return isInBounds(v);});
+        auto rightSecondPixelsInRange = rightSecondPixels | where([graph, isInBounds](vertex_descriptor v){return isInBounds(v);});
+        auto commonPixels = leftSecondPixelsInRange | intersect(rightSecondPixelsInRange);
+        {
+            int count=0;
+            for(const auto p : commonPixels )
+                count++;
+            if(count!=2)
+            {
+                continue;
+            }
+        }
+        auto commonPixelsAdjacent = GetAdjacentVertices(commonPixels, graph);
+        auto firstCommonPixel = graph[commonPixels | first];
+        auto it = commonPixels.begin();
+        auto second = it++;
+        auto lastCommonPixel = graph[*second];
+        auto commonPixelsAdjacentFEdges = commonPixelsAdjacent 
+            | where([graph, firstCommonPixel, lastCommonPixel](vertex_descriptor v)
+                {
+                    Pixel p = graph[v];
+                    int xrange = std::abs(lastCommonPixel.x - firstCommonPixel.x);
+                    int yrange = std::abs(lastCommonPixel.y - firstCommonPixel.y);
+                    return true
+                        and p.label==NODELABEL_F
+                        and std::abs(p.x-firstCommonPixel.x)<=xrange
+                        and std::abs(p.y-firstCommonPixel.y)<=yrange
+                    ;   
+                });
+        int x = (firstCommonPixel.x + lastCommonPixel.x)/2;
+        int y = (firstCommonPixel.y + lastCommonPixel.y)/2;
+        int r,g,b;
+        std::tie(r,g,b) = image.getPixel(x,y);
+        auto newPixel = add_vertex(*(new Pixel(x, y, r, g, b)), graph);
+        auto newFEdge = add_vertex(*(new Pixel((x+graph[adjacentPixels[1]].x)/2, (y+graph[adjacentPixels[1]].y)/2, NODELABEL_F)), graph);
+        for(auto FEdge : commonPixelsAdjacentFEdges)
+            add_edge(newPixel, FEdge, graph);
+        for(auto IEdge : leftIEdges)
+            add_edge(newPixel, IEdge, graph);
+        for(auto IEdge : rightIEdges)
+            add_edge(newPixel, IEdge, graph);
+        add_edge(newPixel, e, graph);
+        add_edge(newPixel, newFEdge, graph);
+        add_edge(adjacentPixels[1], newFEdge, graph);
+        
+        remove_edge(adjacentPixels[1],e, graph);
+
+        graph[e].x = (x+graph[adjacentPixels[0]].x)/2;
+        graph[e].y = (x+graph[adjacentPixels[0]].y)/2;
+        toBeAdded.push_back(newFEdge);
+    }
+    listOfFEdges.insert(listOfFEdges.end(), toBeAdded.begin(), toBeAdded.end());
 }
 
 std::queue<vertex_descriptor> toBeVisited;

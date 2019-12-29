@@ -66,8 +66,9 @@ TEST(P2Test, StartingProduction)
     boost::add_edge(p4,I,graph);
     vector<vertex_descriptor> IEdges;
     vector<vertex_descriptor> BEdges;
+    vector<vertex_descriptor> FEdges;
     IEdges.push_back(I);
-    P2(graph,IEdges,*image);
+    P2(graph,IEdges, FEdges, *image);
     myEdgeWriter<MyGraph> w(graph);
     //boost::write_graphviz(cerr, graph,w );
     EXPECT_EQ(IEdges.size(),4);
@@ -82,11 +83,12 @@ TEST(P3Test, P3AfterP2AfterP1)
     auto image = new Image("./test_files/face.bmp"); 
     vector<vertex_descriptor> IEdges;
     vector<vertex_descriptor> BEdges;
+    vector<vertex_descriptor> FEdges;
     MyGraph graph;
     auto S = boost::add_vertex(*(new Pixel(0,0, NODELABEL_S)), graph);
     P1(graph, S, IEdges, BEdges, *image);
     graph[S]._break=1;
-    P2(graph,IEdges, *image);
+    P2(graph,IEdges, FEdges, *image);
     cout<<"BEDGES SIZE: "<<BEdges.size()<<endl;
     P3(graph,BEdges,*image);
     myEdgeWriter<MyGraph> w(graph);
@@ -121,3 +123,6 @@ TEST(P6Test, OneOfTwo)
     EXPECT_EQ(graph[IEdge1]._break,1);
     EXPECT_EQ(graph[IEdge2]._break,0);
 }
+
+
+
