@@ -7,31 +7,6 @@
 #include <boost/graph/graphviz.hpp>
 using namespace std;
 
-template <class Name>
-class myEdgeWriter {
-public:
-     myEdgeWriter(Name _name) : name(_name) {}
-     template <class VertexOrEdge>
-     void operator()(std::ostream& out, const VertexOrEdge& v) const {
-        char buffer[8];
-        string s = "[";
-        if(name[v].r!=-1){
-            sprintf(buffer,"#%02X%02X%02X",name[v].r,name[v].g,name[v].b);
-            s+= "fillcolor=\"";
-            s+=buffer;
-            s+="\",style=filled\n";
-        }
-        if(name[v].x>=0 && name[v].y>=0 )
-            s+= "pos=\""+to_string(name[v].x)+','+to_string(name[v].y)+"!\"\n";
-        s+="label=\""+ name[v].label +"\"";
-        s+=']';
-        out<<s<<endl;
-     }
-private:
-     Name name;
-};
-
-
 TEST(P1Test, StartingProduction)
 {
     auto image = new Image("./test_files/face.bmp"); 
@@ -92,8 +67,49 @@ TEST(P3Test, P3AfterP2AfterP1)
     cout<<"BEDGES SIZE: "<<BEdges.size()<<endl;
     P3(graph,BEdges,*image);
     myEdgeWriter<MyGraph> w(graph);
-    boost::write_graphviz(cerr, graph, w);
+    // boost::write_graphviz(cerr, graph, w);
     EXPECT_EQ(1,1);
+}
+
+TEST(P4Test, BasicTest)
+{
+    auto image = new Image("./test_files/face.bmp"); 
+    MyGraph graph;
+    std::vector<vertex_descriptor> FEdges;
+    int r=255,g=255,b=255;
+    int width=10, height=10;
+    auto p1 = boost::add_vertex(*(new Pixel(0,4,r,g,b)), graph);
+    auto p2 = boost::add_vertex(*(new Pixel(4,0,r,g,b)), graph);
+    auto p3 = boost::add_vertex(*(new Pixel(9,4,r,g,b)), graph);
+    auto p4 = boost::add_vertex(*(new Pixel(4,9,r,g,b)), graph);
+    auto f1 = boost::add_vertex(*(new Pixel(4,6,NODELABEL_F)), graph);
+    auto f2 = boost::add_vertex(*(new Pixel(4,2,NODELABEL_F)), graph);
+    auto f = boost::add_vertex(*(new Pixel(4,4,NODELABEL_F)), graph);
+    auto i1 = boost::add_vertex(*(new Pixel(2,2,NODELABEL_I)), graph);
+    auto i2 = boost::add_vertex(*(new Pixel(6,2,NODELABEL_I)), graph);
+    auto i3 = boost::add_vertex(*(new Pixel(6,6,NODELABEL_I)), graph);
+    auto i4 = boost::add_vertex(*(new Pixel(2,6,NODELABEL_I)), graph);
+    add_edge(p1,i1,graph);
+    add_edge(p2,i1,graph);
+    add_edge(p2,i2,graph);
+    add_edge(p3,i2,graph);
+    add_edge(p3,i3,graph);
+    add_edge(p4,i3,graph);
+    add_edge(p4,i4,graph);
+    add_edge(p1,i4,graph);
+    add_edge(p2,f2,graph);
+    add_edge(p4,f1,graph);
+    add_edge(p1,f,graph);
+    add_edge(p3,f,graph);
+
+    FEdges.push_back(f);
+    FEdges.push_back(f1);
+    FEdges.push_back(f2);
+    
+    P4(graph, FEdges, *image);
+    myEdgeWriter<MyGraph> w(graph);
+    boost::write_graphviz(cerr, graph, w);
+    EXPECT_EQ(4, FEdges.size());
 }
 
 TEST(P6Test, OneOfTwo)

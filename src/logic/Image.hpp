@@ -12,12 +12,14 @@ class Image
     private:
         boost::gil::rgb8_image_t img;
         boost::gil::rgb8_view_t view;
+        std::tuple<int, int, int> getPixelInternal(int x, int y);
 
     public:    
         Image(std::string filename);
         Image(std::uint8_t ** pixels, int width, int height);
-        long long CompareWith(Image other);
-        long long CompareWith(Image other, int x, int y, int width, int height);
+        long long CompareWith(Image& other);
+        long long CompareWith(Image& other, int x, int y, int width, int height);
+        long long CompareWithInterpolation(int x, int y, int width, int height);
         std::tuple<int, int, int> getPixel(int x, int y);
         int width();
         int height();
