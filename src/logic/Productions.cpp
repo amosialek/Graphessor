@@ -390,7 +390,7 @@ void P5(
             miny = std::min(miny, graph[v].y);
             maxy = std::max(maxy, graph[v].y);
         } 
-        long long error = image.CompareWithInterpolation(minx, maxx, miny, maxy);
+        long long error = image.CompareWithInterpolation(minx, maxx, miny, maxy, 0);
         IEdgeToError[IEdge] = error;
         sumError += error;
         maxError = std::max(maxError, error);
@@ -404,6 +404,18 @@ void P5(
 
 std::queue<vertex_descriptor> toBeVisited;
 
+template <typename T> int signum(T val) {
+    return (T(0) < val) - (val < T(0));
+}
+
+bool haveCommonEdge(MyGraph& graph, vertex_descriptor v1, vertex_descriptor v2, vertex_descriptor corner)
+{
+return !(true
+&& signum(graph[v1].x - graph[corner].x) == signum(graph[corner].x - graph[v2].x)
+&& signum(graph[v1].y - graph[corner].y) == signum(graph[corner].y - graph[v2].y) );
+
+}
+
 void P6(
     MyGraph& graph, 
     std::vector<vertex_descriptor>& listOfIEdges
@@ -411,7 +423,7 @@ void P6(
 {
     for(auto IEdge: listOfIEdges)
     {
-        graph[IEdge].visited=0;
+        graph[IEdge].visited = 0;
     }
     for(auto IEdge: listOfIEdges)
     {
@@ -427,7 +439,12 @@ void P6(
                 for(auto v: adjacentVertices)
                 {
                     auto adjacentEdgesTemp = GetAdjacentVertices(v, graph);
-                    adjacentEdges.insert(adjacentEdges.end(),adjacentEdgesTemp.begin(), adjacentEdgesTemp.end());
+                    auto adjacentEdgesTemp2 = adjacentEdgesTemp 
+                    | linq::where([&graph, currentIEdge, v](vertex_descriptor IEdge)
+                    {
+                        return haveCommonEdge(graph, IEdge, currentIEdge, v);
+                    });
+                    adjacentEdges.insert(adjacentEdges.end(), adjacentEdgesTemp2.begin(), adjacentEdgesTemp2.end());
                 }
                 auto adjacentIEdges = adjacentEdges 
                     | linq::where([&graph, currentIEdge](vertex_descriptor v){
