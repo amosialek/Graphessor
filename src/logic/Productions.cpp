@@ -360,7 +360,7 @@ void P4(MyGraph& graph, std::vector<vertex_descriptor>& listOfFEdges, Image& ima
 }
 
 std::map<vertex_descriptor,std::vector<vertex_descriptor>> vertexToNeighbours;
-std::map<vertex_descriptor,long long> IEdgeToError;
+std::map<vertex_descriptor, double> IEdgeToError;
 
 void P5(
     MyGraph& graph, 
@@ -369,8 +369,8 @@ void P5(
     double epsilon
 )
 {
-    long long sumError=0;
-    long long maxError=0;
+    double sumError=0;
+    double maxError=0;
     vertexToNeighbours.clear();
     int width = image.width();
     int height = image.height();
@@ -390,16 +390,19 @@ void P5(
             miny = std::min(miny, graph[v].y);
             maxy = std::max(maxy, graph[v].y);
         } 
-        long long error = image.CompareWithInterpolation(minx, maxx, miny, maxy, 0);
+        double error = image.CompareWithInterpolation(minx, maxx, miny, maxy, 0);
         IEdgeToError[IEdge] = error;
         sumError += error;
         maxError = std::max(maxError, error);
+    std::cout<<"error: "<<error<<" "<<minx<<" "<<maxx<<" "<<miny<<" "<<maxy<<std::endl;
     }
     for(auto IEdge : IEdges)
-        if(IEdgeToError[IEdge] > epsilon*maxError)
+    {
+        if(IEdgeToError[IEdge] > epsilon * maxError)
             {
                 graph[IEdge]._break = 1;
             }
+    }
 }
 
 std::queue<vertex_descriptor> toBeVisited;

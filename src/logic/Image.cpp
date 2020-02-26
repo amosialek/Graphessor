@@ -84,14 +84,10 @@ double Image::GetInterpolatedPixel(int x1, int x2, int y1, int y2, int x, int y,
         return rInterpolated;
 }
 
-double Image::SquaredErrorOfInterpolation(int xx1, int xx2, int yy1, int yy2, int channel)
+double Image::SquaredErrorOfInterpolation(int x1, int x2, int y1, int y2, int channel)
 {
-    int x1 = xx1;
-    int x2 = xx2;
-    int y1 = yy1;
-    int y2 = yy2;
     double sum = 0;
-    std::cout<<"x2 -x1, y2-y1: "<<x2-x1<<" "<<y2-y1<<std::endl;
+    //std::cout<<"x2 -x1, y2-y1: "<<x2-x1<<" "<<y2-y1<<std::endl;
     if (x2-x1==0 or y2-y1==0) return 0;
 
     for(int x=x1;x<=x2;x++)
@@ -100,50 +96,72 @@ double Image::SquaredErrorOfInterpolation(int xx1, int xx2, int yy1, int yy2, in
             int rOriginal;
             rOriginal = getPixelInternal(x, y, channel);
             double rInterpolated = GetInterpolatedPixel(x1,x2,y1,y2,x,y,channel);
-            std::cout<<x<<" "<<y<<" "<<rOriginal<<" "<<rInterpolated<<std::endl;
             sum+=(rInterpolated - rOriginal)*(rInterpolated - rOriginal);
+      //      std::cout<<x<<" "<<y<<" "<<rOriginal<<" "<<rInterpolated<<" "<<sum<<std::endl;
             ;
         }
     return sum;
 }
 
-double Image::CompareWithInterpolation(int xx1, int xx2, int yy1, int yy2, int channel)
+double Image::CompareWithInterpolation(int x1, int x2, int y1, int y2, int channel)
 {
-    int x1 = xx1;
-    int x2 = xx2;
-    int y1 = yy1;
-    int y2 = yy2;
-    double maxSum = 255*255*(x2-x1)*(y2-y1);
-    return SquaredErrorOfInterpolation(xx1, xx2, yy1, yy2, channel)/maxSum;
+    double maxSum = 255*255*(x2-x1+1)*(y2-y1+1);
+    return SquaredErrorOfInterpolation(x1, x2, y1, y2, channel)/maxSum;
 }
 
-
-
-double ImageMagnifier::SquaredErrorOfInterpolation(int xx1, int xx2, int yy1, int yy2, int channel)
+double ImageMagnifier::SquaredErrorOfInterpolation(int x1, int x2, int y1, int y2, int channel)
 {
-    return Image::SquaredErrorOfInterpolation(xx1/ratio, xx2/ratio, yy1/ratio, yy2/ratio, channel);
+    int originalRatio = ratio;
+    ratio = 1;
+    auto result = Image::SquaredErrorOfInterpolation(x1/originalRatio, x2/originalRatio, y1/originalRatio, y2/originalRatio, channel);
+    ratio = originalRatio;
+return result;
 }
 double ImageMagnifier::GetInterpolatedPixel(int x1, int x2, int y1, int y2, int x, int y, int channel)
 {
-    return Image::GetInterpolatedPixel(x1/ratio, x2/ratio, y1/ratio, y2/ratio, x/ratio, y/ratio, channel);
+    int originalRatio = ratio;
+    ratio = 1;
+    auto result = Image::GetInterpolatedPixel(x1/originalRatio, x2/originalRatio, y1/originalRatio, y2/originalRatio, x/originalRatio, y/originalRatio, channel);
+    ratio = originalRatio;
+return result;
 }
 long long ImageMagnifier::CompareWith(Image& other, int x, int y, int width, int height)
 {
-    return Image::CompareWith(other, x/ratio, y/ratio, width/ratio, height/ratio);
+    int originalRatio = ratio;
+    ratio = 1;
+    auto result = Image::CompareWith(other, x/originalRatio, y/originalRatio, width/originalRatio, height/originalRatio);
+    ratio = originalRatio;
+return result;
 }
-double ImageMagnifier::CompareWithInterpolation(int xx1, int xx2, int yy1, int yy2, int channel)
+double ImageMagnifier::CompareWithInterpolation(int x1, int x2, int y1, int y2, int channel)
 {
-    return Image::CompareWithInterpolation(xx1/ratio, xx2/ratio, yy1/ratio, yy2/ratio, channel);
+    int originalRatio = ratio;
+    ratio = 1;
+    auto result = Image::CompareWithInterpolation(x1/originalRatio, x2/originalRatio, y1/originalRatio, y2/originalRatio, channel);
+    ratio = originalRatio;
+return result;
 }
 std::tuple<int, int, int> ImageMagnifier::getPixel(int x, int y)
 {
-    return Image::getPixel(x/ratio, y/ratio);
+    int originalRatio = ratio;
+    ratio = 1;
+    auto result = Image::getPixel(x/originalRatio, y/originalRatio);
+    ratio = originalRatio;
+return result;
 }
 int ImageMagnifier::width()
 {
-    return Image::width()*ratio;
+    int originalRatio = ratio;
+    ratio = 1;
+    auto result = Image::width()*originalRatio;
+    ratio = originalRatio;
+return result;
 }
 int ImageMagnifier::height()
 {
-    return Image::height()*ratio;
+    int originalRatio = ratio;
+    ratio = 1;
+    auto result = Image::height()*originalRatio;
+    ratio = originalRatio;
+return result;
 }
