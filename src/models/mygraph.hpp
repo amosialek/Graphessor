@@ -33,7 +33,7 @@ public:
             s+="\",style=filled\n";
         }
         if(name[v].x>=0 && name[v].y>=0 )
-            s+= "pos=\""+std::to_string(name[v].x)+','+std::to_string(name[v].y)+"!\"\n";
+            s+= "pos=\""+std::to_string(name[v].x/4)+','+std::to_string(name[v].y/4)+"!\"\n";
         s+="label=\""+ name[v].label +"\"";
         s+=']';
         out<<s<<'\n';

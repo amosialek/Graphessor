@@ -396,13 +396,14 @@ void P5(
         maxError = std::max(maxError, error);
     std::cout<<"error: "<<error<<" "<<minx<<" "<<maxx<<" "<<miny<<" "<<maxy<<std::endl;
     }
-    for(auto IEdge : IEdges)
-    {
-        if(IEdgeToError[IEdge] > epsilon * maxError)
-            {
-                graph[IEdge]._break = 1;
-            }
-    }
+    if(maxError > epsilon)
+        for(auto IEdge : IEdges)
+        {
+            if(IEdgeToError[IEdge] > 0.33 * maxError && IEdgeToError[IEdge] > epsilon)
+                {
+                    graph[IEdge]._break = 1;
+                }
+        }
 }
 
 std::queue<vertex_descriptor> toBeVisited;
