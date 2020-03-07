@@ -9,50 +9,8 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/program_options.hpp>
+#include "writers.hpp"
 #include <chrono>
-
-std::vector<vertex_descriptor> FEdges;
-std::vector<vertex_descriptor> IEdges;
-std::vector<vertex_descriptor> BEdges;
-
-class AbstractDebugWriter
-{
-    public:
-        virtual void WriteItOut(std::string fileSuffix, MyGraph &graph)
-        {};
-};
-
-class DebugWriter: public AbstractDebugWriter
-{
-    private:
-        std::string fileBaseName;
-    public:
-        DebugWriter(std::string fileBaseName)
-        {
-            this->fileBaseName = fileBaseName;
-        };
-        void WriteItOut(std::string fileSuffix, MyGraph &graph) override
-        {
-            {
-                myEdgeWriter<MyGraph> w(graph);
-                std::ofstream a(fileBaseName+fileSuffix);
-                boost::write_graphviz(a, graph, w);
-            }
-        };
-};
-
-class DebugWriterFactory
-{
-    public:
-        static AbstractDebugWriter* GetDebugWriter(std::string fileBaseName)
-        {
-            return fileBaseName.empty() 
-                ?  new AbstractDebugWriter()
-                :  new DebugWriter(fileBaseName);
-        }
-};
-
-
 
 std::map<std::string, int> functionTime;
 
@@ -67,6 +25,9 @@ void measure_time(std::function<void()> lambda, std::string functionName)
 namespace opt=boost::program_options;
 
 int main(int argc, char** argv) {
+    auto FEdges = std::make_shared<std::vector<vertex_descriptor>>();
+    auto IEdges = std::make_shared<std::vector<vertex_descriptor>>();
+    auto BEdges = std::make_shared<std::vector<vertex_descriptor>>();
     int xdebug = 0;
     std::cin >> xdebug;
     opt::options_description description("Allowed options");
@@ -74,7 +35,7 @@ int main(int argc, char** argv) {
     ("help", "produce help message")
     ("epsilon", opt::value<double>(), "set epsilon")
     ("input", opt::value<std::string>(), "input bitmap file")
-    ("debug-output", opt::value<std::string>(), "debug output file template")
+    ("output", opt::value<std::string>(), "debug output file template")
     
 ;
 
@@ -82,7 +43,7 @@ int main(int argc, char** argv) {
     opt::store(opt::parse_command_line(argc, argv, description), vm);
     opt::notify(vm);    
     
-    double epsilon=0.33;
+    double epsilon = 0.33;
     if (vm.count("epsilon"))
         epsilon = vm["epsilon"].as<double>();
 
@@ -91,55 +52,57 @@ int main(int argc, char** argv) {
         inputFileName = vm["input"].as<std::string>();
 
     std::string outputFileName;
-    if (vm.count("debug-output"))
-        outputFileName = vm["debug-output"].as<std::string>();
+    if (vm.count("output"))
+        outputFileName = vm["output"].as<std::string>();
 
-    AbstractDebugWriter* debugWriter = DebugWriterFactory::GetDebugWriter(outputFileName);
-
-    MyGraph graph;
-    auto S = boost::add_vertex(*(new Pixel(0,0, NODELABEL_S)), graph);
-    auto image = new ImageMagnifier(inputFileName);
-    P1(graph, S, IEdges, BEdges, *image);
-    
-    long long lastICount = 0;
-    int i=1;
-    debugWriter->WriteItOut(std::to_string(i++),graph);
-    while(lastICount<IEdges.size())
+    AbstractOutputWriter* debugWriter = WriterFactory::GetDebugWriter(outputFileName);
+    for(int channel=0;channel<3;channel++)
     {
-        lastICount = IEdges.size();
-        std::cerr<<"iteration: "<<i<<std::endl;
-        std::chrono::steady_clock::time_point end;
-        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-        P5(graph, IEdges, *image, i < 30 ? 0 : epsilon);
-        end = std::chrono::steady_clock::now();
-        functionTime["P5"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-        begin = std::chrono::steady_clock::now();
-        debugWriter->WriteItOut(std::to_string(i++),graph);
-        P6(graph, IEdges);
-        end = std::chrono::steady_clock::now();
-        functionTime["P6"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-        begin = std::chrono::steady_clock::now();
-        debugWriter->WriteItOut(std::to_string(i++),graph);
-        P2(graph, IEdges, FEdges, *image);
-        end = std::chrono::steady_clock::now();
-        functionTime["P2"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-        begin = std::chrono::steady_clock::now();
-        debugWriter->WriteItOut(std::to_string(i++),graph);
-        P3(graph, BEdges, *image);
-        end = std::chrono::steady_clock::now();
-        functionTime["P3"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-        begin = std::chrono::steady_clock::now();
-        debugWriter->WriteItOut(std::to_string(i++),graph);
-        P4(graph, FEdges, *image);
-        end = std::chrono::steady_clock::now();
-        functionTime["P4"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-        debugWriter->WriteItOut(std::to_string(i++),graph);
+        auto graph = std::make_shared<MyGraph>();
+        auto S = boost::add_vertex(*(new Pixel(0,0, NODELABEL_S)), *graph);
+        auto image = std::make_shared<ImageMagnifier>(inputFileName);
+        P1(graph, S, IEdges, BEdges, image).Perform();
+        
+        long long lastICount = 0;
+        int i=1;
+        debugWriter->WriteItOut(std::to_string(i++), *graph);
+        while(lastICount<IEdges->size())
+        {
+            lastICount = IEdges->size();
+            std::cerr<<"iteration: "<<i<<std::endl;
+            std::chrono::steady_clock::time_point end;
+            std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+            P5(graph, IEdges, image, channel, i < 10 ? 0 : epsilon).Perform();
+            end = std::chrono::steady_clock::now();
+            functionTime["P5"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+            begin = std::chrono::steady_clock::now();
+            debugWriter->WriteItOut(std::to_string(i++), *graph);
+            P6(graph, IEdges).Perform();
+            end = std::chrono::steady_clock::now();
+            functionTime["P6"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+            begin = std::chrono::steady_clock::now();
+            debugWriter->WriteItOut(std::to_string(i++), *graph);
+            P2(graph, IEdges, FEdges, image).Perform();
+            end = std::chrono::steady_clock::now();
+            functionTime["P2"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+            begin = std::chrono::steady_clock::now();
+            debugWriter->WriteItOut(std::to_string(i++), *graph);
+            P3(graph, BEdges, image).Perform();
+            end = std::chrono::steady_clock::now();
+            functionTime["P3"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+            begin = std::chrono::steady_clock::now();
+            debugWriter->WriteItOut(std::to_string(i++), *graph);
+            P4(graph, FEdges, image).Perform();
+            end = std::chrono::steady_clock::now();
+            functionTime["P4"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+            debugWriter->WriteItOut(std::to_string(i++), *graph);
+        }
+        std::cerr<<"P2 "<<functionTime["P2"]<<std::endl;
+        std::cerr<<"P3 "<<functionTime["P3"]<<std::endl;
+        std::cerr<<"P4 "<<functionTime["P4"]<<std::endl;
+        std::cerr<<"P5 "<<functionTime["P5"]<<std::endl;
+        std::cerr<<"P6 "<<functionTime["P6"]<<std::endl;
     }
-    std::cerr<<"P2 "<<functionTime["P2"]<<std::endl;
-    std::cerr<<"P3 "<<functionTime["P3"]<<std::endl;
-    std::cerr<<"P4 "<<functionTime["P4"]<<std::endl;
-    std::cerr<<"P5 "<<functionTime["P5"]<<std::endl;
-    std::cerr<<"P6 "<<functionTime["P6"]<<std::endl;
 }
 
 
