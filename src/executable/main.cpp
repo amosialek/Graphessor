@@ -28,8 +28,6 @@ int main(int argc, char** argv) {
     auto FEdges = std::make_shared<std::vector<vertex_descriptor>>();
     auto IEdges = std::make_shared<std::vector<vertex_descriptor>>();
     auto BEdges = std::make_shared<std::vector<vertex_descriptor>>();
-    int xdebug = 0;
-    std::cin >> xdebug;
     opt::options_description description("Allowed options");
     description.add_options()
     ("help", "produce help message")
@@ -82,7 +80,9 @@ int main(int argc, char** argv) {
             functionTime["P6"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
             begin = std::chrono::steady_clock::now();
             debugWriter->WriteItOut(std::to_string(i++), *graph);
-            P2(graph, IEdges, FEdges, image).Perform();
+            auto p2s = P2::FindAllMatches(graph, IEdges, FEdges, image);
+            for(auto p2:p2s)
+                p2.Perform();
             end = std::chrono::steady_clock::now();
             functionTime["P2"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
             begin = std::chrono::steady_clock::now();

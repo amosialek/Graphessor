@@ -20,20 +20,26 @@ class P1 : public Production{
         std::shared_ptr<std::vector<vertex_descriptor>> listOfBEdges,
         std::shared_ptr<Image> image);
         void Perform() override;
+        std::vector<uint8_t> Serialize() override;
 }; 
 
 class P2 : Production{
     private:
         std::shared_ptr<MyGraph> graph;
-        std::shared_ptr<std::vector<vertex_descriptor>> listOfIEdges;
+        vertex_descriptor IEdge;
         std::shared_ptr<std::vector<vertex_descriptor>> listOfFEdges;
         std::shared_ptr<Image> image;
     public:
         P2(std::shared_ptr<MyGraph> graph,
-            std::shared_ptr<std::vector<vertex_descriptor>> listOfIEdges,
+            vertex_descriptor IEdge,
             std::shared_ptr<std::vector<vertex_descriptor>> listOfFEdges,
             std::shared_ptr<Image> image);
         void Perform() override;
+        std::vector<uint8_t> Serialize() override;
+        static std::vector<P2> FindAllMatches(std::shared_ptr<MyGraph> graph,
+            std::shared_ptr<std::vector<vertex_descriptor>> listOfIEdges,
+            std::shared_ptr<std::vector<vertex_descriptor>> listOfFEdges,
+            std::shared_ptr<Image> image);
 }; 
 
 class P3 : Production{
@@ -47,6 +53,7 @@ class P3 : Production{
             std::shared_ptr<std::vector<vertex_descriptor>> listOfBEdges,
             std::shared_ptr<Image> image);
         void Perform() override;
+        std::vector<uint8_t> Serialize() override;
 }; 
 
 class P4 : Production{
@@ -59,6 +66,7 @@ class P4 : Production{
         std::shared_ptr<std::vector<vertex_descriptor>> listOfFEdges, 
         std::shared_ptr<Image> image);
         void Perform() override;
+        std::vector<uint8_t> Serialize() override;
 }; 
 
 class P5 : Production{
@@ -75,6 +83,7 @@ class P5 : Production{
             int channel,
             double epsilon);
         void Perform() override;
+        std::vector<uint8_t> Serialize() override;
 }; 
 
 class P6 : Production{
@@ -85,6 +94,7 @@ class P6 : Production{
         P6(std::shared_ptr<MyGraph> graph,
         std::shared_ptr<std::vector<vertex_descriptor>>  listOfIEdges);
         void Perform() override;
+        std::vector<uint8_t> Serialize() override;
 }; 
 
 #endif // __PRODUCTIONS_HPP__

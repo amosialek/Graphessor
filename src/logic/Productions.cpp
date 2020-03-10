@@ -5,16 +5,14 @@
 #include <algorithm>
 #include <queue>
 
-template<typename T, typename Pred>
-std::vector<T> where(boost::iterator_range<T>&& inVec, Pred predicate)
+class NotImplementedException : public std::logic_error
 {
-  std::vector<T> result;
-  std::copy_if(inVec.begin(), inVec.end(), std::back_inserter(result), predicate);
-  return result;
-}
+public:
+    NotImplementedException() : std::logic_error("Function not yet implemented") { };
+};
 
 template<typename T, typename Pred>
-std::vector<T> where(std::vector<T>& inVec, Pred predicate)
+std::vector<T> where(std::vector<T> inVec, Pred predicate)
 {
   std::vector<T> result;
   std::copy_if(inVec.begin(), inVec.end(), std::back_inserter(result), predicate);
@@ -122,18 +120,48 @@ void P1::Perform()
     add_edge(PTopRight, BRight, *graph);
 }
 
+std::vector<uint8_t> P1::Serialize()
+{
+    throw NotImplementedException();
+}
+std::vector<uint8_t> P2::Serialize()
+{
+    throw NotImplementedException();
+}
+std::vector<uint8_t> P3::Serialize()
+{
+    throw NotImplementedException();
+}
+std::vector<uint8_t> P4::Serialize()
+{
+    throw NotImplementedException();
+}
+std::vector<uint8_t> P5::Serialize()
+{
+    throw NotImplementedException();
+}
+std::vector<uint8_t> P6::Serialize()
+{
+    throw NotImplementedException();
+}
+
+
 P2::P2(
     std::shared_ptr<MyGraph> graph, 
-    std::shared_ptr<std::vector<vertex_descriptor>> listOfIEdges,
+    vertex_descriptor IEdge,
     std::shared_ptr<std::vector<vertex_descriptor>> listOfFEdges,
     std::shared_ptr<Image> image):
         graph(graph),
-        listOfIEdges(listOfIEdges),
+        IEdge(IEdge),
         listOfFEdges(listOfFEdges),
         image(image){};
 
-void P2::Perform()
+std::vector<P2> P2::FindAllMatches(std::shared_ptr<MyGraph> graph, 
+    std::shared_ptr<std::vector<vertex_descriptor>> listOfIEdges,
+    std::shared_ptr<std::vector<vertex_descriptor>> listOfFEdges,
+    std::shared_ptr<Image> image)
 {
+    std::vector<P2> p2s;
     vertex_iterator currentEdge, lastEdge;
     std::tie(currentEdge, lastEdge) = vertices(*graph);
 
@@ -156,34 +184,61 @@ void P2::Perform()
                 int dy = abs(y - (*graph)[neighbours[0]].y);
                 if(dx<=2 || dy<=2)
                     continue; //don't want to have too many pixels
-                auto newPixel = e;
-                (*graph)[e].r = r;
-                (*graph)[e].g = g;
-                (*graph)[e].b = b;
-                (*graph)[e].label = NODELABEL_P;
-                (*graph)[e]._break = 0;
-                for(int i=0;i<=3;i++)
-                {
-                    auto newIEdge = add_vertex(*(new Pixel((x+(*graph)[neighbours[i]].x)/2,(y+(*graph)[neighbours[i]].y)/2, NODELABEL_I)), *graph);
-                    (*graph)[newIEdge].breakLevel = (*graph)[e].breakLevel+1;
-                    IEdgesToBeAdded.push_back(newIEdge);
-                    add_edge(neighbours[i], newIEdge, *graph);
-                    add_edge(newPixel, newIEdge, *graph);
-                    remove_edge(neighbours[i],e,*graph);
-                }
-                auto F11 = add_vertex(*(new Pixel(x, y - dy/2, NODELABEL_F)), *graph);
-                add_edge(newPixel, F11, *graph);
-                auto F12 = add_vertex(*(new Pixel(x, y + dy/2, NODELABEL_F)), *graph);
-                add_edge(newPixel, F12, *graph);
-                auto F21 = add_vertex(*(new Pixel(x - dx/2, y, NODELABEL_F)), *graph);
-                add_edge(newPixel, F21, *graph);
-                auto F22 = add_vertex(*(new Pixel(x + dx/2, y, NODELABEL_F)), *graph);              
-                add_edge(newPixel, F22, *graph);
-                listOfFEdges->push_back(F11);
-                listOfFEdges->push_back(F12);
-                listOfFEdges->push_back(F21);
-                listOfFEdges->push_back(F22);
+                p2s.emplace_back(graph, e, listOfFEdges, image);
             }
+        }
+    }
+    return p2s;
+}
+
+void P2::Perform()
+{
+    vertex_iterator currentEdge, lastEdge;
+    std::tie(currentEdge, lastEdge) = vertices(*graph);
+
+    std::vector<vertex_descriptor> neighbours;
+    std::vector<vertex_descriptor> IEdgesToBeAdded;
+    std::set<vertex_descriptor> IEdgesToBeDeleted;
+    auto e = IEdge;
+    {
+        if((*graph)[e].label==NODELABEL_I and (*graph)[e]._break==1)
+        {
+            neighbours = GetAdjacentVertices(e, *graph);
+            IEdgesToBeDeleted.insert(e);
+            int x = (*graph)[e].x;
+            int y = (*graph)[e].y;
+            int r,g,b;
+            std::tie(r,g,b) = image->getPixel(x,y);
+            int dx = abs(x - (*graph)[neighbours[0]].x);
+            int dy = abs(y - (*graph)[neighbours[0]].y);
+            auto newPixel = e;
+            (*graph)[e].r = r;
+            (*graph)[e].g = g;
+            (*graph)[e].b = b;
+            (*graph)[e].label = NODELABEL_P;
+            (*graph)[e]._break = 0;
+            for(int i=0;i<=3;i++)
+            {
+                auto newIEdge = add_vertex(*(new Pixel((x+(*graph)[neighbours[i]].x)/2,(y+(*graph)[neighbours[i]].y)/2, NODELABEL_I)), *graph);
+                (*graph)[newIEdge].breakLevel = (*graph)[e].breakLevel+1;
+                IEdgesToBeAdded.push_back(newIEdge);
+                add_edge(neighbours[i], newIEdge, *graph);
+                add_edge(newPixel, newIEdge, *graph);
+                remove_edge(neighbours[i],e,*graph);
+            }
+            auto F11 = add_vertex(*(new Pixel(x, y - dy/2, NODELABEL_F)), *graph);
+            add_edge(newPixel, F11, *graph);
+            auto F12 = add_vertex(*(new Pixel(x, y + dy/2, NODELABEL_F)), *graph);
+            add_edge(newPixel, F12, *graph);
+            auto F21 = add_vertex(*(new Pixel(x - dx/2, y, NODELABEL_F)), *graph);
+            add_edge(newPixel, F21, *graph);
+            auto F22 = add_vertex(*(new Pixel(x + dx/2, y, NODELABEL_F)), *graph);              
+            add_edge(newPixel, F22, *graph);
+            listOfFEdges->push_back(F11);
+            listOfFEdges->push_back(F12);
+            listOfFEdges->push_back(F21);
+            listOfFEdges->push_back(F22);
+            
         }
     }
     listOfIEdges->insert(listOfIEdges->end(), IEdgesToBeAdded.begin(), IEdgesToBeAdded.end());
@@ -416,21 +471,20 @@ P5::P5(
 
 void P5::Perform()
 {
-    double sumError=0;
-    double maxError=0;
+    double sumError = 0;
+    double maxError = 0;
     vertexToNeighbours.clear();
     int width = image->width();
     int height = image->height();
-    auto IEdges = where((*listOfIEdges 
-        | linq::select([this](vertex_descriptor v){vertexToNeighbours[v] = GetAdjacentVertices(v, *graph); return v;})), 
-        [](vertex_descriptor v){return vertexToNeighbours[v].size()==4;});
+    *listOfIEdges | linq::select([this](vertex_descriptor v){vertexToNeighbours[v] = GetAdjacentVertices(v, *graph); return v;});
+    auto IEdges = where(*listOfIEdges, [](vertex_descriptor v){return vertexToNeighbours[v].size()==4;});
     for(auto IEdge : IEdges)
     {
         int minx = width;
         int maxx = 0;
         int miny = height;
         int maxy = 0;
-        for(auto v :vertexToNeighbours[IEdge])
+        for(auto v : vertexToNeighbours[IEdge])
         {
             minx = std::min(minx, (*graph)[v].x);
             maxx = std::max(maxx, (*graph)[v].x);
@@ -473,9 +527,7 @@ P6::P6(std::shared_ptr<MyGraph> graph,
         listOfIEdges(listOfIEdges)
         {};
 
-void P6::Perform(
-    
-)
+void P6::Perform()
 {
     for(auto IEdge: *listOfIEdges)
     {
@@ -517,5 +569,4 @@ void P6::Perform(
             }
         }
     }
-
 }

@@ -44,7 +44,7 @@ TEST(P2Test, StartingProduction)
     auto BEdges = make_shared<vector<vertex_descriptor>>();
     auto FEdges = make_shared<vector<vertex_descriptor>>();
     IEdges->push_back(I);
-    P2(graph, IEdges, FEdges, move(image)).Perform();
+    P2(graph, (*IEdges)[0], FEdges, move(image)).Perform();
     myEdgeWriter<MyGraph> w(*graph);
     //boost::write_graphviz(cerr, graph,w );
     EXPECT_EQ(IEdges->size(),4);
@@ -64,7 +64,7 @@ TEST(P3Test, P3AfterP2AfterP1)
     auto S = boost::add_vertex(*(make_unique<Pixel>(0,0, NODELABEL_S)), *graph);
     P1(graph, S, IEdges, BEdges, image).Perform();
     (*graph)[S]._break=1;
-    P2(graph, IEdges, FEdges, image).Perform();
+    P2(graph, (*IEdges)[0], FEdges, image).Perform();
     cout<<"BEDGES SIZE: "<<BEdges->size()<<endl;
     P3(graph,BEdges,move(image)).Perform();
     myEdgeWriter<MyGraph> w(*graph);
