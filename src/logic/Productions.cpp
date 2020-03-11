@@ -36,7 +36,7 @@ std::vector<T> intersect(std::vector<T>& inVec1, std::vector<T>& inVec2)
   return result;
 }
 
-std::vector<vertex_descriptor> GetAdjacentVertices(vertex_descriptor v, MyGraph& g)
+std::vector<vertex_descriptor> GetAdjacentVertices(vertex_descriptor v, IGraph& g)
 {
     std::vector<vertex_descriptor> result;
     
@@ -50,7 +50,7 @@ std::vector<vertex_descriptor> GetAdjacentVertices(vertex_descriptor v, MyGraph&
 }
 
 template <class T>
-std::vector<vertex_descriptor> GetAdjacentVertices(const T &vertices, MyGraph& g)
+std::vector<vertex_descriptor> GetAdjacentVertices(const T &vertices, IGraph& g)
 {
     std::vector<vertex_descriptor> result;
     for(auto v : vertices)
@@ -61,7 +61,7 @@ std::vector<vertex_descriptor> GetAdjacentVertices(const T &vertices, MyGraph& g
     return result;
 }
 
-P1::P1(std::shared_ptr<MyGraph> graph,
+P1::P1(std::shared_ptr<IGraph> graph,
         vertex_descriptor S,
         std::shared_ptr<std::vector<vertex_descriptor>> listOfIEdges,
         std::shared_ptr<std::vector<vertex_descriptor>> listOfBEdges,
@@ -85,10 +85,10 @@ void P1::Perform()
     (*graph)[I].label=NODELABEL_I;
     listOfIEdges->push_back(I);
 
-    auto BTop = add_vertex(*(new Pixel(x/2, 0, NODELABEL_B)), *graph);
-    auto BLeft = add_vertex(*(new Pixel(0, y/2, NODELABEL_B)), *graph);
-    auto BBot = add_vertex(*(new Pixel(x/2, y, NODELABEL_B)), *graph);
-    auto BRight = add_vertex(*(new Pixel(x, y/2, NODELABEL_B)), *graph);
+    auto BTop = graph -> AddVertex(*(new Pixel(x/2, 0, NODELABEL_B)));
+    auto BLeft = graph -> AddVertex(*(new Pixel(0, y/2, NODELABEL_B)));
+    auto BBot = graph -> AddVertex(*(new Pixel(x/2, y, NODELABEL_B)));
+    auto BRight = graph -> AddVertex(*(new Pixel(x, y/2, NODELABEL_B)));
     
     listOfBEdges->push_back(BTop);
     listOfBEdges->push_back(BBot);
@@ -96,28 +96,28 @@ void P1::Perform()
     listOfBEdges->push_back(BRight);
     
     std::tie(r,g,b) = image->getPixel(0,0);
-    auto PTopLeft = add_vertex(*(new Pixel(0, 0, r,g,b)), *graph);
+    auto PTopLeft = graph -> AddVertex(*(new Pixel(0, 0, r,g,b)));
     std::tie(r,g,b) = image->getPixel(x, 0);
-    auto PTopRight = add_vertex(*(new Pixel(x, 0, r,g,b)), *graph);
+    auto PTopRight = graph -> AddVertex(*(new Pixel(x, 0, r,g,b)));
     std::tie(r,g,b) = image->getPixel(x, y);
-    auto PBotRight = add_vertex(*(new Pixel(x, y, r,g,b)), *graph);
+    auto PBotRight = graph -> AddVertex(*(new Pixel(x, y, r,g,b)));
     std::tie(r,g,b) = image->getPixel(0, y);
-    auto PBotLeft = add_vertex(*(new Pixel(0, y, r,g,b)), *graph);
+    auto PBotLeft = graph -> AddVertex(*(new Pixel(0, y, r,g,b)));
 
-    add_edge(PBotLeft, I, *graph);
-    add_edge(PBotRight, I, *graph);
-    add_edge(PTopLeft, I, *graph);
-    add_edge(PTopRight, I, *graph);
+    graph -> AddEdge(PBotLeft, I);
+    graph -> AddEdge(PBotRight, I);
+    graph -> AddEdge(PTopLeft, I);
+    graph -> AddEdge(PTopRight, I);
 
-    add_edge(PBotLeft, BBot , *graph);
-    add_edge(PBotRight, BBot, *graph);
-    add_edge(PTopLeft, BTop, *graph);
-    add_edge(PTopRight, BTop, *graph);
+    graph -> AddEdge(PBotLeft, BBot );
+    graph -> AddEdge(PBotRight, BBot);
+    graph -> AddEdge(PTopLeft, BTop);
+    graph -> AddEdge(PTopRight, BTop);
 
-    add_edge(PBotLeft, BLeft, *graph);
-    add_edge(PTopLeft, BLeft, *graph);
-    add_edge(PBotRight, BRight, *graph);
-    add_edge(PTopRight, BRight, *graph);
+    graph -> AddEdge(PBotLeft, BLeft);
+    graph -> AddEdge(PTopLeft, BLeft);
+    graph -> AddEdge(PBotRight, BRight);
+    graph -> AddEdge(PTopRight, BRight);
 }
 
 std::vector<uint8_t> P1::Serialize()
@@ -147,7 +147,7 @@ std::vector<uint8_t> P6::Serialize()
 
 
 P2::P2(
-    std::shared_ptr<MyGraph> graph, 
+    std::shared_ptr<IGraph> graph, 
     vertex_descriptor IEdge,
     std::shared_ptr<std::vector<vertex_descriptor>> listOfFEdges,
     std::shared_ptr<Image> image):
@@ -156,14 +156,12 @@ P2::P2(
         listOfFEdges(listOfFEdges),
         image(image){};
 
-std::vector<P2> P2::FindAllMatches(std::shared_ptr<MyGraph> graph, 
+std::vector<P2> P2::FindAllMatches(std::shared_ptr<IGraph> graph, 
     std::shared_ptr<std::vector<vertex_descriptor>> listOfIEdges,
     std::shared_ptr<std::vector<vertex_descriptor>> listOfFEdges,
     std::shared_ptr<Image> image)
 {
     std::vector<P2> p2s;
-    vertex_iterator currentEdge, lastEdge;
-    std::tie(currentEdge, lastEdge) = vertices(*graph);
 
     std::vector<vertex_descriptor> neighbours;
     std::vector<vertex_descriptor> IEdgesToBeAdded;
@@ -193,9 +191,6 @@ std::vector<P2> P2::FindAllMatches(std::shared_ptr<MyGraph> graph,
 
 void P2::Perform()
 {
-    vertex_iterator currentEdge, lastEdge;
-    std::tie(currentEdge, lastEdge) = vertices(*graph);
-
     std::vector<vertex_descriptor> neighbours;
     std::vector<vertex_descriptor> IEdgesToBeAdded;
     std::set<vertex_descriptor> IEdgesToBeDeleted;
@@ -219,21 +214,21 @@ void P2::Perform()
             (*graph)[e]._break = 0;
             for(int i=0;i<=3;i++)
             {
-                auto newIEdge = add_vertex(*(new Pixel((x+(*graph)[neighbours[i]].x)/2,(y+(*graph)[neighbours[i]].y)/2, NODELABEL_I)), *graph);
+                auto newIEdge = graph->AddVertex(*(new Pixel((x+(*graph)[neighbours[i]].x)/2,(y+(*graph)[neighbours[i]].y)/2, NODELABEL_I)));
                 (*graph)[newIEdge].breakLevel = (*graph)[e].breakLevel+1;
                 IEdgesToBeAdded.push_back(newIEdge);
-                add_edge(neighbours[i], newIEdge, *graph);
-                add_edge(newPixel, newIEdge, *graph);
-                remove_edge(neighbours[i],e,*graph);
+                graph->AddEdge(neighbours[i], newIEdge);
+                graph->AddEdge(newPixel, newIEdge);
+                graph->RemoveEdge(neighbours[i],e);
             }
-            auto F11 = add_vertex(*(new Pixel(x, y - dy/2, NODELABEL_F)), *graph);
-            add_edge(newPixel, F11, *graph);
-            auto F12 = add_vertex(*(new Pixel(x, y + dy/2, NODELABEL_F)), *graph);
-            add_edge(newPixel, F12, *graph);
-            auto F21 = add_vertex(*(new Pixel(x - dx/2, y, NODELABEL_F)), *graph);
-            add_edge(newPixel, F21, *graph);
-            auto F22 = add_vertex(*(new Pixel(x + dx/2, y, NODELABEL_F)), *graph);              
-            add_edge(newPixel, F22, *graph);
+            auto F11 = graph -> AddVertex(*(new Pixel(x, y - dy/2, NODELABEL_F)));
+            graph -> AddEdge(newPixel, F11);
+            auto F12 = graph -> AddVertex(*(new Pixel(x, y + dy/2, NODELABEL_F)));
+            graph -> AddEdge(newPixel, F12);
+            auto F21 = graph -> AddVertex(*(new Pixel(x - dx/2, y, NODELABEL_F)));
+            graph -> AddEdge(newPixel, F21);
+            auto F22 = graph -> AddVertex(*(new Pixel(x + dx/2, y, NODELABEL_F)));              
+            graph -> AddEdge(newPixel, F22);
             listOfFEdges->push_back(F11);
             listOfFEdges->push_back(F12);
             listOfFEdges->push_back(F21);
@@ -256,7 +251,7 @@ const double GetDistance(const Pixel p1, const Pixel p2)
 }
 
 P3::P3(
-    std::shared_ptr<MyGraph> graph, 
+    std::shared_ptr<IGraph> graph, 
     std::shared_ptr<std::vector<vertex_descriptor>> listOfBEdges,
     std::shared_ptr<Image> image
 ):
@@ -267,8 +262,6 @@ P3::P3(
 
 void P3::Perform()
 {
-    vertex_iterator currentEdge, lastEdge;
-    std::tie(currentEdge, lastEdge) = vertices(*graph);
     adjacency_iterator currentNeighbour, endOfNeighbours;
     std::vector<vertex_descriptor> neighbours;
     std::vector<vertex_descriptor> toBeAdded;
@@ -331,38 +324,38 @@ void P3::Perform()
             auto FEdge =*(FEdgesOrdered.begin());
             int x=((*graph)[leftPixel].x + (*graph)[rightPixel].x)/2,
                 y=((*graph)[leftPixel].y + (*graph)[rightPixel].y)/2;
-            auto newPixel = add_vertex(*(new Pixel(x, y, NODELABEL_P)), *graph);
+            auto newPixel = graph -> AddVertex(*(new Pixel(x, y, NODELABEL_P)));
             int r,g,b;
             std::tie(r,g,b) = image->getPixel(x,y);
             (*graph)[newPixel].r = r;
             (*graph)[newPixel].g = g;
             (*graph)[newPixel].b = b;
-            add_edge(newPixel, BEdge, *graph);
-            add_edge(newPixel, FEdge, *graph);
+            graph -> AddEdge(newPixel, BEdge);
+            graph -> AddEdge(newPixel, FEdge);
 
             auto temp = GetAdjacentVertices(leftPixel, *graph);
             auto leftIEdge =  *(temp | linq::intersect(GetAdjacentVertices(centerPixel,*graph))).begin();
             temp = GetAdjacentVertices(rightPixel, *graph);
             auto rightIEdge = *(temp | linq::intersect(GetAdjacentVertices(centerPixel,*graph))).begin();
 
-            add_edge(newPixel, leftIEdge, *graph);
-            add_edge(newPixel, rightIEdge, *graph);
+            graph -> AddEdge(newPixel, leftIEdge);
+            graph -> AddEdge(newPixel, rightIEdge);
 
-            auto newBEdge = add_vertex(*(new Pixel(((*graph)[leftPixel].x+x)/2, ((*graph)[leftPixel].y+y)/2, NODELABEL_B)), *graph);
+            auto newBEdge = graph -> AddVertex(*(new Pixel(((*graph)[leftPixel].x+x)/2, ((*graph)[leftPixel].y+y)/2, NODELABEL_B)));
             (*graph)[BEdge].x = ((*graph)[rightPixel].x+x)/2;
             (*graph)[BEdge].y = ((*graph)[rightPixel].y+y)/2;
             
-            add_edge(leftPixel, newBEdge,*graph);
-            add_edge(newPixel, newBEdge,*graph);
+            graph -> AddEdge(leftPixel, newBEdge);
+            graph -> AddEdge(newPixel, newBEdge);
 
-            remove_edge(BEdge, leftPixel, *graph);
+            graph -> RemoveEdge(BEdge, leftPixel);
             toBeAdded.push_back(newBEdge);
         }
     }
     listOfBEdges->insert(listOfBEdges->end(), toBeAdded.begin(), toBeAdded.end());
 }
 
-P4::P4(std::shared_ptr<MyGraph> graph,
+P4::P4(std::shared_ptr<IGraph> graph,
  std::shared_ptr<std::vector<vertex_descriptor>> listOfFEdges, 
  std::shared_ptr<Image> image):
     graph(graph),
@@ -432,19 +425,19 @@ void P4::Perform()
         int y = (firstCommonPixel.y + lastCommonPixel.y)/2;
         int r,g,b;
         std::tie(r,g,b) = image->getPixel(x,y);
-        auto newPixel = add_vertex(*(new Pixel(x, y, r, g, b)), *graph);
-        auto newFEdge = add_vertex(*(new Pixel((x+(*graph)[adjacentPixels[1]].x)/2, (y+(*graph)[adjacentPixels[1]].y)/2, NODELABEL_F)), *graph);
+        auto newPixel = graph -> AddVertex(*(new Pixel(x, y, r, g, b)));
+        auto newFEdge = graph -> AddVertex(*(new Pixel((x+(*graph)[adjacentPixels[1]].x)/2, (y+(*graph)[adjacentPixels[1]].y)/2, NODELABEL_F)));
         for(auto FEdge : commonPixelsAdjacentFEdges)
-            add_edge(newPixel, FEdge, *graph);
+            graph -> AddEdge(newPixel, FEdge);
         for(auto IEdge : leftIEdges)
-            add_edge(newPixel, IEdge, *graph);
+            graph -> AddEdge(newPixel, IEdge);
         for(auto IEdge : rightIEdges)
-            add_edge(newPixel, IEdge, *graph);
-        add_edge(newPixel, e, *graph);
-        add_edge(newPixel, newFEdge, *graph);
-        add_edge(adjacentPixels[1], newFEdge, *graph);
+            graph -> AddEdge(newPixel, IEdge);
+        graph -> AddEdge(newPixel, e);
+        graph -> AddEdge(newPixel, newFEdge);
+        graph -> AddEdge(adjacentPixels[1], newFEdge);
 
-        remove_edge(adjacentPixels[1], e, *graph);
+        graph -> RemoveEdge(adjacentPixels[1], e);
 
         (*graph)[e].x = (x+(*graph)[adjacentPixels[0]].x)/2;
         (*graph)[e].y = (y+(*graph)[adjacentPixels[0]].y)/2;
@@ -457,7 +450,7 @@ std::map<vertex_descriptor,std::vector<vertex_descriptor>> vertexToNeighbours;
 std::map<vertex_descriptor, double> IEdgeToError;
 
 P5::P5(
-    std::shared_ptr<MyGraph> graph, 
+    std::shared_ptr<IGraph> graph, 
     std::shared_ptr<std::vector<vertex_descriptor>> listOfIEdges,
     std::shared_ptr<Image> image,
     int channel,
@@ -513,7 +506,7 @@ template <typename T> int signum(T val) {
     return (T(0) < val) - (val < T(0));
 }
 
-bool haveCommonEdge(MyGraph& graph, vertex_descriptor v1, vertex_descriptor v2, vertex_descriptor corner)
+bool haveCommonEdge(IGraph& graph, vertex_descriptor v1, vertex_descriptor v2, vertex_descriptor corner)
 {
 return !(true
 && signum(graph[v1].x - graph[corner].x) == signum(graph[corner].x - graph[v2].x)
@@ -521,7 +514,7 @@ return !(true
 
 }
 
-P6::P6(std::shared_ptr<MyGraph> graph, 
+P6::P6(std::shared_ptr<IGraph> graph, 
     std::shared_ptr<std::vector<vertex_descriptor>> listOfIEdges):
         graph(graph),
         listOfIEdges(listOfIEdges)

@@ -12,7 +12,7 @@ TEST(P1Test, StartingProduction)
     auto image = make_unique<Image>("./test_files/face.bmp"); 
     auto IEdges = make_unique<vector<vertex_descriptor>>();
     auto BEdges = make_unique<vector<vertex_descriptor>>();
-    auto graph = make_shared<MyGraph>();
+    auto graph = make_shared<PixelGraph>();
     auto S = boost::add_vertex(*(make_unique<Pixel>(0,0, NODELABEL_S)), *graph);
     auto p1 = make_unique<P1>(graph, S, move(IEdges), move(BEdges), move(image));
     p1->Perform();
@@ -21,7 +21,7 @@ TEST(P1Test, StartingProduction)
 TEST(P2Test, StartingProduction)
 {
     auto image = make_unique<Image>("./test_files/face.bmp"); 
-    auto graph = make_shared<MyGraph>();
+    auto graph = make_shared<PixelGraph>();
     int height = image->height(), width = image->width();
     int r,g,b;
     std::tie(r,g,b) = image->getPixel(0, 0);
@@ -45,7 +45,7 @@ TEST(P2Test, StartingProduction)
     auto FEdges = make_shared<vector<vertex_descriptor>>();
     IEdges->push_back(I);
     P2(graph, (*IEdges)[0], FEdges, move(image)).Perform();
-    myEdgeWriter<MyGraph> w(*graph);
+    myEdgeWriter<PixelGraph> w(*graph);
     //boost::write_graphviz(cerr, graph,w );
     EXPECT_EQ(IEdges->size(),4);
     for(auto IEdge : *IEdges)
@@ -60,14 +60,14 @@ TEST(P3Test, P3AfterP2AfterP1)
     auto IEdges = make_shared<vector<vertex_descriptor>>();
     auto BEdges = make_shared<vector<vertex_descriptor>>();
     auto FEdges = make_shared<vector<vertex_descriptor>>();
-    auto graph = make_shared<MyGraph>();
+    auto graph = make_shared<PixelGraph>();
     auto S = boost::add_vertex(*(make_unique<Pixel>(0,0, NODELABEL_S)), *graph);
     P1(graph, S, IEdges, BEdges, image).Perform();
     (*graph)[S]._break=1;
     P2(graph, (*IEdges)[0], FEdges, image).Perform();
     cout<<"BEDGES SIZE: "<<BEdges->size()<<endl;
     P3(graph,BEdges,move(image)).Perform();
-    myEdgeWriter<MyGraph> w(*graph);
+    myEdgeWriter<PixelGraph> w(*graph);
     // boost::write_graphviz(cerr, graph, w);
     EXPECT_EQ(1,1);
 }
@@ -75,7 +75,7 @@ TEST(P3Test, P3AfterP2AfterP1)
 TEST(P4Test, BasicTest)
 {
     auto image = make_unique<Image>("./test_files/face.bmp"); 
-    auto graph = make_shared<MyGraph>();
+    auto graph = make_shared<PixelGraph>();
     auto FEdges = make_shared<vector<vertex_descriptor>>();
     int r=255,g=255,b=255;
     int width=10, height=10;
@@ -108,7 +108,7 @@ TEST(P4Test, BasicTest)
     FEdges->push_back(f2);
     
     P4(graph, FEdges, move(image)).Perform();
-    myEdgeWriter<MyGraph> w(*graph);
+    myEdgeWriter<PixelGraph> w(*graph);
     boost::write_graphviz(cerr, *graph, w);
     EXPECT_EQ(4, FEdges->size());
 }
@@ -116,7 +116,7 @@ TEST(P4Test, BasicTest)
 TEST(P6Test, OneOfTwo)
 {
     auto image = make_unique<Image>("./test_files/face.bmp"); 
-    auto graph = make_shared<MyGraph>();
+    auto graph = make_shared<PixelGraph>();
     int r=0,g=0,b=0;
     int width=10;
     auto p1 = boost::add_vertex(*(make_unique<Pixel>(-width,0,r,g,b)), *graph);

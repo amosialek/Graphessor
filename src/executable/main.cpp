@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
     AbstractOutputWriter* debugWriter = WriterFactory::GetDebugWriter(outputFileName);
     for(int channel=0;channel<3;channel++)
     {
-        auto graph = std::make_shared<MyGraph>();
+        auto graph = std::make_shared<PixelGraph>();
         auto S = boost::add_vertex(*(new Pixel(0,0, NODELABEL_S)), *graph);
         auto image = std::make_shared<ImageMagnifier>(inputFileName);
         P1(graph, S, IEdges, BEdges, image).Perform();
