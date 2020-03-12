@@ -25,6 +25,7 @@ class Pixel
             this->_break=other._break;
             this->label=other.label;
             this->breakLevel=other.breakLevel;
+            return *this;
         };
 };
 #endif // __PIXEL_HPP__

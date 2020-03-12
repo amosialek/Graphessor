@@ -26,14 +26,16 @@ class IGraph
         virtual vertex_descriptor AddVertex(Pixel p)=0;
         virtual void RemoveEdge(vertex_descriptor v1,vertex_descriptor v2)=0;
         virtual void ChangeVertexType(vertex_descriptor v1, std::string type)=0;
-        virtual Pixel operator[](vertex_descriptor v)=0;
+        virtual Pixel& operator[](vertex_descriptor v)=0;
+        virtual std::vector<vertex_descriptor> GetAdjacentVertices(vertex_descriptor v)=0;
+        virtual PixelGraph GetGraph()=0;
 };
 
 
 template <class Name>
 class myEdgeWriter {
 public:
-    myEdgeWriter(Name _name) : name(_name) {}
+    myEdgeWriter(Name& _name) : name(_name) {}
     template <class VertexOrEdge>
     void operator()(std::ostream& out, const VertexOrEdge& v) const {
     char buffer[8];
@@ -51,6 +53,6 @@ public:
     out<<s<<'\n';
     }
 private:
-     Name name;
+     Name& name;
 };
 #endif // __MYGRAPH_HPP__

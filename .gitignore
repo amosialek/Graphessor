@@ -923,3 +923,4 @@ hello_world
 # gtest
 googletest-build/
 googletest-download/
+googletest-src/

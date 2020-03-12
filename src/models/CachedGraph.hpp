@@ -1,3 +1,8 @@
+#ifndef CACHEDGRAPH_HPP
+#define CACHEDGRAPH_HPP
+
+#include "mygraph.hpp"
+
 #include "mygraph.hpp"
 
 class CachedGraph : public IGraph
@@ -51,18 +56,34 @@ class CachedGraph : public IGraph
             (*graph)[v].label = type;
         };
 
-        Pixel operator[](vertex_descriptor v) override
+        Pixel& operator[](vertex_descriptor v) override
         {
             return (*graph)[v];
         };
 
-        std::pair<std::vector<vertex_descriptor>::iterator,std::vector<vertex_descriptor>::iterator> getCacheIterator(std::string type)
+        const std::set<vertex_descriptor>& getCacheIterator(std::string type)
         {
             EnsureCacheExists(type);
-            return std::make_pair<
-                std::vector<vertex_descriptor>::iterator,
-                std::vector<vertex_descriptor>::iterator>
-                (typeToVerticesCache[type] -> begin,
-                typeToVerticesCache[type] -> end);
+            return *(typeToVerticesCache[type]);
         };
+
+        std::vector<vertex_descriptor> GetAdjacentVertices(vertex_descriptor v)
+        {
+            std::vector<vertex_descriptor> result;
+            
+            adjacency_iterator currentNeighbour, endOfNeighbours;
+            std::tie(currentNeighbour, endOfNeighbours) = adjacent_vertices(v, *graph);
+            for(;currentNeighbour!=endOfNeighbours;++currentNeighbour)
+            {
+                result.push_back(*currentNeighbour);
+            }
+            return result;
+        }
+
+        PixelGraph GetGraph()
+        {
+            return *graph;
+        }
 };
+
+#endif /* CACHEDGRAPH_HPP */

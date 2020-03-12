@@ -10,6 +10,7 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/program_options.hpp>
 #include "writers.hpp"
+#include "CachedGraph.hpp"
 #include <chrono>
 
 std::map<std::string, int> functionTime;
@@ -56,8 +57,8 @@ int main(int argc, char** argv) {
     AbstractOutputWriter* debugWriter = WriterFactory::GetDebugWriter(outputFileName);
     for(int channel=0;channel<3;channel++)
     {
-        auto graph = std::make_shared<PixelGraph>();
-        auto S = boost::add_vertex(*(new Pixel(0,0, NODELABEL_S)), *graph);
+        auto graph = std::make_shared<CachedGraph>();
+        auto S = graph -> AddVertex(*(new Pixel(0,0, NODELABEL_S)));
         auto image = std::make_shared<ImageMagnifier>(inputFileName);
         P1(graph, S, IEdges, BEdges, image).Perform();
         
