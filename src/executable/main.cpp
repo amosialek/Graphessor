@@ -71,29 +71,35 @@ int main(int argc, char** argv) {
             std::cerr<<"iteration: "<<i<<std::endl;
             std::chrono::steady_clock::time_point end;
             std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-            P5(graph, IEdges, image, channel, i < 10 ? 0 : epsilon).Perform();
+            auto p5s = P5::FindAllMatches(graph, image, channel, i < 10 ? 0 : epsilon);
+            for(auto p5 : *p5s)
+                p5.Perform();
             end = std::chrono::steady_clock::now();
             functionTime["P5"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
             begin = std::chrono::steady_clock::now();
             debugWriter->WriteItOut(std::to_string(i++), *graph);
-            P6(graph, IEdges).Perform();
+            P6::PerformAllMatches(graph);
             end = std::chrono::steady_clock::now();
             functionTime["P6"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
             begin = std::chrono::steady_clock::now();
             debugWriter->WriteItOut(std::to_string(i++), *graph);
-            auto p2s = P2::FindAllMatches(graph, IEdges, FEdges, image);
+            auto p2s = P2::FindAllMatches(graph, image);
             for(auto p2:p2s)
                 p2.Perform();
             end = std::chrono::steady_clock::now();
             functionTime["P2"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
             begin = std::chrono::steady_clock::now();
             debugWriter->WriteItOut(std::to_string(i++), *graph);
-            P3(graph, BEdges, image).Perform();
+            auto p3s = P3::FindAllMatches(graph, image);
+            for(auto p3 : *p3s)
+                p3.Perform();
             end = std::chrono::steady_clock::now();
             functionTime["P3"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
             begin = std::chrono::steady_clock::now();
             debugWriter->WriteItOut(std::to_string(i++), *graph);
-            P4(graph, FEdges, image).Perform();
+            auto p4s = P4::FindAllMatches(graph, image);
+            for(auto p4: *p4s)
+                p4.Perform();
             end = std::chrono::steady_clock::now();
             functionTime["P4"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
             debugWriter->WriteItOut(std::to_string(i++), *graph);

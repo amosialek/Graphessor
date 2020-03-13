@@ -5,6 +5,68 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Debug Graphessor Tests",
+            "type": "cppdbg",
+            "request": "launch",
+            "stopAtEntry": true,
+            "program": "${workspaceFolder}/build/example",
+            "MIMode": "gdb",
+            "cwd": "${workspaceFolder}/build",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "Debug Graphessor",
+            "type": "cppdbg",
+            "request": "launch",
+            "stopAtEntry": true,
+            "program": "${workspaceFolder}/src/executable/Graphessor",
+            "MIMode": "gdb",
+            "cwd": "${workspaceFolder}",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "attach Graphessor",
+            "type": "cppdbg",
+            "request": "attach",
+            "program": "${workspaceFolder}/src/executable/Graphessor",
+            "processId": "${command:pickProcess}",
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "Attach Tests Graphessor",
+            "type": "cppdbg",
+            "request": "attach",
+            "program": "${workspaceFolder}/build/example",
+            "processId": "${command:pickProcess}",
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
             "name": "g++ build and debug active file",
             "type": "cppdbg",
             "request": "launch",

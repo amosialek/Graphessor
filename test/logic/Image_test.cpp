@@ -85,8 +85,6 @@ TEST(ImageComparisonTest, CompareWithInterpolation)
 
 TEST(ImageMagnifierComparisonTest, CompareWithInterpolation)
 {
-    int debug;
-    std::cin>>debug;
     uint8_t*** test_img;
     test_img = new uint8_t**[5];
     for(int i=0;i<5;i++)

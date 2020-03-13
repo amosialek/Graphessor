@@ -33,6 +33,10 @@ class CachedGraph : public IGraph
             typeToVerticesCache[type2] -> emplace(v);
         }
     public:
+        CachedGraph()
+        {
+            graph = std::make_unique<PixelGraph>();
+        };
         edge_descriptor AddEdge(vertex_descriptor v1,vertex_descriptor v2) override
         {
             add_edge(v1,v2,*graph);
