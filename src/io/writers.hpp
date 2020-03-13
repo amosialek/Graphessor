@@ -3,12 +3,12 @@
 
 #include<string.h>
 #include "mygraph.hpp"
-#include<boost/graph/graphviz.hpp>
+#include<boost/graph/graphviz.hpp> 
 
 class AbstractOutputWriter
 {
     public:
-        virtual void WriteItOut(std::string fileSuffix, IGraph &graph)
+        virtual void WriteItOut([[maybe_unused]] std::string fileSuffix, [[maybe_unused]] IGraph &graph)
         {};
 };
 

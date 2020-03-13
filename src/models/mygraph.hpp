@@ -22,7 +22,7 @@ class IGraph
 {
     public:
         virtual ~IGraph(){};
-        virtual edge_descriptor AddEdge(vertex_descriptor v1,vertex_descriptor v2)=0;
+        virtual void AddEdge(vertex_descriptor v1,vertex_descriptor v2)=0;
         virtual vertex_descriptor AddVertex(Pixel p)=0;
         virtual void RemoveEdge(vertex_descriptor v1,vertex_descriptor v2)=0;
         virtual void ChangeVertexType(vertex_descriptor v1, std::string type)=0;

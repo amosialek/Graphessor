@@ -13,7 +13,6 @@ class GraphessorImage
         std::unique_ptr<IGraphessorImageSerializer> saver;
     public:
         GraphessorImage(int width, int height);
-
         void AddProduction(std::unique_ptr<Production> production);
         Image GetImage();
         void Save(std::ostream& output);

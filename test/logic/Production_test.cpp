@@ -4,6 +4,12 @@
 #include "Pixel.hpp"
 #include "GraphessorConstants.hpp"
 #include "CachedGraph.hpp"
+#include "P1.hpp"
+#include "P2.hpp"
+#include "P3.hpp"
+#include "P4.hpp"
+#include "P5.hpp"
+#include "P6.hpp"
 
 #include <boost/graph/graphviz.hpp>
 using namespace std;
@@ -11,11 +17,9 @@ using namespace std;
 TEST(P1Test, StartingProduction)
 {
     auto image = make_unique<Image>("./test_files/face.bmp"); 
-    auto IEdges = make_unique<vector<vertex_descriptor>>();
-    auto BEdges = make_unique<vector<vertex_descriptor>>();
     auto graph = make_shared<CachedGraph>();
     auto S = graph -> AddVertex(*(make_unique<Pixel>(0,0, NODELABEL_S)));
-    auto p1 = make_unique<P1>(graph, S, move(IEdges), move(BEdges), move(image));
+    auto p1 = make_unique<P1>(graph, S, move(image));
     p1->Perform();
 }
 
@@ -44,8 +48,8 @@ TEST(P2Test, StartingProduction)
     P2(graph, I, move(image)).Perform();
     //myEdgeWriter<CachedGraph> w(*graph);
     //boost::write_graphviz(cerr, graph,w );
-    EXPECT_EQ(graph->getCacheIterator(NODELABEL_I).size(),4);
-    for(auto IEdge : graph->getCacheIterator(NODELABEL_I))
+    EXPECT_EQ(graph->GetCacheIterator(NODELABEL_I).size(),4);
+    for(auto IEdge : graph->GetCacheIterator(NODELABEL_I))
     {
         EXPECT_EQ((*graph)[IEdge].breakLevel,4);
     }
@@ -54,15 +58,12 @@ TEST(P2Test, StartingProduction)
 TEST(P3Test, P3AfterP2AfterP1)
 {
     auto image = make_shared<Image>("./test_files/face.bmp"); 
-    auto IEdges = make_shared<vector<vertex_descriptor>>();
-    auto BEdges = make_shared<vector<vertex_descriptor>>();
-    auto FEdges = make_shared<vector<vertex_descriptor>>();
     auto graph = make_shared<CachedGraph>();
     auto S = graph -> AddVertex(*(make_unique<Pixel>(0, 0, NODELABEL_S)));
-    P1(graph, S, IEdges, BEdges, image).Perform();
+    P1(graph, S, image).Perform();
     (*graph)[S]._break=1;
-    P2(graph, (*IEdges)[0], image).Perform();
-    cout<<"BEDGES SIZE: "<<BEdges->size()<<endl;
+    P2(graph, *graph -> GetCacheIterator(NODELABEL_I).begin(), image).Perform();
+    cout<<"BEDGES SIZE: "<<graph -> GetCacheIterator(NODELABEL_B).size()<<endl;
     auto p3s = P3::FindAllMatches(graph, image);
     for(auto p3 : *p3s)
     {
@@ -107,7 +108,7 @@ TEST(P4Test, BasicTest)
         p4.Perform();
     //myEdgeWriter<CachedGraph> w(*graph);
     //boost::write_graphviz(cerr, *graph, w);
-    EXPECT_EQ(4, graph->getCacheIterator(NODELABEL_F).size());
+    EXPECT_EQ(4, graph->GetCacheIterator(NODELABEL_F).size());
 }
 
 TEST(P6Test, OneOfTwo)

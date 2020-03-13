@@ -6,96 +6,72 @@
 #include "Image.hpp"
 #include "Production.hpp"
 #include "CachedGraph.hpp"
+#include "GraphessorConstants.hpp"
+#include <iostream>
+#include <linq.h>
+#include <algorithm>
+#include <queue>
 
-class P1 : public Production{
-    private:
-        std::shared_ptr<IGraph> graph;
-        std::shared_ptr<std::vector<vertex_descriptor>> listOfIEdges;
-        std::shared_ptr<std::vector<vertex_descriptor>> listOfBEdges;
-        vertex_descriptor S;
-        std::shared_ptr<Image> image;
-    public:
-        P1(std::shared_ptr<IGraph> graph,
-        vertex_descriptor S,
-        std::shared_ptr<std::vector<vertex_descriptor>> listOfIEdges,
-        std::shared_ptr<std::vector<vertex_descriptor>> listOfBEdges,
-        std::shared_ptr<Image> image);
-        void Perform() override;
-        std::vector<uint8_t> Serialize() override;
-}; 
+class NotImplementedException : public std::logic_error
+{
+public:
+    NotImplementedException() : std::logic_error("Function not yet implemented") { };
+};
 
-class P2 : Production{
-    private:
-        std::shared_ptr<IGraph> graph;
-        vertex_descriptor IEdge;
-        std::shared_ptr<Image> image;
-    public:
-        P2(std::shared_ptr<IGraph> graph,
-            vertex_descriptor IEdge,
-            std::shared_ptr<Image> image);
-        void Perform() override;
-        std::vector<uint8_t> Serialize() override;
-        static std::vector<P2> FindAllMatches(std::shared_ptr<CachedGraph> graph,
-            std::shared_ptr<Image> image);
-}; 
+template<typename T, typename Pred>
+std::vector<T> where(std::vector<T> inVec, Pred predicate)
+{
+  std::vector<T> result;
+  std::copy_if(inVec.begin(), inVec.end(), std::back_inserter(result), predicate);
+  return result;
+}
 
-class P3 : Production{
-    private:
-        std::shared_ptr<IGraph> graph;
-        vertex_descriptor BEdge;
-        std::shared_ptr<Image> image;
-    public:
-        P3(
-            std::shared_ptr<IGraph> graph,
-            vertex_descriptor BEdge,
-            std::shared_ptr<Image> image);
-        void Perform() override;
-        std::vector<uint8_t> Serialize() override;
-        static std::unique_ptr<std::vector<P3>> FindAllMatches(
-            std::shared_ptr<CachedGraph> graph,
-            std::shared_ptr<Image> image);
-}; 
+template<typename T, typename Pred>
+std::set<T> where(std::set<T> inVec, Pred predicate)
+{
+  std::set<T> result;
+  std::copy_if(inVec.begin(), inVec.end(), std::inserter(result, result.begin()), predicate);
+  return result;
+}
 
-class P4 : Production{
-    private:
-        std::shared_ptr<IGraph> graph;
-        vertex_descriptor FEdge;
-        std::shared_ptr<Image> image;
-    public:
-        P4(std::shared_ptr<IGraph> graph,
-        vertex_descriptor FEdge,
-        std::shared_ptr<Image> image);
-        void Perform() override;
-        std::vector<uint8_t> Serialize() override;
-        static std::unique_ptr<std::vector<P4>> FindAllMatches(std::shared_ptr<CachedGraph> graph,
-            std::shared_ptr<Image> image);
-}; 
+template<typename T>
+std::vector<T> intersect(std::vector<T>& inVec1, std::vector<T>& inVec2)
+{
+  std::vector<T> result;
+  if(inVec1.size()<inVec2.size())
+  {
+    std::set<T> tempset(inVec1.begin(), inVec1.end());
+    std::copy_if(inVec2.begin(), inVec2.end(), std::back_inserter(result), [tempset](T t){return tempset.find(t)!=tempset.end();});
+  }
+  else
+  {
+    std::set<T> tempset(inVec2.begin(), inVec2.end());
+    std::copy_if(inVec1.begin(), inVec1.end(), std::back_inserter(result), [tempset](T t){return tempset.find(t)!=tempset.end();});  
+  }
+  return result;
+}
 
-class P5 : Production{
-    private:
-        std::shared_ptr<IGraph> graph;
-        vertex_descriptor IEdge;
-    public:
-        P5(std::shared_ptr<IGraph> graph,
-            vertex_descriptor IEdge);
-        void Perform() override;
-        std::vector<uint8_t> Serialize() override;
-        static std::unique_ptr<std::vector<P5>> FindAllMatches(std::shared_ptr<CachedGraph> graph,
-            std::shared_ptr<Image> image,
-            int channel,
-            double epsilon);
-}; 
+template <class T>
+std::vector<vertex_descriptor> GetAdjacentVertices(const T &vertices, IGraph& g)
+{
+    std::vector<vertex_descriptor> result;
+    for(auto v : vertices)
+    {
+        auto currentNeighbours = g.GetAdjacentVertices(v);
+        result.insert(result.end(),currentNeighbours.begin(), currentNeighbours.end());
+    }
+    return result;
+}
 
-class P6 : Production{
-    private:
-        std::shared_ptr<IGraph> graph;
-        vertex_descriptor IEdge;
-    public:
-        P6(std::shared_ptr<IGraph> graph, vertex_descriptor IEdge);
-        void Perform() override;
-        static std::unique_ptr<std::vector<P6>> PerformAllMatches(std::shared_ptr<CachedGraph> graph);
-        std::vector<uint8_t> Serialize() override;
-        auto PerformAndGetAdjacentEdges();
-}; 
+double GetDistance(const int x1, const int x2, const int y1, const int y2) ;
+
+double GetDistance(const Pixel p1, const Pixel p2);
+
+
+template <typename T> int signum(T val) {
+    return (T(0) < val) - (val < T(0));
+}
+
+bool haveCommonEdge(IGraph& graph, vertex_descriptor v1, vertex_descriptor v2, vertex_descriptor corner);
 
 #endif // __PRODUCTIONS_HPP__

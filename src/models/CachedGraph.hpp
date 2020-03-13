@@ -3,8 +3,6 @@
 
 #include "mygraph.hpp"
 
-#include "mygraph.hpp"
-
 class CachedGraph : public IGraph
 {
     private:
@@ -37,7 +35,7 @@ class CachedGraph : public IGraph
         {
             graph = std::make_unique<PixelGraph>();
         };
-        edge_descriptor AddEdge(vertex_descriptor v1,vertex_descriptor v2) override
+        void AddEdge(vertex_descriptor v1,vertex_descriptor v2) override
         {
             add_edge(v1,v2,*graph);
         };
@@ -65,7 +63,7 @@ class CachedGraph : public IGraph
             return (*graph)[v];
         };
 
-        const std::set<vertex_descriptor>& getCacheIterator(std::string type)
+        const std::set<vertex_descriptor>& GetCacheIterator(std::string type)
         {
             EnsureCacheExists(type);
             return *(typeToVerticesCache[type]);

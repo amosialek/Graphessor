@@ -1,17 +1,17 @@
 #include <iostream>
-#include "Pixel.hpp"
-#include "mygraph.hpp"
-#include "Image.hpp"
-#include "GraphessorConstants.hpp"
-#include "Productions.hpp"
 #include <boost/config.hpp>
 #include <boost/graph/graphviz.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/program_options.hpp>
 #include "writers.hpp"
-#include "CachedGraph.hpp"
 #include <chrono>
+#include "P1.hpp"
+#include "P2.hpp"
+#include "P3.hpp"
+#include "P4.hpp"
+#include "P5.hpp"
+#include "P6.hpp"
 
 std::map<std::string, int> functionTime;
 
@@ -26,9 +26,6 @@ void measure_time(std::function<void()> lambda, std::string functionName)
 namespace opt=boost::program_options;
 
 int main(int argc, char** argv) {
-    auto FEdges = std::make_shared<std::vector<vertex_descriptor>>();
-    auto IEdges = std::make_shared<std::vector<vertex_descriptor>>();
-    auto BEdges = std::make_shared<std::vector<vertex_descriptor>>();
     opt::options_description description("Allowed options");
     description.add_options()
     ("help", "produce help message")
@@ -60,14 +57,14 @@ int main(int argc, char** argv) {
         auto graph = std::make_shared<CachedGraph>();
         auto S = graph -> AddVertex(*(new Pixel(0,0, NODELABEL_S)));
         auto image = std::make_shared<ImageMagnifier>(inputFileName);
-        P1(graph, S, IEdges, BEdges, image).Perform();
+        P1(graph, S, image).Perform();
         
-        long long lastICount = 0;
+        unsigned long long lastICount = 0;
         int i=1;
         debugWriter->WriteItOut(std::to_string(i++), *graph);
-        while(lastICount<IEdges->size())
+        while(lastICount < graph -> GetCacheIterator(NODELABEL_I).size())
         {
-            lastICount = IEdges->size();
+            lastICount = graph -> GetCacheIterator(NODELABEL_I).size();
             std::cerr<<"iteration: "<<i<<std::endl;
             std::chrono::steady_clock::time_point end;
             std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
@@ -84,7 +81,7 @@ int main(int argc, char** argv) {
             begin = std::chrono::steady_clock::now();
             debugWriter->WriteItOut(std::to_string(i++), *graph);
             auto p2s = P2::FindAllMatches(graph, image);
-            for(auto p2:p2s)
+            for(auto p2 : *p2s)
                 p2.Perform();
             end = std::chrono::steady_clock::now();
             functionTime["P2"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
