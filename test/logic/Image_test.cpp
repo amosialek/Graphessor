@@ -110,7 +110,7 @@ TEST(ImageMagnifierComparisonTest, CompareWithInterpolation)
     
     double a = image->CompareWithInterpolation(0,4,0,4,0);
     EXPECT_DOUBLE_EQ(0,a);
-    a = image->CompareWithInterpolation(2,4,0,4,0);
+    a = image->CompareWithInterpolation(8,16,0,4,0);
     EXPECT_DOUBLE_EQ(2500.0/(255*255*6),a);
     a = image->CompareWithInterpolation(0,4,8,16,0);
     EXPECT_DOUBLE_EQ(10000.0/(255*255*6),a);
