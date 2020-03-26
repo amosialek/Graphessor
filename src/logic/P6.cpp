@@ -15,6 +15,7 @@ P6::P6(std::shared_ptr<IGraph> graph,
 
 auto P6::PerformAndGetAdjacentEdges()
 {
+    spdlog::debug("P6 {}", IEdge);    
     std::vector<vertex_descriptor> adjacentEdges;
     auto adjacentVertices = graph -> GetAdjacentVertices(IEdge);
     for(auto v: adjacentVertices)

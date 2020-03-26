@@ -11,6 +11,7 @@
 #include <linq.h>
 #include <algorithm>
 #include <queue>
+#include "spdlog/spdlog.h"
 
 class NotImplementedException : public std::logic_error
 {

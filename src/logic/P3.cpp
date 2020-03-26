@@ -53,6 +53,7 @@ std::unique_ptr<std::vector<P3>> P3::FindAllMatches(std::shared_ptr<CachedGraph>
 
 void P3::Perform()
 {
+    spdlog::debug("P3 {}", BEdge);    
     std::vector<vertex_descriptor> neighbours;
     std::vector<vertex_descriptor> leftPixels;
     std::vector<vertex_descriptor> rightPixels;

@@ -17,6 +17,7 @@ P5::P5(
 
 void P5::Perform()
 {
+    spdlog::debug("P5 {}", IEdge);    
     (*graph)[IEdge]._break = 1;
 }
 
@@ -60,4 +61,6 @@ std::unique_ptr<std::vector<P5>> P5::FindAllMatches(std::shared_ptr<CachedGraph>
                     result -> emplace_back(graph, IEdge);
                 }
         }
+    spdlog::debug("Found {} P5 Matches", result->size());  
+    return result;
 }
