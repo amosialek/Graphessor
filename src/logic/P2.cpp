@@ -41,11 +41,13 @@ std::unique_ptr<std::vector<P2>> P2::FindAllMatches(std::shared_ptr<CachedGraph>
             }
         }
     }
+    spdlog::debug("Found {} P2 Matches", result->size());  
     return result;
 }
 
 void P2::Perform()
 {
+    spdlog::debug("P2 {}", IEdge);    
     std::vector<vertex_descriptor> neighbours;
     auto e = IEdge;
     {

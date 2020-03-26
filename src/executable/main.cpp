@@ -4,8 +4,9 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/program_options.hpp>
-#include "writers.hpp"
 #include <chrono>
+#include "spdlog/spdlog.h"
+#include "writers.hpp"
 #include "P1.hpp"
 #include "P2.hpp"
 #include "P3.hpp"
@@ -26,6 +27,11 @@ void measure_time(std::function<void()> lambda, std::string functionName)
 namespace opt=boost::program_options;
 
 int main(int argc, char** argv) {
+
+    spdlog::set_pattern("[%H:%M:%S %z] [%n] [%^---%L---%$] [thread %t] %v");
+    spdlog::set_level(spdlog::level::debug); // Set global log level to debug
+
+
     opt::options_description description("Allowed options");
     description.add_options()
     ("help", "produce help message")
@@ -34,11 +40,9 @@ int main(int argc, char** argv) {
     ("output", opt::value<std::string>(), "debug output file template")
     
 ;
-
     opt::variables_map vm;
     opt::store(opt::parse_command_line(argc, argv, description), vm);
     opt::notify(vm);    
-    
     double epsilon = 0.33;
     if (vm.count("epsilon"))
         epsilon = vm["epsilon"].as<double>();
@@ -52,7 +56,7 @@ int main(int argc, char** argv) {
         outputFileName = vm["output"].as<std::string>();
 
     AbstractOutputWriter* debugWriter = WriterFactory::GetDebugWriter(outputFileName);
-    for(int channel=0;channel<3;channel++)
+    for(int channel=0;channel<1;channel++)
     {
         auto graph = std::make_shared<CachedGraph>();
         auto S = graph -> AddVertex(*(new Pixel(0,0, NODELABEL_S)));
@@ -64,6 +68,7 @@ int main(int argc, char** argv) {
         debugWriter->WriteItOut(std::to_string(i++), *graph);
         while(lastICount < graph -> GetCacheIterator(NODELABEL_I).size())
         {
+            spdlog::debug("Starting production loop");  
             lastICount = graph -> GetCacheIterator(NODELABEL_I).size();
             std::cerr<<"iteration: "<<i<<std::endl;
             std::chrono::steady_clock::time_point end;
@@ -101,6 +106,7 @@ int main(int argc, char** argv) {
             functionTime["P4"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
             debugWriter->WriteItOut(std::to_string(i++), *graph);
         }
+
         std::cerr<<"P2 "<<functionTime["P2"]<<std::endl;
         std::cerr<<"P3 "<<functionTime["P3"]<<std::endl;
         std::cerr<<"P4 "<<functionTime["P4"]<<std::endl;

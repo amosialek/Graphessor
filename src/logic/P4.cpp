@@ -61,6 +61,7 @@ std::unique_ptr<std::vector<P4>> P4::FindAllMatches(std::shared_ptr<CachedGraph>
 
 void P4::Perform()
 {
+        spdlog::debug("P4 {}", FEdge);    
         auto adjacentPixels = graph -> GetAdjacentVertices(FEdge);
         bool isVertical = (*graph)[adjacentPixels[0]].x==(*graph)[adjacentPixels[1]].x;
         int bound1 = isVertical 

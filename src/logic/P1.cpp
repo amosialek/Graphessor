@@ -11,13 +11,14 @@ P1::P1(std::shared_ptr<IGraph> graph,
 
 void P1::Perform()
 {
+    spdlog::debug("P1 {}",S);    
     int y = image->height()-1,
         x = image->width()-1,
         r,g,b;
     auto I = S;
     (*graph)[I].x=x/2;
     (*graph)[I].y=y/2;
-    (*graph)[I].label=NODELABEL_I;
+    graph->ChangeVertexType(I,NODELABEL_I);
 
     auto BTop = graph -> AddVertex(*(new Pixel(x/2, 0, NODELABEL_B)));
     auto BLeft = graph -> AddVertex(*(new Pixel(0, y/2, NODELABEL_B)));
@@ -38,7 +39,7 @@ void P1::Perform()
     graph -> AddEdge(PTopLeft, I);
     graph -> AddEdge(PTopRight, I);
 
-    graph -> AddEdge(PBotLeft, BBot );
+    graph -> AddEdge(PBotLeft, BBot);
     graph -> AddEdge(PBotRight, BBot);
     graph -> AddEdge(PTopLeft, BTop);
     graph -> AddEdge(PTopRight, BTop);
