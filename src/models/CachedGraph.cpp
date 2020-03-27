@@ -1,4 +1,5 @@
 #include "CachedGraph.hpp"
+#include "spdlog/spdlog.h"
 
 void CachedGraph::EnsureCacheExists(std::string type)
 {
@@ -21,6 +22,7 @@ void CachedGraph::ChangeCachedElementType(vertex_descriptor v, std::string type1
     EnsureCacheExists(type2);
     typeToVerticesCache[type1] -> erase(v);
     typeToVerticesCache[type2] -> emplace(v);
+    spdlog::debug("emplaced {} to {}", v, type2);  
 }
 
 CachedGraph::CachedGraph()

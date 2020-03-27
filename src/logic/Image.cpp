@@ -105,7 +105,7 @@ double Image::SquaredErrorOfInterpolation(int x1, int x2, int y1, int y2, int ch
 
 double Image::CompareWithInterpolation(int x1, int x2, int y1, int y2, int channel)
 {
-    double maxSum = 255*255*(x2-x1+1)*(y2-y1+1);
+    double maxSum = 255.0*255*(x2-x1+1)*(y2-y1+1);
     return SquaredErrorOfInterpolation(x1, x2, y1, y2, channel)/maxSum;
 }
 

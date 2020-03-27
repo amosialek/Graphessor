@@ -16,14 +16,6 @@
 
 std::map<std::string, int> functionTime;
 
-void measure_time(std::function<void()> lambda, std::string functionName)
-{
-    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-    lambda();
-    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-    functionTime[functionName] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-}
-
 namespace opt=boost::program_options;
 
 int main(int argc, char** argv) {
@@ -31,15 +23,13 @@ int main(int argc, char** argv) {
     spdlog::set_pattern("[%H:%M:%S %z] [%n] [%^---%L---%$] [thread %t] %v");
     spdlog::set_level(spdlog::level::debug); // Set global log level to debug
 
-
     opt::options_description description("Allowed options");
     description.add_options()
     ("help", "produce help message")
     ("epsilon", opt::value<double>(), "set epsilon")
     ("input", opt::value<std::string>(), "input bitmap file")
-    ("output", opt::value<std::string>(), "debug output file template")
-    
-;
+    ("output", opt::value<std::string>(), "debug output file template");
+
     opt::variables_map vm;
     opt::store(opt::parse_command_line(argc, argv, description), vm);
     opt::notify(vm);    
@@ -73,7 +63,7 @@ int main(int argc, char** argv) {
             std::cerr<<"iteration: "<<i<<std::endl;
             std::chrono::steady_clock::time_point end;
             std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-            auto p5s = P5::FindAllMatches(graph, image, channel, i < 10 ? 0 : epsilon);
+            auto p5s = P5::FindAllMatches(graph, image, channel, i < 30 ? 0 : epsilon);
             for(auto p5 : *p5s)
                 p5.Perform();
             end = std::chrono::steady_clock::now();

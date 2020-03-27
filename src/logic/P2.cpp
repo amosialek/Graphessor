@@ -21,7 +21,7 @@ std::unique_ptr<std::vector<P2>> P2::FindAllMatches(std::shared_ptr<CachedGraph>
     std::vector<vertex_descriptor> neighbours;
     std::vector<vertex_descriptor> IEdgesToBeAdded;
     std::set<vertex_descriptor> IEdgesToBeDeleted;
-    for(vertex_descriptor e : graph -> GetCacheIterator(NODELABEL_F))
+    for(vertex_descriptor e : graph -> GetCacheIterator(NODELABEL_I))
     {
         if((*graph)[e].label==NODELABEL_I and (*graph)[e]._break==1)
         {

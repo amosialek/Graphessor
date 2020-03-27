@@ -32,10 +32,12 @@ std::unique_ptr<std::vector<P5>> P5::FindAllMatches(std::shared_ptr<CachedGraph>
     vertexToNeighbours.clear();
     int width = image->width();
     int height = image->height();
-    graph -> GetCacheIterator(NODELABEL_I) | linq::select([graph](vertex_descriptor v){vertexToNeighbours[v] = graph -> GetAdjacentVertices(v); return v;});
+    for(auto v : graph -> GetCacheIterator(NODELABEL_I))
+        vertexToNeighbours[v] = graph -> GetAdjacentVertices(v); 
     auto IEdges = where(graph -> GetCacheIterator(NODELABEL_I), [](vertex_descriptor v){return vertexToNeighbours[v].size()==4;});
     for(auto IEdge : IEdges)
     {
+        // spdlog::debug("TOPKEK");  
         int minx = width;
         int maxx = 0;
         int miny = height;
@@ -53,6 +55,7 @@ std::unique_ptr<std::vector<P5>> P5::FindAllMatches(std::shared_ptr<CachedGraph>
         maxError = std::max(maxError, error);
     //std::cout<<"error: "<<error<<" "<<minx<<" "<<maxx<<" "<<miny<<" "<<maxy<<std::endl;
     }
+    spdlog::debug("MaxErrorFound: {}", maxError);  
     if(maxError > epsilon)
         for(auto IEdge : IEdges)
         {
