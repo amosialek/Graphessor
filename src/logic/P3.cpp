@@ -80,8 +80,8 @@ void P3::Perform()
     }
     vertex_descriptor centerPixel = *common.begin();
     auto adjacentVertices = graph -> GetAdjacentVertices(centerPixel);
-    vertex_descriptor leftI = *where(leftIEdges, [adjacentVertices](vertex_descriptor v){return adjacentVertices | linq::contains(v);}).begin();
-    vertex_descriptor rightI = *where(rightIEdges, [adjacentVertices](vertex_descriptor v){return adjacentVertices | linq::contains(v);}).begin();
+    //vertex_descriptor leftI = *where(leftIEdges, [adjacentVertices](vertex_descriptor v){return adjacentVertices | linq::contains(v);}).begin();
+    //vertex_descriptor rightI = *where(rightIEdges, [adjacentVertices](vertex_descriptor v){return adjacentVertices | linq::contains(v);}).begin();
     auto FEdges =  where(adjacentVertices, [this](vertex_descriptor v){return (*graph)[v].label==NODELABEL_F;});
     auto FEdgesOrdered = LINQ(from(v, FEdges) orderby(GetDistance((*graph)[v], (*graph)[BEdge])));
     auto FEdge =*(FEdgesOrdered.begin());

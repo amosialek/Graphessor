@@ -1,7 +1,8 @@
 #include "Image.hpp"
+#include "GraphessorConstants.hpp"
 #include <string>
 #include <iostream>
-
+#include "spdlog/spdlog.h"
 
 
 Image::Image(std::string filename)
@@ -19,6 +20,88 @@ Image::Image(uint8_t*** pixels, int width, int height, int channels)
             for(int channel=0; channel < std::min(channels, 3); channel++)
                 img._view[y*width+x][channel]=pixels[x][y][channel];
     view = boost::gil::view(img);
+}
+
+
+int GetRGBChannelValue(Pixel p, int channel)
+{
+    if (channel==0)
+        return p.r;
+    if (channel==1)        
+        return p.g;
+    return p.b;
+}
+
+Image::Image(std::vector<std::shared_ptr<CachedGraph>> graphs)
+{
+    int width = 0;
+    int height = 0;
+    auto pixels = graphs[0] -> GetCacheIterator(NODELABEL_P);
+    for(auto pixel : pixels)
+    {
+        width = std::max(width ,graphs[0] -> operator[](pixel).x);
+        height = std::max(height ,graphs[0] -> operator[](pixel).y);
+    }
+    img = boost::gil::rgb8_image_t(width+1, height+1);
+    boost::gil::fill_pixels(img._view, boost::gil::rgb8_pixel_t(0,0,0));
+    for(int channel=0;channel<3;channel++)
+    {
+        pixels.clear();
+        pixels = graphs[channel] -> GetCacheIterator(NODELABEL_P);
+        for(auto pixel : pixels)
+        {
+            img._view[graphs[channel]->operator[](pixel).y * (width+1) + graphs[channel]-> operator[](pixel).x][channel] = GetRGBChannelValue(graphs[channel]->operator[](pixel), channel);
+            spdlog::debug("Setting x={} y={} in channel {} to {}", graphs[channel]->operator[](pixel).x,graphs[channel]->operator[](pixel).y, channel, GetRGBChannelValue(graphs[channel]->operator[](pixel), channel));    
+        }
+        auto IEdges = graphs[channel]->GetCacheIterator(NODELABEL_I);
+        std::vector<vertex_descriptor> fullIEdges;
+        for(auto v : IEdges)
+        {
+            if(graphs[channel]->GetAdjacentVertices(v).size()==4)
+            fullIEdges.emplace_back(v);
+        }
+        for(auto v : fullIEdges)
+        {
+            view = boost::gil::view(img);
+            auto adjacentVertices = graphs[channel]-> GetAdjacentVertices(v);
+            int minx,miny,maxx,maxy;
+            minx = maxx = (*graphs[channel])[adjacentVertices[0]].x;
+            miny = maxy = (*graphs[channel])[adjacentVertices[0]].y;
+            for(auto adjacentVertex : adjacentVertices)
+            {
+                minx = std::min(minx,(*graphs[channel])[adjacentVertex].x);
+                maxx = std::max(maxx,(*graphs[channel])[adjacentVertex].x);
+                miny = std::min(miny,(*graphs[channel])[adjacentVertex].y);
+                maxy = std::max(maxy,(*graphs[channel])[adjacentVertex].y);
+            }
+            for(int y=miny;y<=maxy;y++)
+                for(int x=minx;x<maxx;x++)
+                    //for(int channel=0; channel < std::min(1, 3); channel++)
+                        img._view[y*(width+1)+x][channel]=this->GetInterpolatedPixel(minx,maxx,miny, maxy,x,y,channel);
+        }
+        auto xd = 1;
+    }
+    view = boost::gil::view(img);
+}
+
+void Image::Save3Colors()
+{
+    auto imageRed = std::make_unique<boost::gil::rgb8_image_t>(width(), height());
+    auto imageGreen = std::make_unique<boost::gil::rgb8_image_t>(width(), height());
+    auto imageBlue = std::make_unique<boost::gil::rgb8_image_t>(width(), height());
+    auto redView = boost::gil::view(*imageRed);
+    auto greenView = boost::gil::view(*imageGreen);
+    auto blueView = boost::gil::view(*imageBlue);
+
+    int r,g,b;
+    for(int x=0;x<width();x++)
+        for(int y=0;y<height();x++)
+        {
+            std::tie(r,g,b)=getPixel(x,y);
+            redView[y * width()+x][0] = r; 
+            greenView[y * width()+x][0] = g; 
+            blueView[y * width()+x][0] = b; 
+        }
 }
 
 long long Image::CompareWith(Image& other, int x0, int y0, int width, int height)
@@ -107,6 +190,11 @@ double Image::CompareWithInterpolation(int x1, int x2, int y1, int y2, int chann
 {
     double maxSum = 255.0*255*(x2-x1+1)*(y2-y1+1);
     return SquaredErrorOfInterpolation(x1, x2, y1, y2, channel)/maxSum;
+}
+
+void Image::save(std::string filename)
+{
+    boost::gil::write_view(filename, this->view, boost::gil::bmp_tag());
 }
 
 double ImageMagnifier::SquaredErrorOfInterpolation(int x1, int x2, int y1, int y2, int channel)

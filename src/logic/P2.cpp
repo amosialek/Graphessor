@@ -11,7 +11,7 @@ P2::P2(
     std::shared_ptr<Image> image):
         graph(graph),
         IEdge(IEdge),
-        image(image){};
+        image(image){}
 
 std::unique_ptr<std::vector<P2>> P2::FindAllMatches(std::shared_ptr<CachedGraph> graph,
     std::shared_ptr<Image> image)

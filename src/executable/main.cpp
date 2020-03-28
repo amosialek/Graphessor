@@ -46,9 +46,11 @@ int main(int argc, char** argv) {
         outputFileName = vm["output"].as<std::string>();
 
     AbstractOutputWriter* debugWriter = WriterFactory::GetDebugWriter(outputFileName);
-    for(int channel=0;channel<1;channel++)
+    std::vector<std::shared_ptr<CachedGraph>> channel_graphs;
+    for(int channel=0;channel<3;channel++)
     {
         auto graph = std::make_shared<CachedGraph>();
+        channel_graphs.emplace_back(graph);
         auto S = graph -> AddVertex(*(new Pixel(0,0, NODELABEL_S)));
         auto image = std::make_shared<ImageMagnifier>(inputFileName);
         P1(graph, S, image).Perform();
@@ -63,7 +65,7 @@ int main(int argc, char** argv) {
             std::cerr<<"iteration: "<<i<<std::endl;
             std::chrono::steady_clock::time_point end;
             std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-            auto p5s = P5::FindAllMatches(graph, image, channel, i < 30 ? 0 : epsilon);
+            auto p5s = P5::FindAllMatches(graph, image, channel, i < 100 ? 0 : epsilon);
             for(auto p5 : *p5s)
                 p5.Perform();
             end = std::chrono::steady_clock::now();
@@ -97,12 +99,15 @@ int main(int argc, char** argv) {
             debugWriter->WriteItOut(std::to_string(i++), *graph);
         }
 
+
         std::cerr<<"P2 "<<functionTime["P2"]<<std::endl;
         std::cerr<<"P3 "<<functionTime["P3"]<<std::endl;
         std::cerr<<"P4 "<<functionTime["P4"]<<std::endl;
         std::cerr<<"P5 "<<functionTime["P5"]<<std::endl;
         std::cerr<<"P6 "<<functionTime["P6"]<<std::endl;
     }
+    auto restoredImage = std::make_unique<Image>(channel_graphs);
+    restoredImage -> save("/media/albert/Nowy/poligon/bunny3.bmp");
 }
 
 

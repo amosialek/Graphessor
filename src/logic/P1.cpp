@@ -7,7 +7,7 @@ P1::P1(std::shared_ptr<IGraph> graph,
              graph(graph), 
              S(S),
              image(image)
-    {};
+    {}
 
 void P1::Perform()
 {

@@ -11,7 +11,7 @@ P4::P4(std::shared_ptr<IGraph> graph,
     graph(graph),
     FEdge(FEdge),
     image(image)
- {};
+ {}
 
 std::unique_ptr<std::vector<P4>> P4::FindAllMatches(std::shared_ptr<CachedGraph> graph,
             std::shared_ptr<Image> image)
