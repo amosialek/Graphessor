@@ -19,7 +19,8 @@ class CachedGraph : public IGraph
         void ChangeVertexType(vertex_descriptor v, std::string type) override;
         Pixel& operator[](vertex_descriptor v) override;
         const std::set<vertex_descriptor>& GetCacheIterator(std::string type);
-        std::vector<vertex_descriptor> GetAdjacentVertices(vertex_descriptor v);
+        std::vector<vertex_descriptor> GetAdjacentVertices(vertex_descriptor v) override;
+        std::vector<vertex_descriptor> GetAdjacentVertices(vertex_descriptor v, std::string type) override;
         PixelGraph GetGraph();
 };
 

@@ -57,7 +57,7 @@ Image::Image(std::vector<std::shared_ptr<CachedGraph>> graphs)
         std::vector<vertex_descriptor> fullIEdges;
         for(auto v : IEdges)
         {
-            if(graphs[channel]->GetAdjacentVertices(v).size()==4)
+            if(graphs[channel] -> GetAdjacentVertices(v).size()==4)
             fullIEdges.emplace_back(v);
         }
         for(auto v : fullIEdges)
@@ -75,16 +75,92 @@ Image::Image(std::vector<std::shared_ptr<CachedGraph>> graphs)
                 maxy = std::max(maxy,(*graphs[channel])[adjacentVertex].y);
             }
             for(int y=miny;y<=maxy;y++)
-                for(int x=minx;x<maxx;x++)
+                for(int x=minx;x<maxx;x++)//img._view[miny*(width+1)+minx][channel]==0 || img._view[miny*(width+1)+maxx][channel]==0 || img._view[maxy*(width+1)+minx][channel]==0 ||img._view[maxy*(width+1)+maxx][channel]==0
                     //for(int channel=0; channel < std::min(1, 3); channel++)
                         img._view[y*(width+1)+x][channel]=this->GetInterpolatedPixel(minx,maxx,miny, maxy,x,y,channel);
         }
-        auto xd = 1;
+        FillMissingSpacesBasedOnLargerBlocks(graphs[channel], pixels, channel, width);
+        
     }
     view = boost::gil::view(img);
 }
 
-void Image::Save3Colors()
+void Image::FillMissingSpacesBasedOnLargerBlocks(std::shared_ptr<IGraph> graph, std::set<vertex_descriptor>& pixels, int channel, int width)
+{
+    for(auto pixel : pixels)
+    {
+        auto pixelNeighbors = graph -> GetAdjacentVertices(pixel, NODELABEL_I);
+        if(pixelNeighbors.size()<4)
+            continue;
+        std::set<vertex_descriptor> neighborPixels;
+        for(auto v : pixelNeighbors)
+        {
+            auto adjPixels = graph -> GetAdjacentVertices(v, NODELABEL_P);
+            std::copy(adjPixels.begin(), adjPixels.end(), std::inserter(neighborPixels,neighborPixels.end()));
+        }
+        if(neighborPixels.size()<9) //not all neighbor I have been broken
+        {
+            int minx,maxx,miny,maxy;
+            minx=maxx= graph -> operator[](*neighborPixels.begin()).x;
+            miny=maxy= graph -> operator[](*neighborPixels.begin()).y;
+            for(auto v : neighborPixels)
+            {
+                minx = std::min(minx, graph ->operator[](v).x);
+                maxx = std::max(maxx, graph ->operator[](v).x);
+                miny = std::min(miny, graph ->operator[](v).y);
+                maxy = std::max(maxy, graph ->operator[](v).y);
+            }
+            for(int y=miny;y<=maxy;y++)
+                for(int x=minx;x<maxx;x++)//img._view[miny*(width+1)+minx][channel]==0 || img._view[miny*(width+1)+maxx][channel]==0 || img._view[maxy*(width+1)+minx][channel]==0 ||img._view[maxy*(width+1)+maxx][channel]==0
+                    if(img._view[y*(width+1)+x][channel]==0)
+                        img._view[y*(width+1)+x][channel]=this->GetInterpolatedPixel(minx,maxx,miny, maxy,x,y,channel);
+        }
+    }
+
+}
+
+void Image::FillMissingSpacesBasedOnBaricentricInterpolation(std::shared_ptr<CachedGraph> graph, std::set<vertex_descriptor>& pixels, int channel, int width)
+{
+    auto FEdges = graph->GetCacheIterator(NODELABEL_F);
+    std::set<vertex_descriptor> danglingFedges;
+    for(auto fEdge : FEdges)
+    {
+        if(graph -> GetAdjacentVertices(fEdge).size()==1)
+            danglingFedges.insert(fEdge);
+    }
+    for(auto pixel : pixels)
+    {
+        auto pixelNeighbors = graph -> GetAdjacentVertices(pixel, NODELABEL_I);
+        if(pixelNeighbors.size()<4)
+            continue;
+        std::set<vertex_descriptor> neighborPixels;
+        for(auto v : pixelNeighbors)
+        {
+            auto adjPixels = graph -> GetAdjacentVertices(v, NODELABEL_P);
+            std::copy(adjPixels.begin(), adjPixels.end(), std::inserter(neighborPixels,neighborPixels.end()));
+        }
+        if(neighborPixels.size()<9) //not all neighbor I have been broken
+        {
+            int minx,maxx,miny,maxy;
+            minx=maxx= graph -> operator[](*neighborPixels.begin()).x;
+            miny=maxy= graph -> operator[](*neighborPixels.begin()).y;
+            for(auto v : neighborPixels)
+            {
+                minx = std::min(minx, graph ->operator[](v).x);
+                maxx = std::max(maxx, graph ->operator[](v).x);
+                miny = std::min(miny, graph ->operator[](v).y);
+                maxy = std::max(maxy, graph ->operator[](v).y);
+            }
+            for(int y=miny;y<=maxy;y++)
+                for(int x=minx;x<maxx;x++)//img._view[miny*(width+1)+minx][channel]==0 || img._view[miny*(width+1)+maxx][channel]==0 || img._view[maxy*(width+1)+minx][channel]==0 ||img._view[maxy*(width+1)+maxx][channel]==0
+                    if(img._view[y*(width+1)+x][channel]==0)
+                        img._view[y*(width+1)+x][channel]=this->GetInterpolatedPixel(minx,maxx,miny, maxy,x,y,channel);
+        }
+    }
+
+}
+
+void Image::Save3Colors(std::string filename)
 {
     auto imageRed = std::make_unique<boost::gil::rgb8_image_t>(width(), height());
     auto imageGreen = std::make_unique<boost::gil::rgb8_image_t>(width(), height());
@@ -95,13 +171,16 @@ void Image::Save3Colors()
 
     int r,g,b;
     for(int x=0;x<width();x++)
-        for(int y=0;y<height();x++)
+        for(int y=0;y<height();y++)
         {
             std::tie(r,g,b)=getPixel(x,y);
             redView[y * width()+x][0] = r; 
-            greenView[y * width()+x][0] = g; 
-            blueView[y * width()+x][0] = b; 
+            greenView[y * width()+x][1] = g; 
+            blueView[y * width()+x][2] = b; 
         }
+    boost::gil::write_view(filename+"_red.bmp", redView, boost::gil::bmp_tag());
+    boost::gil::write_view(filename+"_green.bmp", greenView, boost::gil::bmp_tag());
+    boost::gil::write_view(filename+"_blue.bmp", blueView, boost::gil::bmp_tag());
 }
 
 long long Image::CompareWith(Image& other, int x0, int y0, int width, int height)
@@ -159,7 +238,7 @@ double Image::GetInterpolatedPixel(int x1, int x2, int y1, int y2, int x, int y,
         r21 = getPixelInternal(x2,y1, channel);
         r12 = getPixelInternal(x1,y2, channel);
         r22 = getPixelInternal(x2,y2, channel);
-        double coef22 = (x-x1)*(y-y1)/(1.0*(x2-x1)*(y2-y1));
+        double coef22 = (x-x1)*(y-y1)/(1.0*(x2-x1)*(y2-y1));//r11==0 || r22==0 || r21==0 || r12==0
         double coef12 = (x2-x)*(y-y1)/(1.0*(x2-x1)*(y2-y1));
         double coef21 = (x-x1)*(y2-y)/(1.0*(x2-x1)*(y2-y1));
         double coef11 = (x2-x)*(y2-y)/(1.0*(x2-x1)*(y2-y1));
@@ -195,6 +274,11 @@ double Image::CompareWithInterpolation(int x1, int x2, int y1, int y2, int chann
 void Image::save(std::string filename)
 {
     boost::gil::write_view(filename, this->view, boost::gil::bmp_tag());
+}
+
+std::tuple<int,int> Image::GetNearestPixelCoords(int x, int y)
+{
+    return std::make_tuple(x,y);
 }
 
 double ImageMagnifier::SquaredErrorOfInterpolation(int x1, int x2, int y1, int y2, int channel)
@@ -252,4 +336,17 @@ int ImageMagnifier::height()
     auto result = Image::height()*originalRatio;
     ratio = originalRatio;
 return result;
+}
+std::tuple<int,int> ImageMagnifier::GetNearestPixelCoords(int x, int y)
+{
+    int halfRatio = ratio/2;
+    int xmod = x%ratio;
+    int ymod = y%ratio;
+    int xres = x - xmod;
+    int yres = y - ymod;
+    if(xmod >= halfRatio && xres+ratio<width())
+        xres += ratio;
+    if(ymod >= halfRatio && yres+ratio<height())
+        yres += ratio;
+    return std::make_tuple(xres,yres);
 }

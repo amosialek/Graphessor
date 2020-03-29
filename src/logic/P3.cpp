@@ -53,7 +53,7 @@ std::unique_ptr<std::vector<P3>> P3::FindAllMatches(std::shared_ptr<CachedGraph>
 
 void P3::Perform()
 {
-    spdlog::debug("P3 {}", BEdge);    
+    //spdlog::debug("P3 {}", BEdge);    
     std::vector<vertex_descriptor> neighbours;
     std::vector<vertex_descriptor> leftPixels;
     std::vector<vertex_descriptor> rightPixels;
@@ -89,6 +89,8 @@ void P3::Perform()
     vertex_descriptor rightPixel = neighbours[1];
     int x=((*graph)[leftPixel].x + (*graph)[rightPixel].x)/2,
         y=((*graph)[leftPixel].y + (*graph)[rightPixel].y)/2;
+    std::tie(x,y) = image->GetNearestPixelCoords(x,y);
+    spdlog::debug("P3 {} x={} y={} y1={} y2={}", BEdge,x,y,(*graph)[leftPixel].y , (*graph)[rightPixel].y);    
     auto newPixel = graph -> AddVertex(*(new Pixel(x, y, NODELABEL_P)));
     int r,g,b;
     std::tie(r,g,b) = image -> getPixel(x,y);

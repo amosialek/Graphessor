@@ -28,40 +28,40 @@ void CachedGraph::ChangeCachedElementType(vertex_descriptor v, std::string type1
 CachedGraph::CachedGraph()
 {
     graph = std::make_unique<PixelGraph>();
-};
+}
 void CachedGraph::AddEdge(vertex_descriptor v1,vertex_descriptor v2) 
 {
     add_edge(v1,v2,*graph);
-};
+}
 
 vertex_descriptor CachedGraph::AddVertex(Pixel p) 
 {
     vertex_descriptor v = add_vertex(p, *graph);
     InsertCacheElement(p.label, v);
     return v;
-};
+}
 
 void CachedGraph::RemoveEdge(vertex_descriptor v1,vertex_descriptor v2) 
 {
     remove_edge(v1,v2,*graph);
-};
+}
 
 void CachedGraph::ChangeVertexType(vertex_descriptor v, std::string type) 
 {
     ChangeCachedElementType(v, (*graph)[v].label, type);
     (*graph)[v].label = type;
-};
+}
 
 Pixel& CachedGraph::operator[](vertex_descriptor v) 
 {
     return (*graph)[v];
-};
+}
 
 const std::set<vertex_descriptor>& CachedGraph::GetCacheIterator(std::string type)
 {
     EnsureCacheExists(type);
     return *(typeToVerticesCache[type]);
-};
+}
 
 std::vector<vertex_descriptor> CachedGraph::GetAdjacentVertices(vertex_descriptor v)
 {
@@ -72,6 +72,20 @@ std::vector<vertex_descriptor> CachedGraph::GetAdjacentVertices(vertex_descripto
     for(;currentNeighbour!=endOfNeighbours;++currentNeighbour)
     {
         result.push_back(*currentNeighbour);
+    }
+    return result;
+}
+
+std::vector<vertex_descriptor> CachedGraph::GetAdjacentVertices(vertex_descriptor v, std::string type)
+{
+    std::vector<vertex_descriptor> result;
+    
+    adjacency_iterator currentNeighbour, endOfNeighbours;
+    std::tie(currentNeighbour, endOfNeighbours) = adjacent_vertices(v, *graph);
+    for(;currentNeighbour!=endOfNeighbours;++currentNeighbour)
+    {
+        if(this-> operator[](*currentNeighbour).label==type)
+            result.push_back(*currentNeighbour);
     }
     return result;
 }

@@ -27,7 +27,7 @@
             // "stopAtEntry": true,
             "program": "${workspaceFolder}/src/executable/Graphessor",
             //"args": ["--input","test/logic/test_files/face_test.bmp", "--output", "../poligon/outs/iii", "--epsilon", "0.33"],
-            "args": ["--input","/media/albert/Nowy/poligon/bunny.bmp",  "--epsilon", "0.33"],
+            "args": ["--input","/media/albert/Nowy/poligon/bunny.bmp",  "--epsilon", "0.01"],
             "MIMode": "gdb",
             "cwd": "${workspaceFolder}",
             // "logging": {
