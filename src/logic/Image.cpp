@@ -79,8 +79,8 @@ Image::Image(std::vector<std::shared_ptr<CachedGraph>> graphs)
                     //for(int channel=0; channel < std::min(1, 3); channel++)
                         img._view[y*(width+1)+x][channel]=this->GetInterpolatedPixel(minx,maxx,miny, maxy,x,y,channel);
         }
-        FillMissingSpacesBasedOnLargerBlocks(graphs[channel], pixels, channel, width);
-        
+        //FillMissingSpacesBasedOnLargerBlocks(graphs[channel], pixels, channel, width);
+        FillMissingSpacesBasedOnBaricentricInterpolation(graphs[channel], pixels, channel, width);
     }
     view = boost::gil::view(img);
 }
@@ -128,35 +128,66 @@ void Image::FillMissingSpacesBasedOnBaricentricInterpolation(std::shared_ptr<Cac
         if(graph -> GetAdjacentVertices(fEdge).size()==1)
             danglingFedges.insert(fEdge);
     }
-    for(auto pixel : pixels)
+    for(auto f : danglingFedges)
     {
-        auto pixelNeighbors = graph -> GetAdjacentVertices(pixel, NODELABEL_I);
-        if(pixelNeighbors.size()<4)
-            continue;
-        std::set<vertex_descriptor> neighborPixels;
-        for(auto v : pixelNeighbors)
-        {
-            auto adjPixels = graph -> GetAdjacentVertices(v, NODELABEL_P);
-            std::copy(adjPixels.begin(), adjPixels.end(), std::inserter(neighborPixels,neighborPixels.end()));
-        }
-        if(neighborPixels.size()<9) //not all neighbor I have been broken
-        {
-            int minx,maxx,miny,maxy;
-            minx=maxx= graph -> operator[](*neighborPixels.begin()).x;
-            miny=maxy= graph -> operator[](*neighborPixels.begin()).y;
-            for(auto v : neighborPixels)
+        auto adjacentPixel = graph->GetAdjacentVertices(f)[0];
+        auto adjacentIEdges = graph->GetAdjacentVertices(adjacentPixel,NODELABEL_I);
+        
+        std::sort(adjacentIEdges.begin(), adjacentIEdges.end(), [f, graph](const vertex_descriptor& v1, const vertex_descriptor& v2)->bool
             {
-                minx = std::min(minx, graph ->operator[](v).x);
-                maxx = std::max(maxx, graph ->operator[](v).x);
-                miny = std::min(miny, graph ->operator[](v).y);
-                maxy = std::max(maxy, graph ->operator[](v).y);
-            }
-            for(int y=miny;y<=maxy;y++)
-                for(int x=minx;x<maxx;x++)//img._view[miny*(width+1)+minx][channel]==0 || img._view[miny*(width+1)+maxx][channel]==0 || img._view[maxy*(width+1)+minx][channel]==0 ||img._view[maxy*(width+1)+maxx][channel]==0
-                    if(img._view[y*(width+1)+x][channel]==0)
-                        img._view[y*(width+1)+x][channel]=this->GetInterpolatedPixel(minx,maxx,miny, maxy,x,y,channel);
-        }
+                auto fx = (*graph)[f].x;
+                auto fy = (*graph)[f].y;
+                auto v1x = (*graph)[v1].x;
+                auto v1y = (*graph)[v1].y;
+                auto v2x = (*graph)[v2].x;
+                auto v2y = (*graph)[v2].y;
+                return (v1x-fx)*(v1x-fx)+(v1y-fy)*(v1y-fy) < (v2x-fx)*(v2x-fx)+(v2y-fy)*(v2y-fy);
+            });
+        
+        std::set<vertex_descriptor> closerPixels;
+        std::set<vertex_descriptor> outerPixels;
+        auto a0 = graph->GetAdjacentVertices(adjacentIEdges[0], NODELABEL_P);
+        auto a1 = graph->GetAdjacentVertices(adjacentIEdges[1], NODELABEL_P);
+        std::copy(a0.begin(),a0.end(),std::inserter(closerPixels, closerPixels.end()));
+        std::copy(a1.begin(),a1.end(),std::inserter(closerPixels, closerPixels.end()));
+        a0 = graph->GetAdjacentVertices(adjacentIEdges[2], NODELABEL_P);
+        a1 = graph->GetAdjacentVertices(adjacentIEdges[3], NODELABEL_P);
+        std::copy(a0.begin(),a0.end(),std::inserter(outerPixels, outerPixels.end()));
+        std::copy(a1.begin(),a1.end(),std::inserter(outerPixels, outerPixels.end()));
+
+        std::vector<vertex_descriptor> otherTriangleVertices;
+
+        std::set_difference(closerPixels.begin(), closerPixels.end(), outerPixels.begin(), outerPixels.end(), std::inserter(otherTriangleVertices, otherTriangleVertices.begin()));
+
+        auto v1 = graph -> operator[](adjacentPixel);
+        auto v2 = graph -> operator[](otherTriangleVertices[0]);
+        auto v3 = graph -> operator[](otherTriangleVertices[1]);
+
+        int minx = std::min(v1.x,(std::min(v2.x,v3.x)));
+        int miny = std::min(v1.y,(std::min(v2.y,v3.y)));
+        int maxx = std::max(v1.x,(std::max(v2.x,v3.x)));
+        int maxy = std::max(v1.y,(std::max(v2.y,v3.y)));
+        double w1Coefficient = 1.0/((v2.y-v3.y)*(v1.x-v3.x) + (v3.x-v2.x)*(v1.y-v3.y));
+        double w2Coefficient = 1.0/((v2.y-v3.y)*(v1.x-v3.x) + (v3.x-v2.x)*(v1.y-v3.y));
+        int y2y3 = v2.y-v3.y;
+        int x3x2 = v3.x-v2.x;
+        int y3y1 = v3.y-v1.y;
+        int x1x3 = v1.x-v3.x;
+        double w1,w2,w3;
+        for(int y=miny;y<=maxy;y++)
+            for(int x=minx;x<maxx;x++)//img._view[miny*(width+1)+minx][channel]==0 || img._view[miny*(width+1)+maxx][channel]==0 || img._view[maxy*(width+1)+minx][channel]==0 ||img._view[maxy*(width+1)+maxx][channel]==0
+                if(img._view[y*(width+1)+x][channel]==0)
+                {
+                    w1 = w1Coefficient*(y2y3*(x-v3.x)+x3x2*(y-v3.y));
+                    w2 = w2Coefficient*(y3y1*(x-v3.x) + x1x3*(y-v3.y));
+                    w3 = 1 - w1 - w2;
+                    img._view[y*(width+1)+x][channel] =
+                       w1 * GetRGBChannelValue(v1,channel) 
+                     + w2 * GetRGBChannelValue(v2,channel)
+                     + w3 * GetRGBChannelValue(v3,channel);
+                }
     }
+    
 
 }
 

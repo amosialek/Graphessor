@@ -111,8 +111,8 @@ int main(int argc, char** argv) {
         std::cerr<<"P6 "<<functionTime["P6"]<<std::endl;
     }
     auto restoredImage = std::make_unique<Image>(channel_graphs);
-    restoredImage -> save("/media/albert/Nowy/poligon/bunny4.bmp");
-    restoredImage -> Save3Colors("/media/albert/Nowy/poligon/bunny4");
+    restoredImage -> save("/media/albert/Nowy/poligon/bunny_baricentric.bmp");
+    restoredImage -> Save3Colors("/media/albert/Nowy/poligon/bunny_baricentric");
 }
 
 
