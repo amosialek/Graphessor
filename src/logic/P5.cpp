@@ -34,7 +34,7 @@ std::unique_ptr<std::vector<P5>> P5::FindAllMatches(std::shared_ptr<CachedGraph>
     int height = image->height();
     for(auto v : graph -> GetCacheIterator(NODELABEL_I))
         vertexToNeighbours[v] = graph -> GetAdjacentVertices(v); 
-    auto IEdges = where(graph -> GetCacheIterator(NODELABEL_I), [](vertex_descriptor v){return vertexToNeighbours[v].size()==4;});
+    auto IEdges = graph -> GetCacheIterator(NODELABEL_I);
     for(auto IEdge : IEdges)
     {
         // spdlog::debug("TOPKEK");  

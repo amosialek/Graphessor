@@ -22,9 +22,9 @@ auto P6::PerformAndGetAdjacentEdges()
     {
         auto adjacentEdgesTemp = graph -> GetAdjacentVertices(v);
         auto adjacentEdgesTemp2 = adjacentEdgesTemp 
-        | linq::where([this, v](vertex_descriptor IEdge)
+        | linq::where([this, v](vertex_descriptor IEdge2)
         {
-            return haveCommonEdge(*graph, IEdge, IEdge, v);
+            return haveCommonEdge(*graph, IEdge, IEdge2, v);
         });
         adjacentEdges.insert(adjacentEdges.end(), adjacentEdgesTemp2.begin(), adjacentEdgesTemp2.end());
     }

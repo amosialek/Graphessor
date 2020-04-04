@@ -22,6 +22,7 @@ class Image
         virtual double GetInterpolatedPixel(int x1, int x2, int y1, int y2, int x, int y, int channel);
         Image(std::string filename);
         Image(uint8_t*** pixels, int width, int height, int channels);
+        Image(int width, int height);
         Image(std::vector<std::shared_ptr<CachedGraph>> graphs);
         long long CompareWith(Image& other);
         virtual long long CompareWith(Image& other, int x, int y, int width, int height);
@@ -35,6 +36,9 @@ class Image
         static int const BLUE_CHANNEL=2;
         virtual void Save3Colors(std::string filename);
         virtual std::tuple<int,int> GetNearestPixelCoords(int x, int y);
+        virtual void SetPixel(int x, int y, int channel, int value);
+        virtual void DrawLine(int x1, int y1, int x2, int y2, int channel, int color);
+        virtual void DrawBlackLine(int x1, int y1, int x2, int y2);
 };
 
 class ImageMagnifier : public Image
@@ -53,5 +57,6 @@ class ImageMagnifier : public Image
         int width() override;
         int height() override;
         std::tuple<int,int> GetNearestPixelCoords(int x, int y) override;
+        void SetPixel(int x, int y, int channel, int value) override;
 };
 #endif // __IMAGE_HPP__

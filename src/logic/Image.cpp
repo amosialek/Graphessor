@@ -1,6 +1,5 @@
 #include "Image.hpp"
 #include "GraphessorConstants.hpp"
-#include <string>
 #include <iostream>
 #include "spdlog/spdlog.h"
 
@@ -22,6 +21,12 @@ Image::Image(uint8_t*** pixels, int width, int height, int channels)
     view = boost::gil::view(img);
 }
 
+Image::Image(int width, int height)
+{
+    img = boost::gil::rgb8_image_t(width, height);
+    boost::gil::fill_pixels(img._view, boost::gil::rgb8_pixel_t(255,255,255));
+    view = boost::gil::view(img);
+}
 
 int GetRGBChannelValue(Pixel p, int channel)
 {
@@ -312,62 +317,154 @@ std::tuple<int,int> Image::GetNearestPixelCoords(int x, int y)
     return std::make_tuple(x,y);
 }
 
+void Image::SetPixel(int x, int y, int channel, int value)
+{
+    view[y*width()+x][channel] = value;
+}
+
+template <typename T> int sign(T val) {
+    return (T(0) < val) - (val < T(0));
+}
+
+void Image::DrawLine(int x1, int y1, int x2, int y2, int channel, int color)
+{
+    if(x1==x2)
+    {
+        for(int y=y1;y<y2;y++)
+        {
+            view[y * width() + x1][channel]=color;
+        }
+        return;
+    }
+    if(y1==y2)
+    {
+        for(int x=x1;x<x2;x++)
+        {
+            view[y1 * width() + x][channel]=color;
+        }
+        return;
+    }
+    double deltax = x2 - x1;
+    double deltay = y2 - y1;
+    double deltaerr = abs(1.0 * deltay / deltax);    // Assume deltax != 0 (line is not vertical),
+          // note that this division needs to be done in a way that preserves the fractional part
+    double error = 0.0; // No error at start
+    int y = y1;
+    for (int x = x1;x< x2;x++)
+    {
+        SetPixel(x, y, channel, color);
+        error += deltaerr;
+        if (error >= 0.5)
+        {
+            y += sign(deltay) * 1;
+            error -= 1.0;
+        }
+    }
+}
+
+void Image::DrawBlackLine(int x1, int y1, int x2, int y2)
+{
+    int pixelCoord;
+    if(x1==x2)
+    {
+        for(int y=y1;y<y2;y++)
+        {
+            pixelCoord = y * width() + x1;
+            view[pixelCoord][0] = view[pixelCoord][1] = view[pixelCoord][2] = 0;
+        }
+        return;
+    }
+    if(y1==y2)
+    {
+        for(int x=x1;x<x2;x++)
+        {
+            pixelCoord = y1 * width() + x;
+            view[pixelCoord][0] = view[pixelCoord][1] = view[pixelCoord][2] = 0;
+        }
+        return;
+    }
+    double deltax = x2 - x1;
+    double deltay = y2 - y1;
+    double deltaerr = abs(1.0 * deltay / deltax);    // Assume deltax != 0 (line is not vertical),
+          // note that this division needs to be done in a way that preserves the fractional part
+    double error = 0.0; // No error at start
+    int y = y1;
+    for (int x = x1;x< x2;x++)
+    {
+        pixelCoord = y * width() + x;
+        view[pixelCoord][0] = view[pixelCoord][1] = view[pixelCoord][2] = 0;
+        error += deltaerr;
+        if (error >= 0.5)
+        {
+            y += sign(deltay) * 1;
+            error -= 1.0;
+        }
+    }
+}
+
 double ImageMagnifier::SquaredErrorOfInterpolation(int x1, int x2, int y1, int y2, int channel)
 {
     int originalRatio = ratio;
     ratio = 1;
     auto result = Image::SquaredErrorOfInterpolation(x1/originalRatio, x2/originalRatio, y1/originalRatio, y2/originalRatio, channel);
     ratio = originalRatio;
-return result;
+    return result;
 }
+
 double ImageMagnifier::GetInterpolatedPixel(int x1, int x2, int y1, int y2, int x, int y, int channel)
 {
     int originalRatio = ratio;
     ratio = 1;
     auto result = Image::GetInterpolatedPixel(x1/originalRatio, x2/originalRatio, y1/originalRatio, y2/originalRatio, x/originalRatio, y/originalRatio, channel);
     ratio = originalRatio;
-return result;
+    return result;
 }
+
 long long ImageMagnifier::CompareWith(Image& other, int x, int y, int width, int height)
 {
     int originalRatio = ratio;
     ratio = 1;
     auto result = Image::CompareWith(other, x/originalRatio, y/originalRatio, width/originalRatio, height/originalRatio);
     ratio = originalRatio;
-return result;
+    return result;
 }
+
 double ImageMagnifier::CompareWithInterpolation(int x1, int x2, int y1, int y2, int channel)
 {
     int originalRatio = ratio;
     ratio = 1;
     auto result = Image::CompareWithInterpolation(x1/originalRatio, x2/originalRatio, y1/originalRatio, y2/originalRatio, channel);
     ratio = originalRatio;
-return result;
+    return result;
 }
+
 std::tuple<int, int, int> ImageMagnifier::getPixel(int x, int y)
 {
     int originalRatio = ratio;
     ratio = 1;
     auto result = Image::getPixel(x/originalRatio, y/originalRatio);
     ratio = originalRatio;
-return result;
+    return result;
 }
+
 int ImageMagnifier::width()
 {
     int originalRatio = ratio;
     ratio = 1;
     auto result = Image::width()*originalRatio;
     ratio = originalRatio;
-return result;
+    return result;
 }
+
 int ImageMagnifier::height()
 {
     int originalRatio = ratio;
     ratio = 1;
     auto result = Image::height()*originalRatio;
     ratio = originalRatio;
-return result;
+    return result;
 }
+
 std::tuple<int,int> ImageMagnifier::GetNearestPixelCoords(int x, int y)
 {
     int halfRatio = ratio/2;
@@ -380,4 +477,12 @@ std::tuple<int,int> ImageMagnifier::GetNearestPixelCoords(int x, int y)
     if(ymod >= halfRatio && yres+ratio<height())
         yres += ratio;
     return std::make_tuple(xres,yres);
+}
+
+void ImageMagnifier::SetPixel(int x, int y, int channel, int value)
+{
+    int originalRatio = ratio;
+    ratio = 1;
+    Image::SetPixel(x/originalRatio, y/originalRatio, channel, value);
+    ratio = originalRatio;
 }

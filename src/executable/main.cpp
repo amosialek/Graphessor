@@ -14,6 +14,7 @@
 #include "P5.hpp"
 #include "P6.hpp"
 #include "spdlog/sinks/basic_file_sink.h"
+#include "GraphImageWriter.hpp"
 
 std::map<std::string, int> functionTime;
 
@@ -31,7 +32,9 @@ int main(int argc, char** argv) {
     ("help", "produce help message")
     ("epsilon", opt::value<double>(), "set epsilon")
     ("input", opt::value<std::string>(), "input bitmap file")
-    ("output", opt::value<std::string>(), "debug output file template");
+    ("graph-output", opt::value<std::string>(), "debug output file template")
+    ("log-file", opt::value<std::string>(), "log file ")
+    ("output-file-template", opt::value<std::string>(), "output file template");
 
     opt::variables_map vm;
     opt::store(opt::parse_command_line(argc, argv, description), vm);
@@ -44,11 +47,15 @@ int main(int argc, char** argv) {
     if (vm.count("input"))
         inputFileName = vm["input"].as<std::string>();
 
-    std::string outputFileName;
-    if (vm.count("output"))
-        outputFileName = vm["output"].as<std::string>();
+    std::string graphOutputFileName;
+    if (vm.count("graph-output"))
+        graphOutputFileName = vm["graph-output"].as<std::string>();
 
-    AbstractOutputWriter* debugWriter = WriterFactory::GetDebugWriter(outputFileName);
+    std::string outputFileName;
+    if (vm.count("output-file-template"))
+        outputFileName = vm["output-file-template"].as<std::string>();
+
+    AbstractOutputWriter* debugWriter = WriterFactory::GetDebugWriter(graphOutputFileName);
     std::vector<std::shared_ptr<CachedGraph>> channel_graphs;
     auto image = std::make_shared<ImageMagnifier>(inputFileName);
     //image -> Save3Colors("/media/albert/Nowy/poligon/bunny_orig");
@@ -69,7 +76,7 @@ int main(int argc, char** argv) {
             std::cerr<<"iteration: "<<i<<std::endl;
             std::chrono::steady_clock::time_point end;
             std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-            auto p5s = P5::FindAllMatches(graph, image, channel, i < 50 ? 0 : epsilon);
+            auto p5s = P5::FindAllMatches(graph, image, channel, i < 10 ? 0 : epsilon);
             for(auto p5 : *p5s)
                 p5.Perform();
             end = std::chrono::steady_clock::now();
@@ -111,8 +118,11 @@ int main(int argc, char** argv) {
         std::cerr<<"P6 "<<functionTime["P6"]<<std::endl;
     }
     auto restoredImage = std::make_unique<Image>(channel_graphs);
-    restoredImage -> save("/media/albert/Nowy/poligon/bunny_baricentric.bmp");
-    restoredImage -> Save3Colors("/media/albert/Nowy/poligon/bunny_baricentric");
+    GraphImageWriter::DrawPixels(channel_graphs[0],outputFileName+"_red_graph.bmp");
+    GraphImageWriter::DrawPixels(channel_graphs[1],outputFileName+"_green_graph.bmp");
+    GraphImageWriter::DrawPixels(channel_graphs[2],outputFileName+"_blue_graph.bmp");
+    restoredImage -> save(outputFileName+".bmp");
+    restoredImage -> Save3Colors(outputFileName);
 }
 
 
