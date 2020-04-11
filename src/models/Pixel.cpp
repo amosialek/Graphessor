@@ -45,7 +45,7 @@ Pixel::Pixel(const Pixel& other)
     this->label=other.label;
     //std::cout<<"copied Pixel"<<std::endl;
     this->breakLevel=other.breakLevel;
-    this->error = -1;
+    this->error = other.error;
 }
 
 Pixel& Pixel::operator=(const Pixel& other)
@@ -58,7 +58,7 @@ Pixel& Pixel::operator=(const Pixel& other)
     this->_break=other._break;
     this->label=other.label;
     this->breakLevel=other.breakLevel;
-    this->error = -1;
+    this->error = other.error;
     return *this;
 }
 

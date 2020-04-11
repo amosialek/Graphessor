@@ -28,7 +28,7 @@ Image::Image(int width, int height)
     view = boost::gil::view(img);
 }
 
-int GetRGBChannelValue(Pixel p, int channel)
+int Image::GetRGBChannelValue(Pixel p, int channel)
 {
     if (channel==0)
         return p.r;
@@ -36,6 +36,44 @@ int GetRGBChannelValue(Pixel p, int channel)
         return p.g;
     return p.b;
 }
+
+void Image::XYZ(int channel, int width, std::set<Pixel> pixels)
+{
+    
+    int minx,miny,maxx,maxy;
+    minx = maxx = pixels.begin() -> x;
+    miny = maxy = pixels.begin() -> y;
+    for(auto adjacentVertex : pixels)
+    {
+        minx = std::min(minx, adjacentVertex.x);
+        maxx = std::max(maxx, adjacentVertex.x);
+        miny = std::min(miny, adjacentVertex.y);
+        maxy = std::max(maxy, adjacentVertex.y);
+    }
+    for(int y=miny;y<=maxy;y++)
+        for(int x=minx;x<maxx;x++)
+            SetPixel(x, y, channel, GetInterpolatedPixel(minx,maxx,miny, maxy,x,y,channel));
+}
+
+void Image::Asdf(int channel, int width, std::shared_ptr<CachedGraph> graph)
+{
+    std::set<vertex_descriptor> pixels;
+    pixels = graph -> GetCacheIterator(NODELABEL_P);
+    for(auto pixel : pixels)
+    {
+        this -> SetPixel(graph -> operator[](pixel).x, graph -> operator[](pixel).y, channel, this -> GetRGBChannelValue(graph->operator[](pixel), channel));
+         //img._view[graph->operator[](pixel).y * (width+1) + graph -> operator[](pixel).x][channel] = this -> GetRGBChannelValue(graph->operator[](pixel), channel);
+        spdlog::debug("Setting x={} y={} in channel {} to {}", graph ->operator[](pixel).x,graph ->operator[](pixel).y, channel, this -> GetRGBChannelValue(graph->operator[](pixel), channel));    
+    }
+    auto IEdges = graph->GetCacheIterator(NODELABEL_I);
+    std::vector<vertex_descriptor> fullIEdges;
+    auto PixelsForBilinearInterpolation = graph ->  GetPixelsForBilinearInterpolation();
+    for(auto v : PixelsForBilinearInterpolation)
+    {
+        this -> XYZ(channel, width, v);
+    }
+}
+
 
 Image::Image(std::vector<std::shared_ptr<CachedGraph>> graphs)
 {
@@ -51,40 +89,11 @@ Image::Image(std::vector<std::shared_ptr<CachedGraph>> graphs)
     boost::gil::fill_pixels(img._view, boost::gil::rgb8_pixel_t(0,0,0));
     for(int channel=0;channel<3;channel++)
     {
-        pixels.clear();
-        pixels = graphs[channel] -> GetCacheIterator(NODELABEL_P);
-        for(auto pixel : pixels)
-        {
-            img._view[graphs[channel]->operator[](pixel).y * (width+1) + graphs[channel]-> operator[](pixel).x][channel] = GetRGBChannelValue(graphs[channel]->operator[](pixel), channel);
-            spdlog::debug("Setting x={} y={} in channel {} to {}", graphs[channel]->operator[](pixel).x,graphs[channel]->operator[](pixel).y, channel, GetRGBChannelValue(graphs[channel]->operator[](pixel), channel));    
-        }
-        auto IEdges = graphs[channel]->GetCacheIterator(NODELABEL_I);
-        std::vector<vertex_descriptor> fullIEdges;
-        for(auto v : IEdges)
-        {
-            if(graphs[channel] -> GetAdjacentVertices(v).size()==4)
-            fullIEdges.emplace_back(v);
-        }
-        for(auto v : fullIEdges)
-        {
-            view = boost::gil::view(img);
-            auto adjacentVertices = graphs[channel]-> GetAdjacentVertices(v);
-            int minx,miny,maxx,maxy;
-            minx = maxx = (*graphs[channel])[adjacentVertices[0]].x;
-            miny = maxy = (*graphs[channel])[adjacentVertices[0]].y;
-            for(auto adjacentVertex : adjacentVertices)
-            {
-                minx = std::min(minx,(*graphs[channel])[adjacentVertex].x);
-                maxx = std::max(maxx,(*graphs[channel])[adjacentVertex].x);
-                miny = std::min(miny,(*graphs[channel])[adjacentVertex].y);
-                maxy = std::max(maxy,(*graphs[channel])[adjacentVertex].y);
-            }
-            for(int y=miny;y<=maxy;y++)
-                for(int x=minx;x<maxx;x++)//img._view[miny*(width+1)+minx][channel]==0 || img._view[miny*(width+1)+maxx][channel]==0 || img._view[maxy*(width+1)+minx][channel]==0 ||img._view[maxy*(width+1)+maxx][channel]==0
-                    //for(int channel=0; channel < std::min(1, 3); channel++)
-                        img._view[y*(width+1)+x][channel]=this->GetInterpolatedPixel(minx,maxx,miny, maxy,x,y,channel);
-        }
-        //FillMissingSpacesBasedOnLargerBlocks(graphs[channel], pixels, channel, width);
+        view = boost::gil::view(img);
+        //graphs[channel]->GetImage(this);
+        graphs[channel] -> GetCacheIterator(NODELABEL_P); // get pixels
+        Asdf(channel, width, graphs[channel]);
+        //FillMissingSpacesBasedOnLargerBlocks(graph, pixels, channel, width);
         FillMissingSpacesBasedOnBaricentricInterpolation(graphs[channel], pixels, channel, width);
     }
     view = boost::gil::view(img);

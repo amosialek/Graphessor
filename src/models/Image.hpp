@@ -13,11 +13,14 @@ class Image
         int getPixelInternal(int x, int y, int channel);
         void FillMissingSpacesBasedOnLargerBlocks(std::shared_ptr<IGraph> graph, std::set<vertex_descriptor>& pixels, int channel, int width);
         void FillMissingSpacesBasedOnBaricentricInterpolation(std::shared_ptr<CachedGraph> graph, std::set<vertex_descriptor>& pixels, int channel, int width);
+
     protected:
         boost::gil::rgb8_image_t img;
         boost::gil::rgb8_view_t view;
 
     public:    
+        void XYZ(int channel, int width, std::set<vertex_descriptor> pixels, std::shared_ptr<CachedGraph> graph, boost::gil::rgb8_image_t img, vertex_descriptor v);
+        int GetRGBChannelValue(Pixel p, int channel);
         virtual double SquaredErrorOfInterpolation(int xx1, int xx2, int yy1, int yy2, int channel);
         virtual double GetInterpolatedPixel(int x1, int x2, int y1, int y2, int x, int y, int channel);
         Image(std::string filename);
@@ -39,6 +42,9 @@ class Image
         virtual void SetPixel(int x, int y, int channel, int value);
         virtual void DrawLine(int x1, int y1, int x2, int y2, int channel, int color);
         virtual void DrawBlackLine(int x1, int y1, int x2, int y2);
+        void XYZ(int channel, int width, std::set<Pixel> pixels);
+        void Asdf(int channel, int width, std::shared_ptr<CachedGraph> graph);
+        
 };
 
 class ImageMagnifier : public Image

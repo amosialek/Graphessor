@@ -22,6 +22,7 @@ class CachedGraph : public IGraph
         std::vector<vertex_descriptor> GetAdjacentVertices(vertex_descriptor v) override;
         std::vector<vertex_descriptor> GetAdjacentVertices(vertex_descriptor v, std::string type) override;
         PixelGraph GetGraph();
+        std::vector<std::set<Pixel>> GetPixelsForBilinearInterpolation();
 };
 
 #endif /* CACHEDGRAPH_HPP */

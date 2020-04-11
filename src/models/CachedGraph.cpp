@@ -1,5 +1,7 @@
 #include "CachedGraph.hpp"
 #include "spdlog/spdlog.h"
+#include "GraphessorConstants.hpp"
+
 
 void CachedGraph::EnsureCacheExists(std::string type)
 {
@@ -93,4 +95,21 @@ std::vector<vertex_descriptor> CachedGraph::GetAdjacentVertices(vertex_descripto
 PixelGraph CachedGraph::GetGraph()
 {
     return *graph;
+}
+
+std::vector<std::set<Pixel>> CachedGraph::GetPixelsForBilinearInterpolation()
+{
+    std::vector<std::set<Pixel>> result;
+    for(auto v : GetCacheIterator(NODELABEL_I))
+    {
+        auto adjacentPixels = GetAdjacentVertices(v);
+        if(adjacentPixels.size()==4)
+        {
+            std::set<Pixel> s;
+            for(auto adjacentPixel : adjacentPixels)
+                s.emplace(this->operator[](adjacentPixel));
+            result.emplace_back(s);
+        }
+    }
+    return result;
 }
