@@ -16,9 +16,9 @@ void GraphImageWriter::DrawPixels(std::shared_ptr<CachedGraph> graph, std::strin
     for (auto p : pixels)
     {
         auto pixel = graph->operator[](p);
-        img->SetPixel(pixel.x,pixel.y,0,0);
-        img->SetPixel(pixel.x,pixel.y,1,0);
-        img->SetPixel(pixel.x,pixel.y,2,0);
+        img->SetSquare(pixel.x,pixel.y,0,0,3);
+        img->SetSquare(pixel.x,pixel.y,1,0,3);
+        img->SetSquare(pixel.x,pixel.y,2,0,3);
         auto adjacentEdges = graph -> GetAdjacentVertices(p);
         std::vector<vertex_descriptor> adjacentPixels;
         for(auto edge : adjacentEdges)

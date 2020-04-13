@@ -97,19 +97,92 @@ PixelGraph CachedGraph::GetGraph()
     return *graph;
 }
 
-std::vector<std::set<Pixel>> CachedGraph::GetPixelsForBilinearInterpolation()
+std::vector<std::vector<Pixel>> CachedGraph::GetPixelsForBilinearInterpolation()
 {
-    std::vector<std::set<Pixel>> result;
+    std::vector<std::vector<Pixel>> result;
     for(auto v : GetCacheIterator(NODELABEL_I))
     {
         auto adjacentPixels = GetAdjacentVertices(v);
         if(adjacentPixels.size()==4)
         {
-            std::set<Pixel> s;
+            std::vector<Pixel> s;
             for(auto adjacentPixel : adjacentPixels)
-                s.emplace(this->operator[](adjacentPixel));
+                s.emplace_back(this->operator[](adjacentPixel));
             result.emplace_back(s);
         }
     }
     return result;
+}
+std::vector<std::vector<Pixel>> CachedGraph::GetPixelsForBaricentricInterpolation()
+{
+    std::vector<std::vector<Pixel>> result;
+    auto FEdges = GetCacheIterator(NODELABEL_F);
+    auto IEdges = GetCacheIterator(NODELABEL_I);
+    std::set<vertex_descriptor> danglingFedges;
+    for(auto fEdge : FEdges)
+    {
+        if(GetAdjacentVertices(fEdge).size()==1)
+            danglingFedges.insert(fEdge);
+    }
+    for(auto f : danglingFedges)
+    {
+        auto adjacentPixel = GetAdjacentVertices(f)[0];
+        auto adjacentIEdges = GetAdjacentVertices(adjacentPixel,NODELABEL_I);
+
+        std::sort(adjacentIEdges.begin(), adjacentIEdges.end(), [f, this](const vertex_descriptor& v1, const vertex_descriptor& v2)->bool
+            {
+                auto fx = (*this)[f].x;
+                auto fy = (*this)[f].y;
+                auto v1x = (*this)[v1].x;
+                auto v1y = (*this)[v1].y;
+                auto v2x = (*this)[v2].x;
+                auto v2y = (*this)[v2].y;
+                return (v1x-fx)*(v1x-fx)+(v1y-fy)*(v1y-fy) < (v2x-fx)*(v2x-fx)+(v2y-fy)*(v2y-fy);
+            });
+        
+        std::set<vertex_descriptor> closerPixels;
+        std::set<vertex_descriptor> outerPixels;
+        auto a0 = GetAdjacentVertices(adjacentIEdges[0], NODELABEL_P);
+        auto a1 = GetAdjacentVertices(adjacentIEdges[1], NODELABEL_P);
+        std::copy(a0.begin(),a0.end(),std::inserter(closerPixels, closerPixels.end()));
+        std::copy(a1.begin(),a1.end(),std::inserter(closerPixels, closerPixels.end()));
+        a0 = GetAdjacentVertices(adjacentIEdges[2], NODELABEL_P);
+        a1 = GetAdjacentVertices(adjacentIEdges[3], NODELABEL_P);
+        std::copy(a0.begin(),a0.end(),std::inserter(outerPixels, outerPixels.end()));
+        std::copy(a1.begin(),a1.end(),std::inserter(outerPixels, outerPixels.end()));
+
+        std::vector<vertex_descriptor> otherTriangleVertices;
+
+        std::set_difference(closerPixels.begin(), closerPixels.end(), outerPixels.begin(), outerPixels.end(), std::inserter(otherTriangleVertices, otherTriangleVertices.begin()));
+        std::vector<Pixel> r
+        {
+            graph -> operator[](adjacentPixel),
+            graph -> operator[](otherTriangleVertices[0]),
+            graph -> operator[](otherTriangleVertices[1])
+        }; 
+        result.emplace_back(r);
+    }
+
+    for(auto IEdge : IEdges)
+    {
+        auto adjacentPixels = GetAdjacentVertices(IEdge);
+        if(adjacentPixels.size()==3)
+        {
+            std::vector<Pixel> r
+            {
+                graph -> operator[](adjacentPixels[0]),
+                graph -> operator[](adjacentPixels[1]),
+                graph -> operator[](adjacentPixels[2])
+            };
+            result.emplace_back(r);
+        }
+    }
+
+    return result;
+}
+
+std::vector<std::vector<Pixel>> CachedGraph::GetPixelsForSVDInterpolation()
+{
+    std::vector<std::vector<Pixel>> s;
+    return s;
 }
