@@ -11,7 +11,7 @@ P6::P6(std::shared_ptr<IGraph> graph,
     vertex_descriptor IEdge):
         graph(graph),
         IEdge(IEdge)
-        {};
+        {}
 
 auto P6::PerformAndGetAdjacentEdges()
 {
@@ -22,22 +22,31 @@ auto P6::PerformAndGetAdjacentEdges()
     {
         auto adjacentEdgesTemp = graph -> GetAdjacentVertices(v);
         auto adjacentEdgesTemp2 = adjacentEdgesTemp 
-        | linq::where([this, v](vertex_descriptor IEdge)
+        | linq::where([this, v](vertex_descriptor IEdge2)
         {
-            return haveCommonEdge(*graph, IEdge, IEdge, v);
+            return haveCommonEdge(*graph, IEdge, IEdge2, v);
         });
         adjacentEdges.insert(adjacentEdges.end(), adjacentEdgesTemp2.begin(), adjacentEdgesTemp2.end());
     }
-    auto adjacentIEdges = adjacentEdges 
-        | linq::where([this](vertex_descriptor v){
-            return true
-                && (*graph)[v].label==NODELABEL_I 
-                && (*graph)[v]._break==0 
-                && (*graph)[v].breakLevel<(*graph)[IEdge].breakLevel;}
-                );
-    for(auto a : adjacentIEdges)
+    // auto adjacentIEdges = adjacentEdges 
+    //     | linq::where([this](vertex_descriptor v){
+    //         return true
+    //             && (*graph)[v].label==NODELABEL_I 
+    //             && (*graph)[v]._break==0 
+    //             && (*graph)[v].breakLevel<(*graph)[IEdge].breakLevel;}
+    //             );
+    std::vector<vertex_descriptor> adjacentIEdges;
+    for(auto a : adjacentEdges)
     {
-        (*graph)[a]._break=1;
+        if(true
+           && (*graph)[a]._break==0 
+           && (*graph)[a].label==NODELABEL_I 
+           && (*graph)[a].breakLevel<(*graph)[IEdge].breakLevel)
+            {
+                (*graph)[a]._break=1;
+                adjacentIEdges.emplace_back(a);
+            }
+        
     }
     return adjacentIEdges;
 }
@@ -55,13 +64,16 @@ std::unique_ptr<std::vector<P6>> P6::PerformAllMatches(std::shared_ptr<CachedGra
         {
             std::vector<vertex_descriptor> adjacentEdges;
             toBeVisited.push(IEdge);
+            spdlog::debug("pushing P6 {}", IEdge);    
+
             while(!toBeVisited.empty()) //BFS through IEdges with break==0
             {
-                auto currentIEdge = toBeVisited.front();
+                long currentIEdge = toBeVisited.front();
                 toBeVisited.pop();
                 result->emplace_back(graph, currentIEdge);
                 for(auto a : result->back().PerformAndGetAdjacentEdges())
                 {
+                    spdlog::debug("pushing2 P6 {}", a);  
                     toBeVisited.push(a);
                 }
             }

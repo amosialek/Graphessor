@@ -53,7 +53,7 @@ std::unique_ptr<std::vector<P3>> P3::FindAllMatches(std::shared_ptr<CachedGraph>
 
 void P3::Perform()
 {
-    spdlog::debug("P3 {}", BEdge);    
+    //spdlog::debug("P3 {}", BEdge);    
     std::vector<vertex_descriptor> neighbours;
     std::vector<vertex_descriptor> leftPixels;
     std::vector<vertex_descriptor> rightPixels;
@@ -80,8 +80,8 @@ void P3::Perform()
     }
     vertex_descriptor centerPixel = *common.begin();
     auto adjacentVertices = graph -> GetAdjacentVertices(centerPixel);
-    vertex_descriptor leftI = *where(leftIEdges, [adjacentVertices](vertex_descriptor v){return adjacentVertices | linq::contains(v);}).begin();
-    vertex_descriptor rightI = *where(rightIEdges, [adjacentVertices](vertex_descriptor v){return adjacentVertices | linq::contains(v);}).begin();
+    //vertex_descriptor leftI = *where(leftIEdges, [adjacentVertices](vertex_descriptor v){return adjacentVertices | linq::contains(v);}).begin();
+    //vertex_descriptor rightI = *where(rightIEdges, [adjacentVertices](vertex_descriptor v){return adjacentVertices | linq::contains(v);}).begin();
     auto FEdges =  where(adjacentVertices, [this](vertex_descriptor v){return (*graph)[v].label==NODELABEL_F;});
     auto FEdgesOrdered = LINQ(from(v, FEdges) orderby(GetDistance((*graph)[v], (*graph)[BEdge])));
     auto FEdge =*(FEdgesOrdered.begin());
@@ -89,6 +89,8 @@ void P3::Perform()
     vertex_descriptor rightPixel = neighbours[1];
     int x=((*graph)[leftPixel].x + (*graph)[rightPixel].x)/2,
         y=((*graph)[leftPixel].y + (*graph)[rightPixel].y)/2;
+    std::tie(x,y) = image->GetNearestPixelCoords(x,y);
+    spdlog::debug("P3 {} x={} y={} y1={} y2={}", BEdge,x,y,(*graph)[leftPixel].y , (*graph)[rightPixel].y);    
     auto newPixel = graph -> AddVertex(*(new Pixel(x, y, NODELABEL_P)));
     int r,g,b;
     std::tie(r,g,b) = image -> getPixel(x,y);

@@ -28,6 +28,7 @@ class IGraph
         virtual void ChangeVertexType(vertex_descriptor v1, std::string type)=0;
         virtual Pixel& operator[](vertex_descriptor v)=0;
         virtual std::vector<vertex_descriptor> GetAdjacentVertices(vertex_descriptor v)=0;
+        virtual std::vector<vertex_descriptor> GetAdjacentVertices(vertex_descriptor v, std::string type)=0;
         virtual PixelGraph GetGraph()=0;
 };
 

@@ -13,6 +13,8 @@
 #include "P4.hpp"
 #include "P5.hpp"
 #include "P6.hpp"
+#include "spdlog/sinks/basic_file_sink.h"
+#include "GraphImageWriter.hpp"
 
 std::map<std::string, int> functionTime;
 
@@ -22,13 +24,17 @@ int main(int argc, char** argv) {
 
     spdlog::set_pattern("[%H:%M:%S %z] [%n] [%^---%L---%$] [thread %t] %v");
     spdlog::set_level(spdlog::level::debug); // Set global log level to debug
+    auto file_logger = spdlog::basic_logger_mt("basic_logger", "/media/albert/Nowy/poligon/logs/basic.txt");
+    spdlog::set_default_logger(file_logger); 
 
     opt::options_description description("Allowed options");
     description.add_options()
     ("help", "produce help message")
     ("epsilon", opt::value<double>(), "set epsilon")
     ("input", opt::value<std::string>(), "input bitmap file")
-    ("output", opt::value<std::string>(), "debug output file template");
+    ("graph-output", opt::value<std::string>(), "debug output file template")
+    ("log-file", opt::value<std::string>(), "log file ")
+    ("output-file-template", opt::value<std::string>(), "output file template");
 
     opt::variables_map vm;
     opt::store(opt::parse_command_line(argc, argv, description), vm);
@@ -41,16 +47,23 @@ int main(int argc, char** argv) {
     if (vm.count("input"))
         inputFileName = vm["input"].as<std::string>();
 
-    std::string outputFileName;
-    if (vm.count("output"))
-        outputFileName = vm["output"].as<std::string>();
+    std::string graphOutputFileName;
+    if (vm.count("graph-output"))
+        graphOutputFileName = vm["graph-output"].as<std::string>();
 
-    AbstractOutputWriter* debugWriter = WriterFactory::GetDebugWriter(outputFileName);
-    for(int channel=0;channel<1;channel++)
+    std::string outputFileName;
+    if (vm.count("output-file-template"))
+        outputFileName = vm["output-file-template"].as<std::string>();
+
+    AbstractOutputWriter* debugWriter = WriterFactory::GetDebugWriter(graphOutputFileName);
+    std::vector<std::shared_ptr<CachedGraph>> channel_graphs;
+    auto image = std::make_shared<ImageMagnifier>(inputFileName);
+    //image -> Save3Colors("/media/albert/Nowy/poligon/bunny_orig");
+    for(int channel=0;channel<3;channel++)
     {
         auto graph = std::make_shared<CachedGraph>();
+        channel_graphs.emplace_back(graph);
         auto S = graph -> AddVertex(*(new Pixel(0,0, NODELABEL_S)));
-        auto image = std::make_shared<ImageMagnifier>(inputFileName);
         P1(graph, S, image).Perform();
         
         unsigned long long lastICount = 0;
@@ -58,12 +71,12 @@ int main(int argc, char** argv) {
         debugWriter->WriteItOut(std::to_string(i++), *graph);
         while(lastICount < graph -> GetCacheIterator(NODELABEL_I).size())
         {
-            spdlog::debug("Starting production loop");  
+            spdlog::debug("Starting production loop, channel={}, i={}",channel,i);  
             lastICount = graph -> GetCacheIterator(NODELABEL_I).size();
             std::cerr<<"iteration: "<<i<<std::endl;
             std::chrono::steady_clock::time_point end;
             std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-            auto p5s = P5::FindAllMatches(graph, image, channel, i < 30 ? 0 : epsilon);
+            auto p5s = P5::FindAllMatches(graph, image, channel, i < 10 ? 0 : epsilon);
             for(auto p5 : *p5s)
                 p5.Perform();
             end = std::chrono::steady_clock::now();
@@ -97,12 +110,19 @@ int main(int argc, char** argv) {
             debugWriter->WriteItOut(std::to_string(i++), *graph);
         }
 
+
         std::cerr<<"P2 "<<functionTime["P2"]<<std::endl;
         std::cerr<<"P3 "<<functionTime["P3"]<<std::endl;
         std::cerr<<"P4 "<<functionTime["P4"]<<std::endl;
         std::cerr<<"P5 "<<functionTime["P5"]<<std::endl;
         std::cerr<<"P6 "<<functionTime["P6"]<<std::endl;
     }
+    auto restoredImage = std::make_unique<Image>(channel_graphs);
+    GraphImageWriter::DrawPixels(channel_graphs[0],outputFileName+"_red_graph.bmp");
+    GraphImageWriter::DrawPixels(channel_graphs[1],outputFileName+"_green_graph.bmp");
+    GraphImageWriter::DrawPixels(channel_graphs[2],outputFileName+"_blue_graph.bmp");
+    restoredImage -> save(outputFileName+".bmp");
+    restoredImage -> Save3Colors(outputFileName);
 }
 
 

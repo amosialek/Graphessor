@@ -34,7 +34,7 @@ std::unique_ptr<std::vector<P5>> P5::FindAllMatches(std::shared_ptr<CachedGraph>
     int height = image->height();
     for(auto v : graph -> GetCacheIterator(NODELABEL_I))
         vertexToNeighbours[v] = graph -> GetAdjacentVertices(v); 
-    auto IEdges = where(graph -> GetCacheIterator(NODELABEL_I), [](vertex_descriptor v){return vertexToNeighbours[v].size()==4;});
+    auto IEdges = graph -> GetCacheIterator(NODELABEL_I);
     for(auto IEdge : IEdges)
     {
         // spdlog::debug("TOPKEK");  
@@ -49,10 +49,11 @@ std::unique_ptr<std::vector<P5>> P5::FindAllMatches(std::shared_ptr<CachedGraph>
             miny = std::min(miny, (*graph)[v].y);
             maxy = std::max(maxy, (*graph)[v].y); 
         } 
-        double error = image->CompareWithInterpolation(minx, maxx, miny, maxy, channel);
-        IEdgeToError[IEdge] = error;
-        sumError += error;
-        maxError = std::max(maxError, error);
+        if((*graph)[IEdge].error < 0)
+            (*graph)[IEdge].error = image->CompareWithInterpolation(minx, maxx, miny, maxy, channel);
+        IEdgeToError[IEdge] = (*graph)[IEdge].error;
+        sumError += (*graph)[IEdge].error;
+        maxError = std::max(maxError, (*graph)[IEdge].error);
     //std::cout<<"error: "<<error<<" "<<minx<<" "<<maxx<<" "<<miny<<" "<<maxy<<std::endl;
     }
     spdlog::debug("MaxErrorFound: {}", maxError);  

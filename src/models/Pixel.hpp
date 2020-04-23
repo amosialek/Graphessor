@@ -7,6 +7,7 @@ class Pixel
 
     public:
         int r, g, b, x, y, breakLevel;
+        double error;
         std::string label;
         bool _break, visited;
 
@@ -15,17 +16,15 @@ class Pixel
         Pixel();
         ~Pixel();
         Pixel(const Pixel& other);
-        Pixel & operator= ( Pixel other ) 
-        {
-            this->x=other.x;
-            this->y=other.y;
-            this->r=other.r;
-            this->g=other.g;
-            this->b=other.b;
-            this->_break=other._break;
-            this->label=other.label;
-            this->breakLevel=other.breakLevel;
-            return *this;
-        };
+        Pixel& operator=(const Pixel& other); 
+        
 };
+inline
+bool operator<(const Pixel& p1, const Pixel& p2)
+        {
+            if(p1.x<p2.x)
+                return true;
+            return p1.y<p2.y;
+
+        }
 #endif // __PIXEL_HPP__

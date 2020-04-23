@@ -11,7 +11,7 @@ P4::P4(std::shared_ptr<IGraph> graph,
     graph(graph),
     FEdge(FEdge),
     image(image)
- {};
+ {}
 
 std::unique_ptr<std::vector<P4>> P4::FindAllMatches(std::shared_ptr<CachedGraph> graph,
             std::shared_ptr<Image> image)
@@ -61,7 +61,7 @@ std::unique_ptr<std::vector<P4>> P4::FindAllMatches(std::shared_ptr<CachedGraph>
 
 void P4::Perform()
 {
-        spdlog::debug("P4 {}", FEdge);    
+        //spdlog::debug("P4 {}", FEdge);    
         auto adjacentPixels = graph -> GetAdjacentVertices(FEdge);
         bool isVertical = (*graph)[adjacentPixels[0]].x==(*graph)[adjacentPixels[1]].x;
         int bound1 = isVertical 
@@ -99,8 +99,10 @@ void P4::Perform()
                         and std::abs(p.y-lastCommonPixel.y)<=yrange
                     ;   
                 });
-        int x = (firstCommonPixel.x + lastCommonPixel.x)/2;
-        int y = (firstCommonPixel.y + lastCommonPixel.y)/2;
+        int x = isVertical ? ((*graph)[adjacentPixels[0]].x +(*graph)[adjacentPixels[1]].x)/2 : (firstCommonPixel.x + lastCommonPixel.x)/2;
+        int y = isVertical ? (firstCommonPixel.y + lastCommonPixel.y)/2 : ((*graph)[adjacentPixels[0]].y +(*graph)[adjacentPixels[1]].y)/2;
+        std::tie(x,y) = image -> GetNearestPixelCoords(x,y);
+        spdlog::debug("P4 {} x={} y={} y1={} y2={}", FEdge,x,y,firstCommonPixel.y, lastCommonPixel.y);    
         int r,g,b;
         std::tie(r,g,b) = image->getPixel(x,y);
         auto newPixel = graph -> AddVertex(*(new Pixel(x, y, r, g, b)));

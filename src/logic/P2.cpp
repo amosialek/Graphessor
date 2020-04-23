@@ -11,7 +11,7 @@ P2::P2(
     std::shared_ptr<Image> image):
         graph(graph),
         IEdge(IEdge),
-        image(image){};
+        image(image){}
 
 std::unique_ptr<std::vector<P2>> P2::FindAllMatches(std::shared_ptr<CachedGraph> graph,
     std::shared_ptr<Image> image)
@@ -47,15 +47,26 @@ std::unique_ptr<std::vector<P2>> P2::FindAllMatches(std::shared_ptr<CachedGraph>
 
 void P2::Perform()
 {
-    spdlog::debug("P2 {}", IEdge);    
+    
     std::vector<vertex_descriptor> neighbours;
     auto e = IEdge;
     {
         if((*graph)[e].label==NODELABEL_I and (*graph)[e]._break==1)
         {
             neighbours = graph -> GetAdjacentVertices(e);
-            int x = (*graph)[e].x;
-            int y = (*graph)[e].y;
+            int x = 0;
+            int y = 0;
+            for(auto p : neighbours)
+            {
+                x+=graph->operator[](p).x;
+                y+=graph->operator[](p).y;
+            }
+            x /= 4;
+            y /= 4;
+            std::tie(x,y) = image->GetNearestPixelCoords(x,y);
+            spdlog::debug("P2 {} x={} y={}", IEdge,x,y);    
+            graph->operator[](e).x = x;
+            graph->operator[](e).y = y;
             int r,g,b;
             std::tie(r,g,b) = image->getPixel(x,y);
             int dx = abs(x - (*graph)[neighbours[0]].x);
