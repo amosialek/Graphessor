@@ -43,12 +43,7 @@ std::unique_ptr<std::vector<P4>> P4::FindAllMatches(std::shared_ptr<CachedGraph>
         auto rightSecondPixelsInRange = where(rightSecondPixels, [graph, &bound1, &bound2, &isVertical](vertex_descriptor v){return (isVertical and (*graph)[v].y>=bound1 and (*graph)[v].y<=bound2)or(!isVertical and (*graph)[v].x>=bound1 and (*graph)[v].x<=bound2);});
         auto commonPixels = intersect(leftSecondPixelsInRange,rightSecondPixelsInRange);
         {
-            int count=0;
-            for(const auto p : commonPixels ){
-                count++;
-                //std::cout<<graph[p].x<<" "<<graph[p].y<<std::endl;
-            }
-            if(count!=2)
+            if(commonPixels.size()!=2)
             {
                 //std::cout<<"Wrong Number common pixels ("<<count<<")"<<std::endl;
                 continue;

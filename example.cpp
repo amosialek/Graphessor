@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include "Image_test.cpp"
 #include "Production_test.cpp"
+#include "Rivara_test.cpp"
 using namespace std;
 int main()
 {

@@ -4,7 +4,7 @@
 DebugWriter::DebugWriter(std::string fileBaseName)
 {
     this->fileBaseName = fileBaseName;
-};
+}
 void DebugWriter::WriteItOut(std::string fileSuffix, IGraph &graph) 
 {
     {
@@ -12,4 +12,4 @@ void DebugWriter::WriteItOut(std::string fileSuffix, IGraph &graph)
         std::ofstream a(fileBaseName+fileSuffix);
         boost::write_graphviz(a, graph.GetGraph(), w);
     }
-};
+}

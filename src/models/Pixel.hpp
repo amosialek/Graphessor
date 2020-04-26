@@ -2,6 +2,8 @@
 #define __PIXEL_HPP__
 
 #include <string>
+#include "Attributes.hpp"
+#include <memory>
 class Pixel
 {
 
@@ -10,6 +12,7 @@ class Pixel
         double error;
         std::string label;
         bool _break, visited;
+        std::shared_ptr<Attributes> attributes;
 
         Pixel(int x, int y, int r, int g, int b);
         Pixel(int x, int y, std::string label);
@@ -19,12 +22,13 @@ class Pixel
         Pixel& operator=(const Pixel& other); 
         
 };
+
 inline
 bool operator<(const Pixel& p1, const Pixel& p2)
         {
-            if(p1.x<p2.x)
+            if(p1.x < p2.x)
                 return true;
-            return p1.y<p2.y;
+            return p1.x == p2.x and p1.y < p2.y;
 
         }
 #endif // __PIXEL_HPP__
