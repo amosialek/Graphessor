@@ -1,9 +1,9 @@
-#include "P0.hpp"
+#include "RivaraP0.hpp"
 #include "RivaraAttributes.hpp"
 
 using namespace Rivara;
 
-P0::P0(std::shared_ptr<IGraph> graph,
+RivaraP0::RivaraP0(std::shared_ptr<IGraph> graph,
         vertex_descriptor S,
         std::shared_ptr<Image> image) 
         :
@@ -12,18 +12,25 @@ P0::P0(std::shared_ptr<IGraph> graph,
              image(image)
     {}
 
-void P0::Perform()
+void RivaraP0::Perform()
 {
     Pixel n1P, n2P, n3P, e1P, e2P, e3P, tP;
+    n1P.attributes = std::make_shared<RivaraAttributes>(),
+    n2P.attributes = std::make_shared<RivaraAttributes>(),
+    n3P.attributes = std::make_shared<RivaraAttributes>(),
+    e1P.attributes = std::make_shared<RivaraAttributes>(),
+    e2P.attributes = std::make_shared<RivaraAttributes>(),
+    e3P.attributes = std::make_shared<RivaraAttributes>(),
+    tP.attributes = std::make_shared<RivaraAttributes>();
     int topPixelHeight = image -> height() - 1;
     int rightPixelWidth = image -> width() - 1;
     n3P = (*graph)[S];
-    n3P.x = rightPixelWidth / 2; 
-    n3P.y = 0;
-    n1P.x = 0;
-    n1P.y = topPixelHeight;
-    n1P.x = rightPixelWidth;
-    n1P.y = topPixelHeight;
+    n3P.attributes -> SetDouble(RIVARA_ATTRIBUTE_X, rightPixelWidth / 2); 
+    n3P.attributes -> SetDouble(RIVARA_ATTRIBUTE_Y, 0);
+    n1P.attributes -> SetDouble(RIVARA_ATTRIBUTE_X, 0);
+    n1P.attributes -> SetDouble(RIVARA_ATTRIBUTE_Y, topPixelHeight);
+    n1P.attributes -> SetDouble(RIVARA_ATTRIBUTE_X, rightPixelWidth);
+    n1P.attributes -> SetDouble(RIVARA_ATTRIBUTE_Y,  topPixelHeight);
     std::tie(n3P.r, n3P.g, n3P.b) = image -> getPixel(rightPixelWidth / 2, 0);
     n3P.attributes -> SetBool(RIVARA_ATTRIBUTE_HN, false);
     graph -> ChangeVertexType(S, NODELABEL_N);
@@ -56,7 +63,7 @@ void P0::Perform()
     graph -> AddEdge(S, t);
 }
 
-std::vector<uint8_t> P0::Serialize()
+std::vector<uint8_t> RivaraP0::Serialize()
 {
     throw NotImplementedException();
 }

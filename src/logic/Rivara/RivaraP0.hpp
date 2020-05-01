@@ -9,17 +9,17 @@ namespace Rivara
     ///
     /// Starting production for Rivara grammar
     ///
-    class P0 {
+    class RivaraP0 {
         private:
             std::shared_ptr<IGraph> graph;
             vertex_descriptor S;
             std::shared_ptr<Image> image;
         public:
-            P0(std::shared_ptr<IGraph> graph,
+            RivaraP0(std::shared_ptr<IGraph> graph,
             vertex_descriptor S,
             std::shared_ptr<Image> image);
             void Perform() ;
             std::vector<uint8_t> Serialize() ;
     }; 
 }
-#endif /* Rivara_P1_HPP */
+#endif /* Rivara_P0_HPP */

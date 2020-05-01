@@ -6,27 +6,37 @@
 
 namespace Rivara
 {
-    double NL(int x1, int y1, int x2, int y2)
+    inline double NL(double x1, double y1, double x2, double y2)
     {
         return std::sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
     }
 
-    double NL(Pixel p1, Pixel p2)
+    inline double NL(Pixel p1, Pixel p2)
     {
-        return NL(p1.x, p1.y, p2.x, p2.y);
+        return NL(
+            p1.attributes -> GetDouble(RIVARA_ATTRIBUTE_X),
+            p1.attributes -> GetDouble(RIVARA_ATTRIBUTE_Y),
+            p2.attributes -> GetDouble(RIVARA_ATTRIBUTE_X),
+            p2.attributes -> GetDouble(RIVARA_ATTRIBUTE_Y));
     }
 
-    double NL(int x1, int y1, int x2, int y2, int x3, int y3)
+    inline double NL(double x1, double y1, double x2, double y2, double x3, double y3)
     {
         return std::sqrt(((x1+x2)/2.0-x3)*((x1+x2)/2.0-x3) + ((y1+y2)/2.0-y3)*((y1+y2)/2.0-y3));
     }
 
-    double NL(Pixel p1, Pixel p2, Pixel p3)
+    inline double NL(Pixel p1, Pixel p2, Pixel p3)
     {
-        return NL(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y);
+        return NL(
+            p1.attributes -> GetDouble(RIVARA_ATTRIBUTE_X),
+            p1.attributes -> GetDouble(RIVARA_ATTRIBUTE_Y),
+            p2.attributes -> GetDouble(RIVARA_ATTRIBUTE_X),
+            p2.attributes -> GetDouble(RIVARA_ATTRIBUTE_Y), 
+            p3.attributes -> GetDouble(RIVARA_ATTRIBUTE_X), 
+            p3.attributes -> GetDouble(RIVARA_ATTRIBUTE_Y));
     }
 
-    bool EdgeComparator(const Pixel& lhs, const Pixel& rhs)
+    inline bool EdgeComparator(const Pixel& lhs, const Pixel& rhs)
     {
         return lhs.attributes->GetDouble(RIVARA_ATTRIBUTE_L)<rhs.attributes->GetDouble(RIVARA_ATTRIBUTE_L);
     }

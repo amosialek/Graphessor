@@ -29,6 +29,5 @@ bool operator<(const Pixel& p1, const Pixel& p2)
             if(p1.x < p2.x)
                 return true;
             return p1.x == p2.x and p1.y < p2.y;
-
         }
 #endif // __PIXEL_HPP__

@@ -12,7 +12,7 @@ namespace Rivara
             void SetBool(char attributeName, bool value) override;
             void SetDouble(char attributeName, double value) override;
             bool HN, B, R;
-            double L;
+            double L, X, Y;
     };
 }
 #define NODELABEL_N "N"
@@ -23,5 +23,7 @@ namespace Rivara
 #define RIVARA_ATTRIBUTE_HN 'H'
 #define RIVARA_ATTRIBUTE_R 'R'
 #define RIVARA_ATTRIBUTE_L 'L'
+#define RIVARA_ATTRIBUTE_X 'X'
+#define RIVARA_ATTRIBUTE_Y 'Y'
 
 #endif // __RivaraAttributes hpp_RivaraAttributes_hpp__
