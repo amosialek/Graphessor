@@ -11,18 +11,16 @@ namespace Rivara
         private:
             std::shared_ptr<IGraph> graph;
             vertex_descriptor hangingNode;
-            vertex_descriptor TEdge;;
+            vertex_descriptor TEdge;
         public:
             RivaraP2(std::shared_ptr<IGraph> graph,
-            vertex_descriptor EEdge,
-            vertex_descriptor TEdge);
-            Pixel GetNewENode(Pixel& newNNode, std::vector<vertex_descriptor>& nodes);
-            Pixel GetNewNNode(std::vector<vertex_descriptor> nodes);
+                vertex_descriptor EEdge,
+                vertex_descriptor TEdge);
+            Pixel GetNewENode(Pixel& newNNode, vertex_descriptor hangingNode);
             Pixel GetNewTNode();
-            Pixel GetNewEMiddleNode(Pixel& newNNode, vertex_descriptor lastNode);
             void Perform();
             static std::unique_ptr<std::vector<RivaraP2>> FindAllMatches(std::shared_ptr<CachedGraph> g);
-            std::vector<uint8_t> Serialize();            
+            std::vector<uint8_t> Serialize();   
     }; 
 }
 

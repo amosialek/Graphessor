@@ -14,8 +14,54 @@ namespace Rivara
 
     void RivaraP2::Perform()
     {
-        
-        
+        auto EEdges = graph -> GetAdjacentVertices(hangingNode);
+        std::vector<vertex_descriptor> HNNeighbors;
+        for(auto e : EEdges)
+        {
+            auto nodes = where(graph->GetAdjacentVertices(e), [this](vertex_descriptor v){return v!=hangingNode;});
+            HNNeighbors.insert(HNNeighbors.end(), EEdges.begin(), EEdges.end());
+        }
+        vertex_descriptor lastNode = where(graph->GetAdjacentVertices(TEdge), [&HNNeighbors](vertex_descriptor v){return v!=HNNeighbors[0] and v!=HNNeighbors[1];})[0];
+
+        Pixel newENode = GetNewENode((*graph)[hangingNode], lastNode);
+        Pixel newTNode = GetNewTNode();
+        vertex_descriptor newENodeVertex = graph -> AddVertex(newENode);
+        vertex_descriptor newTNodeVertex = graph -> AddVertex(newTNode);
+
+        (*graph)[hangingNode].attributes -> SetBool(RIVARA_ATTRIBUTE_HN, false);
+        (*graph)[TEdge].attributes -> SetBool(RIVARA_ATTRIBUTE_R, false);
+
+        //oldTEdge neighbors
+        graph -> RemoveEdge(HNNeighbors[0], TEdge);
+        graph -> AddEdge(hangingNode, TEdge);
+
+        //newEEdge neighbors
+        graph -> AddEdge(hangingNode, newENodeVertex);
+        graph -> AddEdge(lastNode, newENodeVertex);
+
+        //newTEdge neighbors
+        graph -> AddEdge(newTNodeVertex, HNNeighbors[0]);
+        graph -> AddEdge(newTNodeVertex, hangingNode);
+        graph -> AddEdge(newTNodeVertex, lastNode);
+    }
+
+    Pixel RivaraP2::GetNewENode(Pixel& newNNode, vertex_descriptor lastNode)
+    {
+        Pixel newMiddleENode;
+        newMiddleENode.attributes = std::make_shared<RivaraAttributes>();
+        newMiddleENode.label = NODELABEL_E;
+        newMiddleENode.attributes -> SetDouble(RIVARA_ATTRIBUTE_L, NL(newNNode, (*graph)[lastNode]));
+        newMiddleENode.attributes -> SetBool(RIVARA_ATTRIBUTE_B, false);
+        return newMiddleENode;
+    }
+
+    Pixel RivaraP2::GetNewTNode()
+    {
+        Pixel newTNode;
+        newTNode.attributes = std::make_shared<RivaraAttributes>();
+        newTNode.label = NODELABEL_T;
+        newTNode.attributes -> SetBool(RIVARA_ATTRIBUTE_R, false);
+        return newTNode;
     }
 
     std::unique_ptr<std::vector<RivaraP2>> RivaraP2::FindAllMatches(std::shared_ptr<CachedGraph> g)
