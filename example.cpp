@@ -3,6 +3,9 @@
 #include "Production_test.cpp"
 #include "RivaraProduction1test.cpp"
 #include "RivaraProduction2test.cpp"
+#include "RivaraProduction3test.cpp"
+#include "RivaraProduction4test.cpp"
+#include "RivaraProduction5test.cpp"
 using namespace std;
 int main()
 {

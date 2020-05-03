@@ -43,6 +43,8 @@ namespace Rivara
         graph -> AddEdge(newTNodeVertex, HNNeighbors[0]);
         graph -> AddEdge(newTNodeVertex, hangingNode);
         graph -> AddEdge(newTNodeVertex, lastNode);
+        
+        (*graph)[TEdge].attributes->SetBool(RIVARA_ATTRIBUTE_R, false);
     }
 
     Pixel RivaraP2::GetNewENode(Pixel& newNNode, vertex_descriptor lastNode)

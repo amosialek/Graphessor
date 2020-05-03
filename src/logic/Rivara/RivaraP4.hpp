@@ -1,5 +1,5 @@
-#ifndef Rivara_P3_HPP
-#define Rivara_P3_HPP
+#ifndef Rivara_P4_HPP
+#define Rivara_P4_HPP
 
 #include "Productions.hpp"
 #include "RivaraAttributes.hpp"
@@ -10,14 +10,12 @@ namespace Rivara
     class RivaraP4 {
         private:
             std::shared_ptr<IGraph> graph;
-            vertex_descriptor EEdgeToBreak;
+            vertex_descriptor NNode;
             vertex_descriptor TEdge;
         public:
             RivaraP4(std::shared_ptr<IGraph> graph,
-                vertex_descriptor EEdge,
+                vertex_descriptor NNode,
                 vertex_descriptor TEdge);
-            Pixel GetNewENode(Pixel& newNNode, std::vector<vertex_descriptor>& nodes);
-            Pixel GetNewNNode(std::vector<vertex_descriptor> nodes);
             Pixel GetNewTNode();
             Pixel GetNewEMiddleNode(Pixel& newNNode, vertex_descriptor lastNode);
             void Perform();
@@ -27,4 +25,4 @@ namespace Rivara
     }; 
 }
 
-#endif /* Rivara_P3_HPP */
+#endif /* Rivara_P4_HPP */

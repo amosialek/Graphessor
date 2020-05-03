@@ -53,6 +53,8 @@ namespace Rivara
         
         graph -> AddEdge(newMiddleENodeVertex, lastNode);
         graph -> AddEdge(newMiddleENodeVertex, newNNodeVertex);
+
+        (*graph)[TEdge].attributes->SetBool(RIVARA_ATTRIBUTE_R, false);
     }
 
     std::unique_ptr<std::vector<RivaraP3>> RivaraP3::FindAllMatches(std::shared_ptr<CachedGraph> g, std::shared_ptr<Image> image)
@@ -165,7 +167,6 @@ namespace Rivara
         auto Nnodes = graph.GetAdjacentVertices(v);
         return ( !(graph)[Nnodes[0]].attributes->GetBool(RIVARA_ATTRIBUTE_HN) 
         and  !(graph)[Nnodes[1]].attributes->GetBool(RIVARA_ATTRIBUTE_HN));
-        
     }
 
     Pixel RivaraP3::GetNewENode(Pixel& newNNode, std::vector<vertex_descriptor>& nodes)
