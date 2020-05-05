@@ -1,5 +1,5 @@
-#ifndef Rivara_P6_HPP
-#define Rivara_P6_HPP
+#ifndef Rivara_P7_HPP
+#define Rivara_P7_HPP
 
 #include "Productions.hpp"
 #include "RivaraUtils.hpp"
@@ -7,18 +7,18 @@
 
 namespace Rivara
 {
-    class RivaraP6 {
+    class RivaraP7 {
         private:
             std::shared_ptr<IGraph> graph;
             vertex_descriptor hangingNode;
             vertex_descriptor TEdge;
         public:
-            RivaraP6(std::shared_ptr<IGraph> graph,
+            RivaraP7(std::shared_ptr<IGraph> graph,
                 vertex_descriptor hangingNode,
                 vertex_descriptor TEdge
                 );
             void Perform();
-            static std::unique_ptr<std::vector<RivaraP6>> FindAllMatches(std::shared_ptr<CachedGraph> g);
+            static std::unique_ptr<std::vector<RivaraP7>> FindAllMatches(std::shared_ptr<CachedGraph> g);
             std::vector<uint8_t> Serialize();   
     }; 
 }

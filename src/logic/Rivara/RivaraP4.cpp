@@ -1,5 +1,4 @@
 #include "RivaraP4.hpp"
-#include "RivaraUtils.hpp"
 
 namespace Rivara
 {
@@ -28,7 +27,7 @@ namespace Rivara
 
         std::set_difference(vertices.begin(), vertices.end(), nodes.begin(), nodes.end(), std::back_inserter(lastNodeSet));
 
-        Pixel newEMiddleNode = GetNewEMiddleNode((*graph)[NNode], lastNodeSet[0]);
+        Pixel newEMiddleNode = GetNewEMiddleNode(graph, (*graph)[NNode], lastNodeSet[0]);
         Pixel newTNode = GetNewTNode();
 
         auto newTVertex = graph -> AddVertex(newTNode);
@@ -48,7 +47,7 @@ namespace Rivara
         (*graph)[TEdge].attributes->SetBool(RIVARA_ATTRIBUTE_R, false);
     }
 
-    std::unique_ptr<std::vector<RivaraP4>> RivaraP4::FindAllMatches(std::shared_ptr<CachedGraph> g, std::shared_ptr<Image> image)
+    std::unique_ptr<std::vector<RivaraP4>> RivaraP4::FindAllMatches(std::shared_ptr<CachedGraph> g)
     {
        std::unique_ptr<std::vector<RivaraP4>> result = std::make_unique<std::vector<RivaraP4>>();
         auto triangles = g -> GetCacheIterator(NODELABEL_T);
@@ -129,24 +128,5 @@ namespace Rivara
             }
         }
         return result; 
-    }
-    
-    Pixel RivaraP4::GetNewEMiddleNode(Pixel& newNNode, vertex_descriptor lastNode)
-    {
-        Pixel newMiddleENode;
-        newMiddleENode.attributes = std::make_shared<RivaraAttributes>();
-        newMiddleENode.label = NODELABEL_E;
-        newMiddleENode.attributes -> SetDouble(RIVARA_ATTRIBUTE_L, NL(newNNode, (*graph)[lastNode]));
-        newMiddleENode.attributes -> SetBool(RIVARA_ATTRIBUTE_B, false);
-        return newMiddleENode;
-    }
-
-    Pixel RivaraP4::GetNewTNode()
-    {
-        Pixel newTNode;
-        newTNode.attributes = std::make_shared<RivaraAttributes>();
-        newTNode.label = NODELABEL_T;
-        newTNode.attributes -> SetBool(RIVARA_ATTRIBUTE_R, false);
-        return newTNode;
     }
 }

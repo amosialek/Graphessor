@@ -1,6 +1,5 @@
 #include "RivaraP1.hpp"
 #include <algorithm>
-#include "RivaraUtils.hpp"
 
 namespace Rivara
 {
@@ -23,9 +22,9 @@ namespace Rivara
         auto lastNode = where(lastNodes,[&nodes](vertex_descriptor v){return nodes[0]!=v and nodes[1]!=v;}).front();
 
         auto newTNode = GetNewTNode();
-        auto newNNode = GetNewNNode(nodes);
-        auto newMiddleENode = GetNewEMiddleNode(newNNode, lastNode);
-        auto newENode = GetNewENode(newNNode, nodes);
+        auto newNNode = GetNewNNode(graph, nodes, image);
+        auto newMiddleENode = GetNewEMiddleNode(graph, newNNode, lastNode);
+        auto newENode = GetNewENode(graph, EEdge);
 
         vertex_descriptor newNNodeVertex = graph -> AddVertex(newNNode);
         vertex_descriptor newENodeVertex = graph -> AddVertex(newENode);
@@ -47,46 +46,6 @@ namespace Rivara
         
         graph -> AddEdge(newMiddleENodeVertex, lastNode);
         graph -> AddEdge(newMiddleENodeVertex, newNNodeVertex);
-    }
-
-    Pixel RivaraP1::GetNewENode(Pixel& newNNode, std::vector<vertex_descriptor>& nodes)
-    {
-        Pixel newENode;
-        newENode.attributes = std::make_shared<RivaraAttributes>();
-        newENode.label = NODELABEL_E;
-        newENode.attributes -> SetDouble(RIVARA_ATTRIBUTE_L, NL(newNNode, (*graph)[nodes[0]]));
-        newENode.attributes -> SetBool(RIVARA_ATTRIBUTE_B, (*graph)[EEdge].attributes -> GetBool(RIVARA_ATTRIBUTE_B));
-        return newENode;
-    }
-
-    Pixel RivaraP1::GetNewEMiddleNode(Pixel& newNNode, vertex_descriptor lastNode)
-    {
-        Pixel newMiddleENode;
-        newMiddleENode.attributes = std::make_shared<RivaraAttributes>();
-        newMiddleENode.label = NODELABEL_E;
-        newMiddleENode.attributes -> SetDouble(RIVARA_ATTRIBUTE_L, NL(newNNode, (*graph)[lastNode]));
-        newMiddleENode.attributes -> SetBool(RIVARA_ATTRIBUTE_B, false);
-        return newMiddleENode;
-    }
-
-    Pixel RivaraP1::GetNewTNode()
-    {
-        Pixel newTNode;
-        newTNode.attributes = std::make_shared<RivaraAttributes>();
-        newTNode.label = NODELABEL_T;
-        newTNode.attributes -> SetBool(RIVARA_ATTRIBUTE_R, false);
-        return newTNode;
-    }
-
-    Pixel RivaraP1::GetNewNNode(std::vector<vertex_descriptor> nodes)
-    {
-        Pixel newNNode;
-        newNNode.attributes = std::make_shared<RivaraAttributes>();
-        newNNode.attributes -> SetDouble(RIVARA_ATTRIBUTE_X, ((*graph)[nodes[0]].attributes -> GetDouble(RIVARA_ATTRIBUTE_X) + (*graph)[nodes[1]].attributes -> GetDouble(RIVARA_ATTRIBUTE_X))/2);
-        newNNode.attributes -> SetDouble(RIVARA_ATTRIBUTE_Y, ((*graph)[nodes[0]].attributes -> GetDouble(RIVARA_ATTRIBUTE_Y) + (*graph)[nodes[1]].attributes -> GetDouble(RIVARA_ATTRIBUTE_Y))/2); 
-        std::tie(newNNode.r, newNNode.g, newNNode.b) = image->getPixel(newNNode.attributes -> GetDouble(RIVARA_ATTRIBUTE_X), newNNode.attributes -> GetDouble(RIVARA_ATTRIBUTE_Y));
-        newNNode.label = NODELABEL_N;
-        return newNNode;
     }
 
     std::unique_ptr<std::vector<RivaraP1>> RivaraP1::FindAllMatches(std::shared_ptr<CachedGraph> g, std::shared_ptr<Image> image) 

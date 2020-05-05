@@ -116,17 +116,4 @@ namespace Rivara{
         ASSERT_EQ(tNodes.size(), 2);
         ASSERT_EQ(eNodes.size(), 5);
     }
-
-    TEST_F(RivaraProduction2Test, GetNewENode)
-    {
-        Pixel newENode = p2 -> GetNewENode(node4, node3Vertex);
-        ASSERT_DOUBLE_EQ(newENode.attributes -> GetDouble(RIVARA_ATTRIBUTE_L), 2.0);
-        ASSERT_EQ(newENode.attributes -> GetBool(RIVARA_ATTRIBUTE_B), false);
-    }
-
-    TEST_F(RivaraProduction2Test, GetNewTNode)
-    {
-        Pixel newENode = p2 -> GetNewENode(node4, node3Vertex);
-        ASSERT_DOUBLE_EQ(newENode.attributes -> GetBool(RIVARA_ATTRIBUTE_R), false);
-    }
 }

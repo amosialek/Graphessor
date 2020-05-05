@@ -96,51 +96,48 @@ namespace Rivara{
     TEST_F(RivaraProduction1Test, P1TestNewENodeLAttribute)
     {
         this->E1.attributes->SetBool(RIVARA_ATTRIBUTE_B, true);
-        Pixel newNNode = this->p1->GetNewNNode(this->nodes);
-        Pixel p = this->p1->GetNewENode(newNNode, this->nodes);
-        ASSERT_DOUBLE_EQ(p.attributes -> GetDouble(RIVARA_ATTRIBUTE_L), 1.8027756377319946);
+        Pixel p = GetNewENode(this->g, this->E1Vertex);
+        ASSERT_DOUBLE_EQ(p.attributes -> GetDouble(RIVARA_ATTRIBUTE_L), 1.1180339887498949);
     }
 
     TEST_F(RivaraProduction1Test, P1TestNewENodeBAttributeTrue)
     {
         this->E1.attributes->SetBool(RIVARA_ATTRIBUTE_B, true);
-        Pixel newNNode = this->p1->GetNewNNode(this->nodes);
-        Pixel p = this->p1->GetNewENode(newNNode, this->nodes);
+        Pixel p = GetNewENode(this->g, this->E1Vertex);
         ASSERT_EQ(p.attributes -> GetBool(RIVARA_ATTRIBUTE_B), true);
     }
 
     TEST_F(RivaraProduction1Test, P1TestNewENodeBAttributeFalse)
     {
         this->E1.attributes->SetBool(RIVARA_ATTRIBUTE_B, false);
-        Pixel newNNode = this->p1->GetNewNNode(this->nodes);
-        Pixel p = this->p1->GetNewENode(newNNode, this->nodes);
+        Pixel p = GetNewENode(this->g, this->E1Vertex);
         ASSERT_EQ(p.attributes -> GetBool(RIVARA_ATTRIBUTE_B), false);
     }
 
     TEST_F(RivaraProduction1Test, P1TestNewNNode)
     {
-        Pixel p = this->p1->GetNewNNode(this->nodes);
+        Pixel p = GetNewNNode(this->g, this->nodes, this->image);
         ASSERT_DOUBLE_EQ(p.attributes -> GetDouble(RIVARA_ATTRIBUTE_X), 4.5);
         ASSERT_DOUBLE_EQ(p.attributes -> GetDouble(RIVARA_ATTRIBUTE_Y), 5);
     }
 
     TEST_F(RivaraProduction1Test, P1TestNewEMiddleNodeBAttribute)
     {
-        Pixel newNNode = this->p1->GetNewNNode(this->nodes);
-        Pixel p = this->p1->GetNewEMiddleNode(newNNode, node3Vertex);
+        Pixel newNNode = GetNewNNode(this->g, this->nodes, this->image);
+        Pixel p = GetNewEMiddleNode(this->g, newNNode, node3Vertex);
         ASSERT_EQ(p.attributes -> GetBool(RIVARA_ATTRIBUTE_B), false);
     }
 
     TEST_F(RivaraProduction1Test, P1TestNewEMiddleNodeLAttribute)
     {
-        Pixel newNNode = this->p1->GetNewNNode(this->nodes);
-        Pixel p = this->p1->GetNewEMiddleNode(newNNode, node3Vertex);
+        Pixel newNNode = GetNewNNode(this->g, this->nodes, this->image);
+        Pixel p = GetNewEMiddleNode(this->g, newNNode, node3Vertex);
         ASSERT_EQ(p.attributes -> GetDouble(RIVARA_ATTRIBUTE_L), 0.5);
     }
 
     TEST_F(RivaraProduction1Test, P1TestNewTNode)
     {
-        auto TNode = p1 -> GetNewTNode();
+        auto TNode = GetNewTNode();
         ASSERT_EQ(TNode.attributes -> GetBool(RIVARA_ATTRIBUTE_R), false);
     }
 

@@ -6,6 +6,7 @@
 #include "RivaraProduction3test.cpp"
 #include "RivaraProduction4test.cpp"
 #include "RivaraProduction5test.cpp"
+#include "RivaraProduction6test.cpp"
 using namespace std;
 int main()
 {

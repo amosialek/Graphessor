@@ -133,23 +133,5 @@ namespace Rivara{
         ASSERT_EQ(eNodes.size(), 7);
     }
 
-    TEST_F(RivaraProduction5Test, P5TestNewEMiddleNodeBAttribute)
-    {
-        // Pixel newNNode = this->p5->GetNewNNode(this->nodes);
-        // Pixel p = this->p5->GetNewEMiddleNode(newNNode, node4Vertex);
-        // ASSERT_EQ(p.attributes -> GetBool(RIVARA_ATTRIBUTE_B), false);
-    }
-
-    TEST_F(RivaraProduction5Test, P5TestNewEMiddleNodeLAttribute)
-    {
-        // Pixel newNNode = this->p5->GetNewNNode(this->nodes);
-        // Pixel p = this->p5->GetNewEMiddleNode(newNNode, node3Vertex);
-        // ASSERT_EQ(p.attributes -> GetDouble(RIVARA_ATTRIBUTE_L), 2.5);
-    }
-
-    TEST_F(RivaraProduction5Test, P5TestNewTNode)
-    {
-        auto TNode = p5 -> GetNewTNode();
-        ASSERT_EQ(TNode.attributes -> GetBool(RIVARA_ATTRIBUTE_R), false);
-    }
+   
 }

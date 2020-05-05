@@ -2,7 +2,7 @@
 #define Rivara_P1_HPP
 
 #include "Productions.hpp"
-#include "RivaraAttributes.hpp"
+#include "RivaraUtils.hpp"
 #include <optional>
 
 namespace Rivara
@@ -18,10 +18,6 @@ namespace Rivara
             vertex_descriptor EEdge,
             vertex_descriptor TEdge,
             std::shared_ptr<Image> image);
-            Pixel GetNewENode(Pixel& newNNode, std::vector<vertex_descriptor>& nodes);
-            Pixel GetNewNNode(std::vector<vertex_descriptor> nodes);
-            Pixel GetNewTNode();
-            Pixel GetNewEMiddleNode(Pixel& newNNode, vertex_descriptor lastNode);
             void Perform();
             static std::unique_ptr<std::vector<RivaraP1>> FindAllMatches(std::shared_ptr<CachedGraph> g, std::shared_ptr<Image> image);
             std::vector<uint8_t> Serialize();

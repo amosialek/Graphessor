@@ -97,8 +97,6 @@ namespace Rivara{
                 E9Vertex = g->AddVertex(E9);
                 TVertex = g->AddVertex(T);
 
-                g->AddEdge(node3Vertex, E3Vertex);
-                g->AddEdge(node1Vertex, E3Vertex);
                 g->AddEdge(node1Vertex, E4Vertex);
                 g->AddEdge(node4Vertex, E4Vertex);
                 g->AddEdge(node2Vertex, E5Vertex);
@@ -107,6 +105,10 @@ namespace Rivara{
                 g->AddEdge(node2Vertex, E6Vertex);
                 g->AddEdge(node5Vertex, E7Vertex);
                 g->AddEdge(node3Vertex, E7Vertex);
+                g->AddEdge(node3Vertex, E8Vertex);
+                g->AddEdge(node6Vertex, E8Vertex);
+                g->AddEdge(node6Vertex, E9Vertex);
+                g->AddEdge(node1Vertex, E9Vertex);
 
                 g->AddEdge(node1Vertex, TVertex);
                 g->AddEdge(node2Vertex, TVertex);
@@ -143,23 +145,5 @@ namespace Rivara{
         ASSERT_EQ(eNodes.size(), 7);
     }
 
-    TEST_F(RivaraProduction6Test, P6TestNewEMiddleNodeBAttribute)
-    {
-        // Pixel newNNode = this->p6->GetNewNNode(this->nodes);
-        // Pixel p = this->p6->GetNewEMiddleNode(newNNode, node4Vertex);
-        // ASSERT_EQ(p.attributes -> GetBool(RIVARA_ATTRIBUTE_B), false);
-    }
-
-    TEST_F(RivaraProduction6Test, P6TestNewEMiddleNodeLAttribute)
-    {
-        // Pixel newNNode = this->p6->GetNewNNode(this->nodes);
-        // Pixel p = this->p6->GetNewEMiddleNode(newNNode, node3Vertex);
-        // ASSERT_EQ(p.attributes -> GetDouble(RIVARA_ATTRIBUTE_L), 2.5);
-    }
-
-    TEST_F(RivaraProduction6Test, P6TestNewTNode)
-    {
-        auto TNode = p6 -> GetNewTNode();
-        ASSERT_EQ(TNode.attributes -> GetBool(RIVARA_ATTRIBUTE_R), false);
-    }
+    
 }

@@ -1,5 +1,4 @@
 #include "RivaraP5.hpp"
-#include "RivaraUtils.hpp"
 
 namespace Rivara
 {
@@ -22,10 +21,10 @@ namespace Rivara
 
         auto vertices = graph -> GetAdjacentVertices(TEdge);
 
-        Pixel newNNode = GetNewNNode(nodes);
-        Pixel newEMiddleNode = GetNewEMiddleNode(newNNode, NNode);
+        Pixel newNNode = GetNewNNode(graph, nodes, image);
+        Pixel newEMiddleNode = GetNewEMiddleNode(graph, newNNode, NNode);
         Pixel newTNode = GetNewTNode(); 
-        Pixel newENode = GetNewENode(newNNode, nodes);
+        Pixel newENode = GetNewENode(graph, EEdge);
 
         auto newTVertex = graph -> AddVertex(newTNode);
         auto newEVertex = graph -> AddVertex(newENode);
@@ -131,50 +130,6 @@ namespace Rivara
         return result; 
     }
     
-    bool RivaraP5::EdgeHasNoHangingNodes(IGraph& graph, vertex_descriptor v)
-    {
-        auto Nnodes = graph.GetAdjacentVertices(v);
-        return ( !(graph)[Nnodes[0]].attributes->GetBool(RIVARA_ATTRIBUTE_HN) 
-        and  !(graph)[Nnodes[1]].attributes->GetBool(RIVARA_ATTRIBUTE_HN));
-    }
 
-        Pixel RivaraP5::GetNewENode(Pixel& newNNode, std::vector<vertex_descriptor>& nodes)
-    {
-        Pixel newENode;
-        newENode.attributes = std::make_shared<RivaraAttributes>();
-        newENode.label = NODELABEL_E;
-        newENode.attributes -> SetDouble(RIVARA_ATTRIBUTE_L, NL(newNNode, (*graph)[nodes[0]]));
-        newENode.attributes -> SetBool(RIVARA_ATTRIBUTE_B, (*graph)[EEdge].attributes -> GetBool(RIVARA_ATTRIBUTE_B));
-        return newENode;
-    }
 
-    Pixel RivaraP5::GetNewEMiddleNode(Pixel& newNNode, vertex_descriptor lastNode)
-    {
-        Pixel newMiddleENode;
-        newMiddleENode.attributes = std::make_shared<RivaraAttributes>();
-        newMiddleENode.label = NODELABEL_E;
-        newMiddleENode.attributes -> SetDouble(RIVARA_ATTRIBUTE_L, NL(newNNode, (*graph)[lastNode]));
-        newMiddleENode.attributes -> SetBool(RIVARA_ATTRIBUTE_B, false);
-        return newMiddleENode;
-    }
-
-    Pixel RivaraP5::GetNewTNode()
-    {
-        Pixel newTNode;
-        newTNode.attributes = std::make_shared<RivaraAttributes>();
-        newTNode.label = NODELABEL_T;
-        newTNode.attributes -> SetBool(RIVARA_ATTRIBUTE_R, false);
-        return newTNode;
-    }
-
-    Pixel RivaraP5::GetNewNNode(std::vector<vertex_descriptor> nodes)
-    {
-        Pixel newNNode;
-        newNNode.attributes = std::make_shared<RivaraAttributes>();
-        newNNode.attributes -> SetDouble(RIVARA_ATTRIBUTE_X, ((*graph)[nodes[0]].attributes -> GetDouble(RIVARA_ATTRIBUTE_X) + (*graph)[nodes[1]].attributes -> GetDouble(RIVARA_ATTRIBUTE_X))/2);
-        newNNode.attributes -> SetDouble(RIVARA_ATTRIBUTE_Y, ((*graph)[nodes[0]].attributes -> GetDouble(RIVARA_ATTRIBUTE_Y) + (*graph)[nodes[1]].attributes -> GetDouble(RIVARA_ATTRIBUTE_Y))/2); 
-        std::tie(newNNode.r, newNNode.g, newNNode.b) = image->getPixel(newNNode.attributes -> GetDouble(RIVARA_ATTRIBUTE_X), newNNode.attributes -> GetDouble(RIVARA_ATTRIBUTE_Y));
-        newNNode.label = NODELABEL_N;
-        return newNNode;
-    }
 }
