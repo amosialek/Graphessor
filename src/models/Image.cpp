@@ -151,7 +151,7 @@ void Image::BaricentricInterpolation(int channel, std::vector<Pixel> pixels)
     int maxx = std::max(pixels[0].x,(std::max(pixels[1].x,pixels[2].x)));
     int maxy = std::max(pixels[0].y,(std::max(pixels[1].y,pixels[2].y)));
     double w1Coefficient = 1.0/(y2y3 * x1x3 + x3x2 * y1y3);
-    double w2Coefficient = 1.0/(y2y3 * x1x3 + x3x2 * y1y3);
+    double w2Coefficient = w1Coefficient;
     double w1,w2,w3;
     Pixel p;
     for(int y = miny; y <= maxy; y++)
@@ -263,6 +263,23 @@ double Image::GetInterpolatedPixel(int x1, int x2, int y1, int y2, int x, int y,
         return rInterpolated;
 }
 
+double Image::GetInterpolatedPixel(int x1, int x2, int x3, int y1, int y2, int y3, int x, int y, double wDenominator, int channel)
+{
+
+    double w1Coefficient = wDenominator;
+    double w2Coefficient = wDenominator;
+    double w1,w2,w3;
+    int r1,r2,r3;
+    r1 = getPixelInternal(x1,y1, channel);
+    r2 = getPixelInternal(x2,y2, channel);
+    r3 = getPixelInternal(x3,y3, channel);
+    w1 = w1Coefficient * ((y2 - y3) * (x - x3) + (x3 - x2) * (y - y3));
+    w2 = w2Coefficient * ((y3 - y1) * (x - x3) + (x1 - x3) * (y - y3));
+    w3 = 1 - w1 - w2;
+    double rInterpolated = r1 * w1 + r2 * w2 + r3 * w3;
+    return rInterpolated;
+}
+
 double Image::SquaredErrorOfInterpolation(int x1, int x2, int y1, int y2, int channel)
 {
     double sum = 0;
@@ -282,10 +299,42 @@ double Image::SquaredErrorOfInterpolation(int x1, int x2, int y1, int y2, int ch
     return sum;
 }
 
+double Image::SquaredErrorOfInterpolation(int x1, int x2, int x3, int y1, int y2, int y3, int channel)
+{
+    double sum = 0;
+    //std::cout<<"x2 -x1, y2-y1: "<<x2-x1<<" "<<y2-y1<<std::endl;
+
+    int minx = std::min(x1, std::min(x2,x3));
+    int miny = std::min(y1, std::min(y2,y3));
+    int maxx = std::max(x1, std::max(x2,x3));
+    int maxy = std::max(y1, std::max(y2,y3));
+
+    if (maxx-minx==0 or maxy-miny==0) 
+        return 0;
+    double wDenominator = 1.0/((y2-y3) * (x1-x3) + (x3-x2) * (y1-y3));
+    for(int x=minx;x<=maxx;x++)
+        for(int y=miny;y<=maxy;y++)
+            if(PointInTriangle(x,y,x1,y1,x2,y2,x3,y3))
+            {
+                int rOriginal;
+                rOriginal = getPixelInternal(x, y, channel);
+                double rInterpolated = GetInterpolatedPixel(x1,x2,x3,y1,y2,y3,x,y,wDenominator,channel);
+                sum+=(rInterpolated - rOriginal)*(rInterpolated - rOriginal);
+        //      std::cout<<x<<" "<<y<<" "<<rOriginal<<" "<<rInterpolated<<" "<<sum<<std::endl;
+            }
+    return sum;
+}
+
 double Image::CompareWithInterpolation(int x1, int x2, int y1, int y2, int channel)
 {
     double maxSum = 255.0*255*(x2-x1+1)*(y2-y1+1);
     return SquaredErrorOfInterpolation(x1, x2, y1, y2, channel)/maxSum;
+}
+
+double Image::CompareWithInterpolation(int x1, int x2, int x3, int y1, int y2, int y3, int channel)
+{
+    double maxSum = 255.0*255*abs(x1*y2+x2*y3+x3*y1-x1*y3-x2*y1-x3*y2) / 2;
+    return SquaredErrorOfInterpolation(x1, x2, x3, y1, y2, y3, channel)/maxSum;
 }
 
 void Image::save(std::string filename)
@@ -396,11 +445,40 @@ void Image::DrawBlackLine(int x1, int y1, int x2, int y2)
     }
 }
 
+int Image::sign2 (int x1, int y1, int x2, int y2, int x3, int y3)
+{
+    return (x1 - x3) * (y2 - y3) - (x2 - x3) * (y1 - y3);
+}
+
+bool Image::PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int x3, int y3)
+{
+    int d1, d2, d3;
+    bool has_neg, has_pos;
+
+    d1 = sign2(px, py, x1, y1, x2, y2);
+    d2 = sign2(px, py, x2, y2, x3, y3);
+    d3 = sign2(px, py, x3, y3, x1, y1);
+
+    has_neg = (d1 < 0) || (d2 < 0) || (d3 < 0);
+    has_pos = (d1 > 0) || (d2 > 0) || (d3 > 0);
+
+    return !(has_neg && has_pos);
+}
+
 double ImageMagnifier::SquaredErrorOfInterpolation(int x1, int x2, int y1, int y2, int channel)
 {
     int originalRatio = ratio;
     ratio = 1;
     auto result = Image::SquaredErrorOfInterpolation(x1/originalRatio, x2/originalRatio, y1/originalRatio, y2/originalRatio, channel);
+    ratio = originalRatio;
+    return result;
+}
+
+double ImageMagnifier::SquaredErrorOfInterpolation(int x1, int x2, int x3, int y1, int y2, int y3, int channel)
+{
+    int originalRatio = ratio;
+    ratio = 1;
+    auto result = Image::SquaredErrorOfInterpolation(x1/originalRatio, x2/originalRatio, x3/originalRatio, y1/originalRatio, y2/originalRatio, y3/originalRatio, channel);
     ratio = originalRatio;
     return result;
 }
@@ -428,6 +506,15 @@ double ImageMagnifier::CompareWithInterpolation(int x1, int x2, int y1, int y2, 
     int originalRatio = ratio;
     ratio = 1;
     auto result = Image::CompareWithInterpolation(x1/originalRatio, x2/originalRatio, y1/originalRatio, y2/originalRatio, channel);
+    ratio = originalRatio;
+    return result;
+}
+
+double ImageMagnifier::CompareWithInterpolation(int x1, int x2, int x3, int y1, int y2, int y3, int channel)
+{
+    int originalRatio = ratio;
+    ratio = 1;
+    auto result = Image::CompareWithInterpolation(x1/originalRatio, x2/originalRatio, x3/originalRatio, y1/originalRatio, y2/originalRatio, y3/originalRatio, channel);
     ratio = originalRatio;
     return result;
 }

@@ -10,15 +10,16 @@ namespace Rivara
     class RivaraP7 {
         private:
             std::shared_ptr<IGraph> graph;
-            vertex_descriptor hangingNode;
             vertex_descriptor TEdge;
         public:
             RivaraP7(std::shared_ptr<IGraph> graph,
-                vertex_descriptor hangingNode,
                 vertex_descriptor TEdge
                 );
             void Perform();
-            static std::unique_ptr<std::vector<RivaraP7>> FindAllMatches(std::shared_ptr<CachedGraph> g);
+            static std::unique_ptr<std::vector<RivaraP7>> FindAllMatches(std::shared_ptr<CachedGraph> g, 
+                                                                        std::shared_ptr<Image> image,
+                                                                        int channel,
+                                                                        double epsilon);
             std::vector<uint8_t> Serialize();   
     }; 
 }

@@ -59,6 +59,8 @@ namespace Rivara
         newMiddleENode.label = NODELABEL_E;
         newMiddleENode.attributes -> SetDouble(RIVARA_ATTRIBUTE_L, NL(newNNode, (*graph)[lastNode]));
         newMiddleENode.attributes -> SetBool(RIVARA_ATTRIBUTE_B, false);
+        newMiddleENode.x = (newNNode.x+(*graph)[lastNode].x)/2;
+        newMiddleENode.y = (newNNode.y+(*graph)[lastNode].y)/2;
         return newMiddleENode;
     }
 
@@ -77,6 +79,8 @@ namespace Rivara
         newNNode.attributes = std::make_shared<RivaraAttributes>();
         newNNode.attributes -> SetDouble(RIVARA_ATTRIBUTE_X, ((*graph)[nodes[0]].attributes -> GetDouble(RIVARA_ATTRIBUTE_X) + (*graph)[nodes[1]].attributes -> GetDouble(RIVARA_ATTRIBUTE_X))/2);
         newNNode.attributes -> SetDouble(RIVARA_ATTRIBUTE_Y, ((*graph)[nodes[0]].attributes -> GetDouble(RIVARA_ATTRIBUTE_Y) + (*graph)[nodes[1]].attributes -> GetDouble(RIVARA_ATTRIBUTE_Y))/2); 
+        newNNode.x = newNNode.attributes -> GetDouble(RIVARA_ATTRIBUTE_X);
+        newNNode.y = newNNode.attributes -> GetDouble(RIVARA_ATTRIBUTE_Y);
         std::tie(newNNode.r, newNNode.g, newNNode.b) = image->getPixel(newNNode.attributes -> GetDouble(RIVARA_ATTRIBUTE_X), newNNode.attributes -> GetDouble(RIVARA_ATTRIBUTE_Y));
         newNNode.label = NODELABEL_N;
         return newNNode;

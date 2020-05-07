@@ -8,5 +8,6 @@
 #include "RivaraP4.hpp"
 #include "RivaraP5.hpp"
 #include "RivaraP6.hpp"
+#include "RivaraP7.hpp"
 
 #endif // __RIVARAPRODUCTIONS_HPP__

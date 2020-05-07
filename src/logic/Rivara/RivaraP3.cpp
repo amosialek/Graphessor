@@ -53,6 +53,15 @@ namespace Rivara
         graph -> AddEdge(newMiddleENodeVertex, lastNode);
         graph -> AddEdge(newMiddleENodeVertex, newNNodeVertex);
 
+
+        (*graph)[EEdgeToBreak].x = ((*graph)[nodes[1]].x+newNNode.x)/2;
+        (*graph)[EEdgeToBreak].y = ((*graph)[nodes[1]].y+newNNode.y)/2;
+        (*graph)[newENodeVertex].x = ((*graph)[nodes[0]].x+newNNode.x)/2;
+        (*graph)[newENodeVertex].y = ((*graph)[nodes[0]].y+newNNode.y)/2;
+        (*graph)[TEdge].x = ((*graph)[nodes[1]].x+newNNode.x+(*graph)[lastNode].x)/3;
+        (*graph)[TEdge].y = ((*graph)[nodes[1]].y+newNNode.y+(*graph)[lastNode].y)/3;
+        (*graph)[newTNodeVertex].x = ((*graph)[nodes[0]].x+newNNode.x+(*graph)[lastNode].x)/3;
+        (*graph)[newTNodeVertex].y = ((*graph)[nodes[0]].y+newNNode.y+(*graph)[lastNode].y)/3;
         (*graph)[TEdge].attributes->SetBool(RIVARA_ATTRIBUTE_R, false);
     }
 

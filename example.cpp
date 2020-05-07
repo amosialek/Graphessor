@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include "Image_test.cpp"
 #include "Production_test.cpp"
+#include "RivaraProduction0test.cpp"
 #include "RivaraProduction1test.cpp"
 #include "RivaraProduction2test.cpp"
 #include "RivaraProduction3test.cpp"

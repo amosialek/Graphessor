@@ -43,6 +43,11 @@ namespace Rivara
         graph -> AddEdge(newTNodeVertex, hangingNode);
         graph -> AddEdge(newTNodeVertex, lastNode);
         
+        (*graph)[TEdge].x = ((*graph)[HNNeighbors[1]].x+(*graph)[hangingNode].x+(*graph)[lastNode].x)/3;
+        (*graph)[TEdge].y = ((*graph)[HNNeighbors[1]].y+(*graph)[hangingNode].y+(*graph)[lastNode].y)/3;
+        (*graph)[newTNodeVertex].x = ((*graph)[HNNeighbors[0]].x+(*graph)[hangingNode].x+(*graph)[lastNode].x)/3;
+        (*graph)[newTNodeVertex].y = ((*graph)[HNNeighbors[0]].y+(*graph)[hangingNode].y+(*graph)[lastNode].y)/3;
+
         (*graph)[TEdge].attributes->SetBool(RIVARA_ATTRIBUTE_R, false);
     }
 
