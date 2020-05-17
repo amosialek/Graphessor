@@ -17,6 +17,7 @@ namespace Rivara
 
     void RivaraP5::Perform()
     {
+        spdlog::debug("Rivara P5");
         auto nodes = graph -> GetAdjacentVertices(EEdge);
 
         auto vertices = graph -> GetAdjacentVertices(TEdge);

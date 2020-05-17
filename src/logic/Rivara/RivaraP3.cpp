@@ -15,6 +15,7 @@ namespace Rivara
 
     void RivaraP3::Perform()
     {
+        spdlog::debug("Rivara P3");
         auto nodes = graph -> GetAdjacentVertices(EEdgeToBreak);
         auto vertices = graph -> GetAdjacentVertices(TEdge);
         std::vector<vertex_descriptor> lastNodeSet;

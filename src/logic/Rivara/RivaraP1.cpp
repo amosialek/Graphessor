@@ -1,5 +1,6 @@
 #include "RivaraP1.hpp"
 #include <algorithm>
+#include <cassert>
 
 namespace Rivara
 {
@@ -16,9 +17,10 @@ namespace Rivara
 
     void RivaraP1::Perform()
     {
-        
+        spdlog::debug("Rivara P1");
         auto nodes = graph -> GetAdjacentVertices(EEdge);
         auto lastNodes = graph -> GetAdjacentVertices(TEdge);
+        assert(lastNodes.size()==3 && "P1 TEdge has not 3 nodes");
         auto lastNode = where(lastNodes,[&nodes](vertex_descriptor v){return nodes[0]!=v and nodes[1]!=v;}).front();
 
         auto newTNode = GetNewTNode();
@@ -46,13 +48,13 @@ namespace Rivara
 
         graph -> AddEdge(newMiddleENodeVertex, lastNode);
         graph -> AddEdge(newMiddleENodeVertex, newNNodeVertex);
-
-        (*graph)[EEdge].x = ((*graph)[nodes[1]].x+newNNode.x)/2;
-        (*graph)[EEdge].y = ((*graph)[nodes[1]].y+newNNode.y)/2;
+        (*graph)[EEdge].x = ((*graph)[nodes[1]].x + newNNode.x) / 2;
+        (*graph)[EEdge].y = ((*graph)[nodes[1]].y + newNNode.y) / 2;
+        (*graph)[EEdge].attributes -> SetDouble(RIVARA_ATTRIBUTE_L, NL((*graph)[nodes[1]], newNNode));
         (*graph)[newENodeVertex].x = ((*graph)[nodes[0]].x+newNNode.x)/2;
         (*graph)[newENodeVertex].y = ((*graph)[nodes[0]].y+newNNode.y)/2;
-        (*graph)[TEdge].x = ((*graph)[nodes[0]].x+newNNode.x+(*graph)[lastNode].x)/3;
-        (*graph)[TEdge].y = ((*graph)[nodes[0]].y+newNNode.y+(*graph)[lastNode].y)/3;
+        (*graph)[TEdge].x = ((*graph)[nodes[1]].x+newNNode.x+(*graph)[lastNode].x)/3;
+        (*graph)[TEdge].y = ((*graph)[nodes[1]].y+newNNode.y+(*graph)[lastNode].y)/3;
         (*graph)[newTNodeVertex].x = ((*graph)[nodes[0]].x+newNNode.x+(*graph)[lastNode].x)/3;
         (*graph)[newTNodeVertex].y = ((*graph)[nodes[0]].y+newNNode.y+(*graph)[lastNode].y)/3;
     }
@@ -87,7 +89,7 @@ namespace Rivara
                 auto maybeBestEdge = RivaraP1::GetBestEdge(g, commonEEdges);
                 if(maybeBestEdge.has_value())
                 {
-                    result->emplace_back(g, t, maybeBestEdge.value(), image);
+                    result->emplace_back(g, maybeBestEdge.value(), t, image);
                 }
             }
         }

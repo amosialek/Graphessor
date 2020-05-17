@@ -13,6 +13,7 @@ namespace Rivara
 
     void RivaraP6::Perform()
     {
+        spdlog::debug("Rivara P6");
         auto vertices = graph -> GetAdjacentVertices(TEdge);
 
         auto hangingNodeEEdges = graph -> GetAdjacentVertices(hangingNode);;

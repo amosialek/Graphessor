@@ -13,6 +13,7 @@ namespace Rivara
 
     void RivaraP2::Perform()
     {
+        spdlog::debug("Rivara P2");
         auto EEdges = graph -> GetAdjacentVertices(hangingNode);
         std::vector<vertex_descriptor> HNNeighbors;
         for(auto e : EEdges)

@@ -97,6 +97,8 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>> channel_graphs,
         auto S = graph -> AddVertex(*(new Pixel(0,0, NODELABEL_S)));
         (*graph)[S].attributes = std::make_shared<RivaraAttributes>();
         RivaraP0(graph, S, image).Perform();
+        auto aaaaaa = graph -> GetAdjacentVertices((*graph -> GetCacheIterator(NODELABEL_T).begin()));
+
         
         unsigned long long lastICount = 0;
         int i=1;
@@ -110,7 +112,9 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>> channel_graphs,
             std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
             auto p7s = RivaraP7::FindAllMatches(graph, image, channel, i < 10 ? 0 : epsilon);
             for(auto p7 : *p7s)
+            {
                 p7.Perform();
+            }
             end = std::chrono::steady_clock::now();
             functionTime["P7"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
             
@@ -118,7 +122,9 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>> channel_graphs,
             debugWriter->WriteItOut(std::to_string(i++), *graph);
             auto p1s = RivaraP1::FindAllMatches(graph, image);
             for(auto p1 : *p1s)
+            {
                 p1.Perform();
+            }
             end = std::chrono::steady_clock::now();
             functionTime["P1"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
             begin = std::chrono::steady_clock::now();

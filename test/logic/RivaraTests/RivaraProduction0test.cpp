@@ -27,6 +27,13 @@ namespace Rivara
         {
             ASSERT_TRUE((*graph)[node].attributes!=NULL);
             ASSERT_EQ(graph->GetAdjacentVertices(node, NODELABEL_T).size(),1);
+            ASSERT_EQ(graph->GetAdjacentVertices(node, NODELABEL_E).size(),2);
+            double x = (*graph)[node].attributes->GetDouble(RIVARA_ATTRIBUTE_X);
+            double y = (*graph)[node].attributes->GetDouble(RIVARA_ATTRIBUTE_Y);
+            ASSERT_TRUE(
+                (abs(x)<0.0000001 && abs(y-29)<0.0000001) 
+                || (abs(x-29)<0.0000001 && abs(y-29)<0.0000001) 
+                || (abs(x-14)<0.0000001 && abs(y)<0.0000001) );
         }
         for(auto node:tNodes)
         {
@@ -36,7 +43,5 @@ namespace Rivara
         {
             ASSERT_TRUE((*graph)[node].attributes!=NULL);
         }
-    }
-
-    
+    }   
 }

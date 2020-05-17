@@ -34,20 +34,31 @@ namespace Rivara{
                 node2.attributes = std::make_shared<RivaraAttributes>();
                 node3.attributes = std::make_shared<RivaraAttributes>();
                 T.attributes = std::make_shared<RivaraAttributes>();
-                
+                T.x = 4;
+                T.y = 5;
                 E1.attributes = std::make_shared<RivaraAttributes>();
                 E2.attributes = std::make_shared<RivaraAttributes>();
                 E3.attributes = std::make_shared<RivaraAttributes>();
+                E1.x = 4;
+                E1.y = 5;
+                E2.x = E2.y = 5;
+                E3.x = E3.y = 4;
                 node1.attributes->SetDouble(RIVARA_ATTRIBUTE_X, 3);
                 node1.attributes->SetDouble(RIVARA_ATTRIBUTE_Y, 4);
+                node1.x = 3;
+                node1.y = 4;
                 node2.attributes->SetDouble(RIVARA_ATTRIBUTE_X, 6);
                 node2.attributes->SetDouble(RIVARA_ATTRIBUTE_Y, 6);
+                node2.x = 6;
+                node2.y = 6;
                 node3.attributes->SetDouble(RIVARA_ATTRIBUTE_X, 5);
                 node3.attributes->SetDouble(RIVARA_ATTRIBUTE_Y, 5);
+                node3.x = 5;
+                node3.y = 5;
                 node1.label = NODELABEL_N;
                 node2.label = NODELABEL_N;
                 node3.label = NODELABEL_N;
-                E1.attributes -> SetDouble(RIVARA_ATTRIBUTE_L, NL(node3, node1));
+                E1.attributes -> SetDouble(RIVARA_ATTRIBUTE_L, NL(node2, node1));
                 E2.attributes -> SetDouble(RIVARA_ATTRIBUTE_L, NL(node2, node3));
                 E3.attributes -> SetDouble(RIVARA_ATTRIBUTE_L, NL(node3, node1));
                 E1.label = NODELABEL_E;
@@ -97,7 +108,7 @@ namespace Rivara{
     {
         this->E1.attributes->SetBool(RIVARA_ATTRIBUTE_B, true);
         Pixel p = GetNewENode(this->g, this->E1Vertex);
-        ASSERT_DOUBLE_EQ(p.attributes -> GetDouble(RIVARA_ATTRIBUTE_L), 1.1180339887498949);
+        ASSERT_DOUBLE_EQ(p.attributes -> GetDouble(RIVARA_ATTRIBUTE_L), 1.8027756377319946);
     }
 
     TEST_F(RivaraProduction1Test, P1TestNewENodeBAttributeTrue)

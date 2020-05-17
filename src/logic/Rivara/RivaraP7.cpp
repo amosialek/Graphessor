@@ -16,6 +16,7 @@ namespace Rivara
 
     std::unique_ptr<std::vector<RivaraP7>> RivaraP7::FindAllMatches(std::shared_ptr<CachedGraph> g, std::shared_ptr<Image> image, int channel, double epsilon)
     {
+        spdlog::debug("Rivara P7");
         std::unique_ptr<std::vector<RivaraP7>> result = std::make_unique<std::vector<RivaraP7>>();
         auto triangles = g -> GetCacheIterator(NODELABEL_T);
         double maxError = 0;
