@@ -54,7 +54,6 @@ namespace Rivara
         graph -> AddEdge(newMiddleENodeVertex, lastNode);
         graph -> AddEdge(newMiddleENodeVertex, newNNodeVertex);
 
-
         (*graph)[EEdgeToBreak].x = ((*graph)[nodes[1]].x+newNNode.x)/2;
         (*graph)[EEdgeToBreak].y = ((*graph)[nodes[1]].y+newNNode.y)/2;
         (*graph)[newENodeVertex].x = ((*graph)[nodes[0]].x+newNNode.x)/2;
@@ -64,6 +63,8 @@ namespace Rivara
         (*graph)[newTNodeVertex].x = ((*graph)[nodes[0]].x+newNNode.x+(*graph)[lastNode].x)/3;
         (*graph)[newTNodeVertex].y = ((*graph)[nodes[0]].y+newNNode.y+(*graph)[lastNode].y)/3;
         (*graph)[TEdge].attributes->SetBool(RIVARA_ATTRIBUTE_R, false);
+
+        
     }
 
     std::unique_ptr<std::vector<RivaraP3>> RivaraP3::FindAllMatches(std::shared_ptr<CachedGraph> g, std::shared_ptr<Image> image)
@@ -111,11 +112,11 @@ namespace Rivara
                     possibleHangingNodes.insert(possibleHangingNodes.end(), tmp.begin(), tmp.end());
                 }
                 double expectedX =
-                    (*g)[hangingNodeNeighbors[0]].attributes->GetDouble(RIVARA_ATTRIBUTE_X)
-                    + (*g)[hangingNodeNeighbors[1]].attributes->GetDouble(RIVARA_ATTRIBUTE_X);  
+                    ((*g)[hangingNodeNeighbors[0]].attributes->GetDouble(RIVARA_ATTRIBUTE_X)
+                    + (*g)[hangingNodeNeighbors[1]].attributes->GetDouble(RIVARA_ATTRIBUTE_X))/2;  
                 double expectedY =
-                    (*g)[hangingNodeNeighbors[0]].attributes->GetDouble(RIVARA_ATTRIBUTE_Y)
-                    + (*g)[hangingNodeNeighbors[1]].attributes->GetDouble(RIVARA_ATTRIBUTE_Y);
+                    ((*g)[hangingNodeNeighbors[0]].attributes->GetDouble(RIVARA_ATTRIBUTE_Y)
+                    + (*g)[hangingNodeNeighbors[1]].attributes->GetDouble(RIVARA_ATTRIBUTE_Y))/2;
                 auto hangingNode = where(possibleHangingNodes, [&g, expectedX, expectedY](vertex_descriptor v){
                     return true
                         and std::abs((*g)[v].attributes->GetDouble(RIVARA_ATTRIBUTE_X) - expectedX) < 0.1

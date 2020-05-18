@@ -223,9 +223,8 @@ namespace Rivara{
             B23(B23),
             B12(B12),
             result(result)
-            {
-                ;
-            };
+            {};
+
             void Print()
             {
                 std::cout<<" "<<HN1<<" "<<HN2<<" "<<HN3<<" "<<L13<<" "<<L23<<" "<<L12<<" "<<B13<<" "<<B23<<" "<<B12<<" "<<result<<std::endl;
@@ -329,6 +328,7 @@ namespace Rivara{
         BestEdgeTestInstance,
         RivaraProduction1BestEdgeTestFixture,
         ::testing::Values(
+            //params: HN1, HN2, HN3, L1, L2, L3, B1, B2, B3, IS_E13_BestEdge
             RivaraProduction1BestEdgeTestParameters(true,true,true,5.0,4.0,3.0,true,true,true,true),
             RivaraProduction1BestEdgeTestParameters(true,true,false,5.0,4.0,3.0,true,true,true,true),
             RivaraProduction1BestEdgeTestParameters(true,false,true,5.0,4.0,3.0,true,true,true,true),
