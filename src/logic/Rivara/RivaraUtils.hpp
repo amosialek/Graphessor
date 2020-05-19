@@ -5,6 +5,7 @@
 #include "RivaraAttributes.hpp"
 #include "mygraph.hpp"
 #include "Image.hpp"
+
 namespace Rivara
 {
     inline double NL(double x1, double y1, double x2, double y2)

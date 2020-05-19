@@ -115,5 +115,13 @@ namespace Rivara{
         ASSERT_EQ(nNodes.size(), 4);
         ASSERT_EQ(tNodes.size(), 2);
         ASSERT_EQ(eNodes.size(), 5);
+        for(auto tNode: tNodes)
+        {
+            auto vertices = this -> g -> GetAdjacentVertices(tNode);
+            for(auto vertex : vertices)
+            {
+                ASSERT_EQ((*g)[vertex].label, NODELABEL_N);
+            }
+        }
     }
 }

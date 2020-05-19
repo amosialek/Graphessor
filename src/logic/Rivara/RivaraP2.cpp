@@ -19,7 +19,7 @@ namespace Rivara
         for(auto e : EEdges)
         {
             auto nodes = where(graph->GetAdjacentVertices(e), [this](vertex_descriptor v){return v!=hangingNode;});
-            HNNeighbors.insert(HNNeighbors.end(), EEdges.begin(), EEdges.end());
+            HNNeighbors.insert(HNNeighbors.end(), nodes.begin(), nodes.end());
         }
         vertex_descriptor lastNode = where(graph->GetAdjacentVertices(TEdge), [&HNNeighbors](vertex_descriptor v){return v!=HNNeighbors[0] and v!=HNNeighbors[1];})[0];
 

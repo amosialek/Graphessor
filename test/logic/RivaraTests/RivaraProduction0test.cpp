@@ -43,5 +43,13 @@ namespace Rivara
         {
             ASSERT_TRUE((*graph)[node].attributes!=NULL);
         }
+        for(auto tNode: tNodes)
+        {
+            auto vertices = graph -> GetAdjacentVertices(tNode);
+            for(auto vertex : vertices)
+            {
+                ASSERT_EQ((*graph)[vertex].label, NODELABEL_N);
+            }
+        }
     }   
 }
