@@ -19,12 +19,8 @@ namespace Rivara
         auto nodes = graph -> GetAdjacentVertices(EEdgeToBreak);
         auto vertices = graph -> GetAdjacentVertices(TEdge);
         std::vector<vertex_descriptor> lastNodeSet;
-        std::set_difference(
-            vertices.begin(),
-            vertices.end(),
-            nodes.begin(), 
-            nodes.end(),
-            std::back_inserter(lastNodeSet));
+        Rivara::RelativeComplementOfBInA(
+            vertices, nodes, lastNodeSet);
 
         auto lastNode = lastNodeSet[0];
 
@@ -62,7 +58,9 @@ namespace Rivara
         (*graph)[TEdge].y = ((*graph)[nodes[1]].y+newNNode.y+(*graph)[lastNode].y)/3;
         (*graph)[newTNodeVertex].x = ((*graph)[nodes[0]].x+newNNode.x+(*graph)[lastNode].x)/3;
         (*graph)[newTNodeVertex].y = ((*graph)[nodes[0]].y+newNNode.y+(*graph)[lastNode].y)/3;
+
         (*graph)[TEdge].attributes->SetBool(RIVARA_ATTRIBUTE_R, false);
+        (*graph)[EEdgeToBreak].attributes->SetDouble(RIVARA_ATTRIBUTE_L, NL((*graph)[nodes[1]],newNNode));
 
         
     }
@@ -94,17 +92,15 @@ namespace Rivara
                 auto tempNNodes1 = g -> GetAdjacentVertices(commonEEdges[0]);
                 auto tempNNodes2 = g -> GetAdjacentVertices(commonEEdges[1]);
                 std::vector<vertex_descriptor> intersection;
-                std::set_intersection(
-                    tempNNodes1.begin(),
-                    tempNNodes1.end(),
-                    tempNNodes2.begin(), 
-                    tempNNodes2.end(),
-                    std::back_inserter(intersection));
+                Rivara::Intersection(
+                    tempNNodes1, tempNNodes2, intersection);
                 std::vector<vertex_descriptor> hangingNodeNeighbors;
                 hangingNodeNeighbors = where(vertices, [&intersection](vertex_descriptor v){return v!=intersection[0];});
-                auto tempENodes1 = g -> GetAdjacentVertices(hangingNodeNeighbors[0]);
-                auto x = g -> GetAdjacentVertices(hangingNodeNeighbors[1]);
-                tempENodes1.insert(tempENodes1.end(), x.begin(), x.end());
+                std::set<vertex_descriptor> tempENodes1; 
+                auto hangingNodeNNeighboursEEdgeNeighbours = g -> GetAdjacentVertices(hangingNodeNeighbors[0], NODELABEL_E);
+                tempENodes1.insert(hangingNodeNNeighboursEEdgeNeighbours.begin(), hangingNodeNNeighboursEEdgeNeighbours.end());
+                hangingNodeNNeighboursEEdgeNeighbours = g -> GetAdjacentVertices(hangingNodeNeighbors[1], NODELABEL_E);
+                tempENodes1.insert(hangingNodeNNeighboursEEdgeNeighbours.begin(), hangingNodeNNeighboursEEdgeNeighbours.end());
                 std::vector<vertex_descriptor> possibleHangingNodes;
                 for(auto EEdge : tempENodes1)
                 {
@@ -117,14 +113,18 @@ namespace Rivara
                 double expectedY =
                     ((*g)[hangingNodeNeighbors[0]].attributes->GetDouble(RIVARA_ATTRIBUTE_Y)
                     + (*g)[hangingNodeNeighbors[1]].attributes->GetDouble(RIVARA_ATTRIBUTE_Y))/2;
-                auto hangingNode = where(possibleHangingNodes, [&g, expectedX, expectedY](vertex_descriptor v){
+                auto hangingNode = first(possibleHangingNodes, [&g, expectedX, expectedY](vertex_descriptor v){
                     return true
                         and std::abs((*g)[v].attributes->GetDouble(RIVARA_ATTRIBUTE_X) - expectedX) < 0.1
                         and std::abs((*g)[v].attributes->GetDouble(RIVARA_ATTRIBUTE_Y) - expectedY) < 0.1;
-                    })[0];
-                auto hangingNodeENeighbors = g -> GetAdjacentVertices(hangingNode);
-                double lengthOfSplitEdge = (*g)[hangingNodeENeighbors[0]].attributes->GetDouble(RIVARA_ATTRIBUTE_L)
-                 + (*g)[hangingNodeENeighbors[1]].attributes->GetDouble(RIVARA_ATTRIBUTE_L);
+                    });
+                
+                auto hangingNodeENeighbors = g -> GetAdjacentVertices(hangingNode, NODELABEL_E);
+                std::vector<vertex_descriptor> hangingNodeENeighborsInThisTriangle;
+                Rivara::Intersection(
+                    hangingNodeENeighbors, tempENodes1, hangingNodeENeighborsInThisTriangle);
+                double lengthOfSplitEdge = (*g)[hangingNodeENeighborsInThisTriangle[0]].attributes->GetDouble(RIVARA_ATTRIBUTE_L)
+                 + (*g)[hangingNodeENeighborsInThisTriangle[1]].attributes->GetDouble(RIVARA_ATTRIBUTE_L);
                 if(true
                     and lengthOfSplitEdge<(*g)[commonEEdges[0]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L)
                     and (*g)[commonEEdges[0]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L)>=(*g)[commonEEdges[1]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L)
@@ -138,7 +138,7 @@ namespace Rivara
                             !(
                                 (*g)[commonEEdges[1]].attributes -> GetBool(RIVARA_ATTRIBUTE_B)
                                 and 
-                                (*g)[commonEEdges[0]].attributes -> GetBool(RIVARA_ATTRIBUTE_L)!=(*g)[commonEEdges[1]].attributes -> GetBool(RIVARA_ATTRIBUTE_L)
+                                (*g)[commonEEdges[0]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L)!=(*g)[commonEEdges[1]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L)
                             )
                         )
                     )
@@ -159,7 +159,7 @@ namespace Rivara
                             !(
                                 (*g)[commonEEdges[0]].attributes -> GetBool(RIVARA_ATTRIBUTE_B)
                                 and 
-                                (*g)[commonEEdges[1]].attributes -> GetBool(RIVARA_ATTRIBUTE_L)!=(*g)[commonEEdges[0]].attributes -> GetBool(RIVARA_ATTRIBUTE_L)
+                                (*g)[commonEEdges[1]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L)==(*g)[commonEEdges[0]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L)
                             )
                         )
                     )

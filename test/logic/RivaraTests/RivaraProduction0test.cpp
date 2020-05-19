@@ -20,14 +20,14 @@ namespace Rivara
         auto nNodes = graph -> GetCacheIterator(NODELABEL_N);
         auto tNodes = graph -> GetCacheIterator(NODELABEL_T);
         auto eNodes = graph -> GetCacheIterator(NODELABEL_E);
-        ASSERT_EQ(nNodes.size(), 3);
-        ASSERT_EQ(tNodes.size(), 1);
-        ASSERT_EQ(eNodes.size(), 3);
+        ASSERT_EQ(nNodes.size(), 3u);
+        ASSERT_EQ(tNodes.size(), 1u);
+        ASSERT_EQ(eNodes.size(), 3u);
         for(auto node:nNodes)
         {
             ASSERT_TRUE((*graph)[node].attributes!=NULL);
-            ASSERT_EQ(graph->GetAdjacentVertices(node, NODELABEL_T).size(),1);
-            ASSERT_EQ(graph->GetAdjacentVertices(node, NODELABEL_E).size(),2);
+            ASSERT_EQ(graph->GetAdjacentVertices(node, NODELABEL_T).size(), 1u);
+            ASSERT_EQ(graph->GetAdjacentVertices(node, NODELABEL_E).size(), 2u);
             double x = (*graph)[node].attributes->GetDouble(RIVARA_ATTRIBUTE_X);
             double y = (*graph)[node].attributes->GetDouble(RIVARA_ATTRIBUTE_Y);
             ASSERT_TRUE(

@@ -56,4 +56,28 @@ public:
 private:
      Name& name;
 };
+
+template <class Name>
+class myEdgeWriterWithNodeId {
+public:
+    myEdgeWriterWithNodeId(Name& _name) : name(_name) {}
+    template <class VertexOrEdge>
+    void operator()(std::ostream& out, const VertexOrEdge& v) const {
+    char buffer[8];
+    std::string s = "[";
+    if(name[v].r!=-1){
+        sprintf(buffer,"#%02X%02X%02X",name[v].r,name[v].g,name[v].b);
+        s+= "fillcolor=\"";
+        s+=buffer;
+        s+="\",style=filled\n";
+    }
+    if(name[v].x>=0 && name[v].y>=0 )
+        s+= "pos=\""+std::to_string(name[v].x/100.0)+','+std::to_string(name[v].y/100.0)+"!\"\n";
+    s+="label=\""+ std::to_string(v) +"\"";
+    s+=']';
+    out<<s<<'\n';
+    }
+private:
+     Name& name;
+};
 #endif // __MYGRAPH_HPP__

@@ -334,7 +334,8 @@ double Image::CompareWithInterpolation(int x1, int x2, int y1, int y2, int chann
 double Image::CompareWithInterpolation(int x1, int x2, int x3, int y1, int y2, int y3, int channel)
 {
     double maxSum = 255.0*255*abs(x1*y2+x2*y3+x3*y1-x1*y3-x2*y1-x3*y2) / 2;
-    return SquaredErrorOfInterpolation(x1, x2, x3, y1, y2, y3, channel)/maxSum;
+    double result =  SquaredErrorOfInterpolation(x1, x2, x3, y1, y2, y3, channel)/maxSum;
+    return result;
 }
 
 void Image::save(std::string filename)

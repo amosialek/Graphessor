@@ -25,12 +25,10 @@ namespace Rivara
 
         std::vector<vertex_descriptor> lastNodeSet;
 
-        std::set_difference(
-            vertices.begin(), 
-            vertices.end(), 
-            hangingNodeNeighbors.begin(), 
-            hangingNodeNeighbors.end(),
-            std::back_inserter(lastNodeSet));
+        Rivara::RelativeComplementOfBInA(
+            vertices, 
+            hangingNodeNeighbors,
+            lastNodeSet);
 
         Pixel newEMiddleNode = GetNewEMiddleNode(graph, (*graph)[hangingNode], lastNodeSet[0]);
         Pixel newTNode = GetNewTNode();

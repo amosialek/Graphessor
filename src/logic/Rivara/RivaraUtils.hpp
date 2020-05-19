@@ -86,6 +86,7 @@ namespace Rivara
         newNNode.label = NODELABEL_N;
         return newNNode;
     }
+
     inline bool EdgeHasNoHangingNodes(IGraph& graph, vertex_descriptor v)
     {
         auto Nnodes = graph.GetAdjacentVertices(v);
@@ -93,5 +94,91 @@ namespace Rivara
         and  !(graph)[Nnodes[1]].attributes->GetBool(RIVARA_ATTRIBUTE_HN));
     }
     
+    template<typename T>
+    inline void Intersection(std::set<T>& set1, std::set<T>& set2, std::set<T>& output)
+    {
+        std::set_intersection(
+            set1.begin(), set1.end(),
+            set2.begin(), set2.end(),
+            std::inserter(output)
+        );
+    }
+
+    template<typename T>
+    inline void Intersection(std::vector<T>& set1, std::vector<T>& set2, std::vector<T>& output)
+    {
+        std::sort(set1.begin(), set1.end());
+        std::sort(set2.begin(), set2.end());
+        std::set_intersection(
+            set1.begin(), set1.end(),
+            set2.begin(), set2.end(),
+            std::back_inserter(output)
+        );
+    }
+
+    template<typename T>
+    inline void Intersection(std::set<T>& set1, std::vector<T>& set2, std::vector<T>& output)
+    {
+        std::sort(set2.begin(), set2.end());
+        std::set_intersection(
+            set1.begin(), set1.end(),
+            set2.begin(), set2.end(),
+            std::back_inserter(output)
+        );
+    }
+
+    template<typename T>
+    inline void Intersection(std::vector<T>& set1, std::set<T>& set2, std::vector<T>& output)
+    {
+        Intersection(set2, set1, output);
+    }
+
+    template<typename T>
+    inline void RelativeComplementOfBInA(std::vector<T>& A, std::set<T>& B, std::vector<T>& output)
+    {
+        std::sort(A.begin(), A.end());
+        std::set_difference(
+        A.begin(),
+        A.end(),
+        B.begin(), 
+        B.end(),
+        std::back_inserter(output));
+    }
+
+    template<typename T>
+    inline void RelativeComplementOfBInA(std::set<T>& A, std::vector<T>& B, std::vector<T>& output)
+    {
+        std::sort(B.begin(), B.end());
+        std::set_difference(
+        A.begin(),
+        A.end(),
+        B.begin(), 
+        B.end(),
+        std::back_inserter(output));
+    }
+
+    template<typename T>
+    inline void RelativeComplementOfBInA(std::vector<T>& A, std::vector<T>& B, std::vector<T>& output)
+    {
+        std::sort(A.begin(), A.end());
+        std::sort(B.begin(), B.end());
+        std::set_difference(
+        A.begin(),
+        A.end(),
+        B.begin(), 
+        B.end(),
+        std::back_inserter(output));
+    }
+
+    template<typename T>
+    inline void RelativeComplementOfBInA(std::set<T>& A, std::set<T>& B, std::set<T>& output)
+    {
+        std::set_difference(
+        A.begin(),
+        A.end(),
+        B.begin(), 
+        B.end(),
+        std::inserter(output));
+    }
 }
 #endif // __RIVARAUTILS_HPP__

@@ -48,7 +48,7 @@ TEST(Productions, P2TestStartingProduction)
     P2(graph, I, move(image)).Perform();
     //myEdgeWriter<CachedGraph> w(*graph);
     //boost::write_graphviz(cerr, graph,w );
-    EXPECT_EQ(graph->GetCacheIterator(NODELABEL_I).size(),4);
+    EXPECT_EQ(graph->GetCacheIterator(NODELABEL_I).size(),4u);
     for(auto IEdge : graph->GetCacheIterator(NODELABEL_I))
     {
         EXPECT_EQ((*graph)[IEdge].breakLevel,4);
@@ -107,7 +107,7 @@ TEST(Productions, P4BasicTest)
         p4.Perform();
     //myEdgeWriter<CachedGraph> w(*graph);
     //boost::write_graphviz(cerr, *graph, w);
-    EXPECT_EQ(4, graph->GetCacheIterator(NODELABEL_F).size());
+    EXPECT_EQ(4u, graph->GetCacheIterator(NODELABEL_F).size());
 }
 
 TEST(Productions, P6OneOfTwo)

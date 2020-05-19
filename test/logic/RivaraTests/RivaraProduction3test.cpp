@@ -56,8 +56,8 @@ namespace Rivara{
                 node4.label = NODELABEL_N;
                 E2.attributes -> SetDouble(RIVARA_ATTRIBUTE_L, NL(node2, node3));
                 E3.attributes -> SetDouble(RIVARA_ATTRIBUTE_L, NL(node3, node1));
-                E4.attributes -> SetDouble(RIVARA_ATTRIBUTE_L, NL(node1, node2));
-                E5.attributes -> SetDouble(RIVARA_ATTRIBUTE_L, NL(node1, node2));
+                E4.attributes -> SetDouble(RIVARA_ATTRIBUTE_L, NL(node1, node4));
+                E5.attributes -> SetDouble(RIVARA_ATTRIBUTE_L, NL(node4, node2));
                 E2.label = NODELABEL_E;
                 E3.label = NODELABEL_E;
                 E4.label = NODELABEL_E;
@@ -112,9 +112,9 @@ namespace Rivara{
         auto nNodes = this -> g -> GetCacheIterator(NODELABEL_N);
         auto tNodes = this -> g -> GetCacheIterator(NODELABEL_T);
         auto eNodes = this -> g -> GetCacheIterator(NODELABEL_E);
-        ASSERT_EQ(nNodes.size(), 5);
-        ASSERT_EQ(tNodes.size(), 2);
-        ASSERT_EQ(eNodes.size(), 6);
+        ASSERT_EQ(nNodes.size(), 5u);
+        ASSERT_EQ(tNodes.size(), 2u);
+        ASSERT_EQ(eNodes.size(), 6u);
         for(auto tNode: tNodes)
         {
             auto vertices = this -> g -> GetAdjacentVertices(tNode);
@@ -123,5 +123,6 @@ namespace Rivara{
                 ASSERT_EQ((*g)[vertex].label, NODELABEL_N);
             }
         }
+        ASSERT_DOUBLE_EQ((*g)[E2Vertex].attributes->GetDouble(RIVARA_ATTRIBUTE_L), 2.5);
     }
 }

@@ -128,9 +128,9 @@ namespace Rivara{
         auto nNodes = this -> g -> GetCacheIterator(NODELABEL_N);
         auto tNodes = this -> g -> GetCacheIterator(NODELABEL_T);
         auto eNodes = this -> g -> GetCacheIterator(NODELABEL_E);
-        ASSERT_EQ(nNodes.size(), 6);
-        ASSERT_EQ(tNodes.size(), 2);
-        ASSERT_EQ(eNodes.size(), 7);
+        ASSERT_EQ(nNodes.size(), 6u);
+        ASSERT_EQ(tNodes.size(), 2u);
+        ASSERT_EQ(eNodes.size(), 7u);
         for(auto tNode: tNodes)
         {
             auto vertices = this -> g -> GetAdjacentVertices(tNode);

@@ -26,7 +26,7 @@ namespace Rivara
 
         std::vector<vertex_descriptor> lastNodeSet;
 
-        std::set_difference(vertices.begin(), vertices.end(), nodes.begin(), nodes.end(), std::back_inserter(lastNodeSet));
+        Rivara::RelativeComplementOfBInA(vertices, nodes, lastNodeSet);
 
         Pixel newEMiddleNode = GetNewEMiddleNode(graph, (*graph)[NNode], lastNodeSet[0]);
         Pixel newTNode = GetNewTNode();
@@ -80,12 +80,8 @@ namespace Rivara
             {
                 auto notBrokenEdgeNodes = g -> GetAdjacentVertices(commonEEdges[0]);
                 std::vector<vertex_descriptor> lastNodeSet;
-                std::set_difference(
-                    vertices.begin(),
-                    vertices.end(), 
-                    notBrokenEdgeNodes.begin(), 
-                    notBrokenEdgeNodes.end(),
-                    std::back_inserter(lastNodeSet));
+                Rivara::RelativeComplementOfBInA(
+                    vertices, notBrokenEdgeNodes, lastNodeSet);
                 auto EEdges = g -> GetAdjacentVertices(lastNodeSet[0]);
                 std::vector<vertex_descriptor> hangingNodes;
                 for(auto e: EEdges)

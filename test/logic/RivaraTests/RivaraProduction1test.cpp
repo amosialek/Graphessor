@@ -34,27 +34,29 @@ namespace Rivara{
                 node2.attributes = std::make_shared<RivaraAttributes>();
                 node3.attributes = std::make_shared<RivaraAttributes>();
                 T.attributes = std::make_shared<RivaraAttributes>();
-                T.x = 4;
-                T.y = 5;
+                T.x = 3;
+                T.y = 2;
                 E1.attributes = std::make_shared<RivaraAttributes>();
                 E2.attributes = std::make_shared<RivaraAttributes>();
                 E3.attributes = std::make_shared<RivaraAttributes>();
-                E1.x = 4;
-                E1.y = 5;
-                E2.x = E2.y = 5;
-                E3.x = E3.y = 4;
-                node1.attributes->SetDouble(RIVARA_ATTRIBUTE_X, 3);
-                node1.attributes->SetDouble(RIVARA_ATTRIBUTE_Y, 4);
-                node1.x = 3;
-                node1.y = 4;
-                node2.attributes->SetDouble(RIVARA_ATTRIBUTE_X, 6);
-                node2.attributes->SetDouble(RIVARA_ATTRIBUTE_Y, 6);
-                node2.x = 6;
-                node2.y = 6;
-                node3.attributes->SetDouble(RIVARA_ATTRIBUTE_X, 5);
-                node3.attributes->SetDouble(RIVARA_ATTRIBUTE_Y, 5);
-                node3.x = 5;
-                node3.y = 5;
+                E1.x = 2;
+                E1.y = 3;
+                E2.x = 4;
+                E2.y = 3;
+                E3.x = 2;
+                E3.y = 1;
+                node1.attributes->SetDouble(RIVARA_ATTRIBUTE_X, 1);
+                node1.attributes->SetDouble(RIVARA_ATTRIBUTE_Y, 1);
+                node1.x = 1;
+                node1.y = 1;
+                node2.attributes->SetDouble(RIVARA_ATTRIBUTE_X, 4);
+                node2.attributes->SetDouble(RIVARA_ATTRIBUTE_Y, 5);
+                node2.x = 4;
+                node2.y = 5;
+                node3.attributes->SetDouble(RIVARA_ATTRIBUTE_X, 4);
+                node3.attributes->SetDouble(RIVARA_ATTRIBUTE_Y, 1);
+                node3.x = 4;
+                node3.y = 1;
                 node1.label = NODELABEL_N;
                 node2.label = NODELABEL_N;
                 node3.label = NODELABEL_N;
@@ -65,6 +67,7 @@ namespace Rivara{
                 E2.label = NODELABEL_E;
                 E3.label = NODELABEL_E;
                 T.label = NODELABEL_T;
+                T.attributes->SetBool(RIVARA_ATTRIBUTE_R, true);
 
                 node1Vertex = g->AddVertex(node1);
                 node2Vertex = g->AddVertex(node2);
@@ -108,7 +111,7 @@ namespace Rivara{
     {
         this->E1.attributes->SetBool(RIVARA_ATTRIBUTE_B, true);
         Pixel p = GetNewENode(this->g, this->E1Vertex);
-        ASSERT_DOUBLE_EQ(p.attributes -> GetDouble(RIVARA_ATTRIBUTE_L), 1.8027756377319946);
+        ASSERT_DOUBLE_EQ(p.attributes -> GetDouble(RIVARA_ATTRIBUTE_L), 2.5);
     }
 
     TEST_F(RivaraProduction1Test, P1TestNewENodeBAttributeTrue)
@@ -128,8 +131,8 @@ namespace Rivara{
     TEST_F(RivaraProduction1Test, P1TestNewNNode)
     {
         Pixel p = GetNewNNode(this->g, this->nodes, this->image);
-        ASSERT_DOUBLE_EQ(p.attributes -> GetDouble(RIVARA_ATTRIBUTE_X), 4.5);
-        ASSERT_DOUBLE_EQ(p.attributes -> GetDouble(RIVARA_ATTRIBUTE_Y), 5);
+        ASSERT_DOUBLE_EQ(p.attributes -> GetDouble(RIVARA_ATTRIBUTE_X), 2.5);
+        ASSERT_DOUBLE_EQ(p.attributes -> GetDouble(RIVARA_ATTRIBUTE_Y), 3);
     }
 
     TEST_F(RivaraProduction1Test, P1TestNewEMiddleNodeBAttribute)
@@ -143,7 +146,7 @@ namespace Rivara{
     {
         Pixel newNNode = GetNewNNode(this->g, this->nodes, this->image);
         Pixel p = GetNewEMiddleNode(this->g, newNNode, node3Vertex);
-        ASSERT_EQ(p.attributes -> GetDouble(RIVARA_ATTRIBUTE_L), 0.5);
+        ASSERT_EQ(p.attributes -> GetDouble(RIVARA_ATTRIBUTE_L), 2.5);
     }
 
     TEST_F(RivaraProduction1Test, P1TestNewTNode)
@@ -158,17 +161,19 @@ namespace Rivara{
         auto nNodes = this -> g -> GetCacheIterator(NODELABEL_N);
         auto tNodes = this -> g -> GetCacheIterator(NODELABEL_T);
         auto eNodes = this -> g -> GetCacheIterator(NODELABEL_E);
-        ASSERT_EQ(nNodes.size(), 4);
-        ASSERT_EQ(tNodes.size(), 2);
-        ASSERT_EQ(eNodes.size(), 5);
+        ASSERT_EQ(nNodes.size(), 4u);
+        ASSERT_EQ(tNodes.size(), 2u);
+        ASSERT_EQ(eNodes.size(), 5u);
         for(auto tNode: tNodes)
         {
+            ASSERT_EQ((*g)[tNode].attributes->GetBool(RIVARA_ATTRIBUTE_R), false);
             auto vertices = this -> g -> GetAdjacentVertices(tNode);
             for(auto vertex : vertices)
             {
                 ASSERT_EQ((*g)[vertex].label, NODELABEL_N);
             }
         }
+        ASSERT_DOUBLE_EQ((*g)[E1Vertex].attributes->GetDouble(RIVARA_ATTRIBUTE_L), 2.5);
         //ASSERT_EQ(false, true);
     }
 
@@ -336,7 +341,7 @@ namespace Rivara{
         BestEdgeTestInstance,
         RivaraProduction1BestEdgeTestFixture,
         ::testing::Values(
-            //params: HN1, HN2, HN3, L1, L2, L3, B1, B2, B3, IS_E13_BestEdge
+            //params: HN1, HN2, HN3, L13, L23, L12, B13, B23, B12, IS_E13_BestEdge
             RivaraProduction1BestEdgeTestParameters(true,true,true,5.0,4.0,3.0,true,true,true,true),
             RivaraProduction1BestEdgeTestParameters(true,true,false,5.0,4.0,3.0,true,true,true,true),
             RivaraProduction1BestEdgeTestParameters(true,false,true,5.0,4.0,3.0,true,true,true,true),

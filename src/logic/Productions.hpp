@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <queue>
 #include "spdlog/spdlog.h"
+#include <cassert>
 
 class NotImplementedException : public std::logic_error
 {
@@ -33,6 +34,24 @@ std::set<T> where(std::set<T> inVec, Pred predicate)
   std::set<T> result;
   std::copy_if(inVec.begin(), inVec.end(), std::inserter(result, result.begin()), predicate);
   return result;
+}
+
+template<typename T, typename Pred>
+T first(std::vector<T> inVec, Pred predicate)
+{
+  for(auto element : inVec)
+    if(predicate(element))
+      return element;
+  assert(false && "Sequence contains no matching elements");
+}
+
+template<typename T, typename Pred>
+T first(std::set<T> inVec, Pred predicate)
+{
+  for(auto element : inVec)
+    if(predicate(element))
+      return element;
+  assert(false && "Sequence contains no matching elements");
 }
 
 template<typename T>
