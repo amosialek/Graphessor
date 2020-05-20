@@ -61,22 +61,10 @@ namespace Rivara
         auto triangles = g -> GetCacheIterator(NODELABEL_T);
         for(auto triangle : triangles)
         {
-            auto vertices = g -> GetAdjacentVertices(triangle);
             std::vector<vertex_descriptor> secondEEdges;
-            for(auto v : vertices)
-            {
-                auto temp = g -> GetAdjacentVertices(v, NODELABEL_E);
-                std::copy(temp.begin(), temp.end(), back_inserter(secondEEdges));
-            } 
-            std::sort(secondEEdges.begin(), secondEEdges.end());
             std::vector<vertex_descriptor> commonEEdges;
-            for(size_t i = 0; i < secondEEdges.size() - 1; i++)
-            {
-                if(secondEEdges[i] == secondEEdges[i+1])
-                {
-                    commonEEdges.push_back(secondEEdges[i]);
-                }
-            }
+            std::vector<vertex_descriptor> vertices;
+            GetCommonEEdges(g, triangle, secondEEdges, commonEEdges, vertices);
             if(commonEEdges.size()==1)
             {
                 auto notBrokenEdgeNodes = g -> GetAdjacentVertices(commonEEdges[0]);

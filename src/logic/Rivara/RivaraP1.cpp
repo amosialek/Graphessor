@@ -20,6 +20,7 @@ namespace Rivara
         spdlog::debug("Rivara P1");
         auto nodes = graph -> GetAdjacentVertices(EEdge);
         auto lastNodes = graph -> GetAdjacentVertices(TEdge);
+        spdlog::debug("{} {} {}", lastNodes[0],  lastNodes[1], lastNodes[2]);
         assert(lastNodes.size()==3 && "P1 TEdge has not 3 nodes");
         auto lastNode = where(lastNodes,[&nodes](vertex_descriptor v){return nodes[0]!=v and nodes[1]!=v;}).front();
 
@@ -60,6 +61,9 @@ namespace Rivara
 
         (*graph)[TEdge].attributes -> SetBool(RIVARA_ATTRIBUTE_R, false);
         (*graph)[TEdge].error = (*graph)[newTNodeVertex].error = -1;
+
+        spdlog::debug("{} {} {} {}", nodes[0],  nodes[1], lastNode, newNNodeVertex);
+
     }
 
     std::unique_ptr<std::vector<RivaraP1>> RivaraP1::FindAllMatches(std::shared_ptr<CachedGraph> g, std::shared_ptr<Image> image) 
@@ -70,23 +74,11 @@ namespace Rivara
         {
             if(!(*g)[t].attributes -> GetBool(RIVARA_ATTRIBUTE_R)) //if not marked
                 continue;
-            auto vertices = g -> GetAdjacentVertices(t);
             std::vector<vertex_descriptor> secondEEdges;
-            for(auto v : vertices)
-            {
-                auto temp = g -> GetAdjacentVertices(v, NODELABEL_E);
-                std::copy(temp.begin(), temp.end(), back_inserter(secondEEdges));
-            } 
-            std::sort(secondEEdges.begin(), secondEEdges.end());
             std::vector<vertex_descriptor> commonEEdges;
-            for(size_t i = 0; i < secondEEdges.size() - 1; i++)
-            {
-                if(secondEEdges[i] == secondEEdges[i+1])
-                {
-                    commonEEdges.push_back(secondEEdges[i]);
-                }
-            }
-
+            std::vector<vertex_descriptor> vertices;
+            GetCommonEEdges(g, t, secondEEdges, commonEEdges, vertices);
+            
             if(commonEEdges.size() == 3) //checks whether there is any hanging node (3 means none)
             {
                 auto maybeBestEdge = RivaraP1::GetBestEdge(g, commonEEdges);

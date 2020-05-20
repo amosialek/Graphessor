@@ -21,7 +21,9 @@ namespace Rivara
             auto nodes = where(graph->GetAdjacentVertices(e), [this](vertex_descriptor v){return v!=hangingNode;});
             HNNeighbors.insert(HNNeighbors.end(), nodes.begin(), nodes.end());
         }
-        vertex_descriptor lastNode = where(graph->GetAdjacentVertices(TEdge), [&HNNeighbors](vertex_descriptor v){return v!=HNNeighbors[0] and v!=HNNeighbors[1];})[0];
+        auto vertices = graph->GetAdjacentVertices(TEdge);
+        spdlog::debug("{} {} {}", vertices[0],  vertices[1], vertices[2]);
+        vertex_descriptor lastNode = where(vertices, [&HNNeighbors](vertex_descriptor v){return v!=HNNeighbors[0] and v!=HNNeighbors[1];})[0];
 
         Pixel newENode = GetNewEMiddleNode(graph, (*graph)[hangingNode], lastNode);
         Pixel newTNode = GetNewTNode();
@@ -43,7 +45,7 @@ namespace Rivara
         graph -> AddEdge(newTNodeVertex, HNNeighbors[0]);
         graph -> AddEdge(newTNodeVertex, hangingNode);
         graph -> AddEdge(newTNodeVertex, lastNode);
-        
+        spdlog::debug("{} {} {} {}", HNNeighbors[0],  HNNeighbors[1], lastNode, hangingNode);
         (*graph)[TEdge].x = ((*graph)[HNNeighbors[1]].x+(*graph)[hangingNode].x+(*graph)[lastNode].x)/3;
         (*graph)[TEdge].y = ((*graph)[HNNeighbors[1]].y+(*graph)[hangingNode].y+(*graph)[lastNode].y)/3;
         (*graph)[newTNodeVertex].x = ((*graph)[HNNeighbors[0]].x+(*graph)[hangingNode].x+(*graph)[lastNode].x)/3;
@@ -60,22 +62,10 @@ namespace Rivara
         auto triangles = g -> GetCacheIterator(NODELABEL_T);
         for(auto triangle : triangles)
         {
-            auto vertices = g -> GetAdjacentVertices(triangle);
             std::vector<vertex_descriptor> secondEEdges;
-            for(auto v : vertices)
-            {
-                auto temp = g -> GetAdjacentVertices(v, NODELABEL_E);
-                std::copy(temp.begin(), temp.end(), back_inserter(secondEEdges));
-            } 
-            std::sort(secondEEdges.begin(), secondEEdges.end());
             std::vector<vertex_descriptor> commonEEdges;
-            for(size_t i = 0; i < secondEEdges.size() - 1; i++)
-            {
-                if(secondEEdges[i] == secondEEdges[i+1])
-                {
-                    commonEEdges.push_back(secondEEdges[i]);
-                }
-            }
+            std::vector<vertex_descriptor> vertices;
+            GetCommonEEdges(g, triangle, secondEEdges, commonEEdges, vertices);
             if(commonEEdges.size()==2)
             {
                 auto tempNNodes1 = g -> GetAdjacentVertices(commonEEdges[0]);

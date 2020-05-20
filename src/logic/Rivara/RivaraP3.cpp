@@ -1,4 +1,5 @@
 #include "RivaraP3.hpp"
+#include<cassert>
 
 namespace Rivara
 {
@@ -17,13 +18,15 @@ namespace Rivara
     {
         spdlog::debug("Rivara P3");
         auto nodes = graph -> GetAdjacentVertices(EEdgeToBreak);
+        assert(nodes.size()==2 && "nodes should have 2 elements");
         auto vertices = graph -> GetAdjacentVertices(TEdge);
+        spdlog::debug("{} {} {}", vertices[0],  vertices[1], vertices[2]);
         std::vector<vertex_descriptor> lastNodeSet;
         Rivara::RelativeComplementOfBInA(
             vertices, nodes, lastNodeSet);
 
         auto lastNode = lastNodeSet[0];
-
+        assert(lastNodeSet.size()==1 && "lastNodeSet should have 1 element");
         auto newTNode = GetNewTNode();
         auto newNNode = GetNewNNode(graph, nodes, image);
         auto newMiddleENode = GetNewEMiddleNode(graph, newNNode, lastNode);
@@ -50,6 +53,8 @@ namespace Rivara
         graph -> AddEdge(newMiddleENodeVertex, lastNode);
         graph -> AddEdge(newMiddleENodeVertex, newNNodeVertex);
 
+        spdlog::debug("{} {} {} {}", nodes[0],  nodes[1], lastNode, newNNodeVertex);
+
         (*graph)[EEdgeToBreak].x = ((*graph)[nodes[1]].x+newNNode.x)/2;
         (*graph)[EEdgeToBreak].y = ((*graph)[nodes[1]].y+newNNode.y)/2;
         (*graph)[newENodeVertex].x = ((*graph)[nodes[0]].x+newNNode.x)/2;
@@ -72,22 +77,10 @@ namespace Rivara
         auto triangles = g -> GetCacheIterator(NODELABEL_T);
         for(auto triangle : triangles)
         {
-            auto vertices = g -> GetAdjacentVertices(triangle);
             std::vector<vertex_descriptor> secondEEdges;
-            for(auto v : vertices)
-            {
-                auto temp = g -> GetAdjacentVertices(v, NODELABEL_E);
-                std::copy(temp.begin(), temp.end(), back_inserter(secondEEdges));
-            } 
-            std::sort(secondEEdges.begin(), secondEEdges.end());
             std::vector<vertex_descriptor> commonEEdges;
-            for(size_t i = 0; i < secondEEdges.size() - 1; i++)
-            {
-                if(secondEEdges[i] == secondEEdges[i+1])
-                {
-                    commonEEdges.push_back(secondEEdges[i]);
-                }
-            }
+            std::vector<vertex_descriptor> vertices;
+            GetCommonEEdges(g, triangle, secondEEdges, commonEEdges, vertices);
             if(commonEEdges.size()==2)
             {
                 auto tempNNodes1 = g -> GetAdjacentVertices(commonEEdges[0]);

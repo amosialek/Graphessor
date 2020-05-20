@@ -135,7 +135,7 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
             std::cerr<<"iteration: "<<i<<std::endl;
             //begin = std::chrono::steady_clock::now();
             //debugWriter->WriteItOut(std::to_string(i++), *graph);
-             i++;
+            // i++;
             int productionsPerformed = 1;
             while(productionsPerformed>0)
             {
@@ -148,8 +148,7 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
                 functionTime["P2"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
                 std::cerr<<"iteration: "<<i<<std::endl;
 
-                if(i>190)
-                    debugWriter->WriteItOut(std::to_string(i++), *graph);
+                debugWriter->WriteItOut(std::to_string(i++), *graph);
                 begin = std::chrono::steady_clock::now();
                 auto p3s = RivaraP3::FindAllMatches(graph, image);
                 for(auto p3 : *p3s)
