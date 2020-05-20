@@ -186,3 +186,8 @@ std::vector<std::vector<Pixel>> CachedGraph::GetPixelsForSVDInterpolation()
     std::vector<std::vector<Pixel>> s;
     return s;
 }
+
+const std::set<vertex_descriptor>& CachedGraph::GetPixels()
+{
+    return GetCacheIterator(NODELABEL_P);
+}

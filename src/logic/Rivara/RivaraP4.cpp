@@ -52,6 +52,7 @@ namespace Rivara
 
         (*graph)[NNode].attributes -> SetBool(RIVARA_ATTRIBUTE_HN, false);
         (*graph)[TEdge].attributes->SetBool(RIVARA_ATTRIBUTE_R, false);
+        (*graph)[TEdge].error = (*graph)[newTVertex].error = -1;
     }
 
     std::unique_ptr<std::vector<RivaraP4>> RivaraP4::FindAllMatches(std::shared_ptr<CachedGraph> g)

@@ -16,6 +16,7 @@
 #include "spdlog/sinks/basic_file_sink.h"
 #include "GraphImageWriter.hpp"
 #include "RivaraProductions.hpp"
+#include "RivaraCachedGraph.hpp"
 
 std::map<std::string, int> functionTime;
 
@@ -92,7 +93,7 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
 {
     for(int channel=0;channel<3;channel++)
     {
-        auto graph = std::make_shared<CachedGraph>();
+        auto graph = std::make_shared<RivaraCachedGraph>();
         channel_graphs.emplace_back(graph);
         auto S = graph -> AddVertex(*(new Pixel(0,0, NODELABEL_S)));
         (*graph)[S].attributes = std::make_shared<RivaraAttributes>();

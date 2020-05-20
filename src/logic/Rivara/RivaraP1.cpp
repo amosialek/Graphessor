@@ -59,6 +59,7 @@ namespace Rivara
         (*graph)[newTNodeVertex].y = ((*graph)[nodes[0]].y+newNNode.y+(*graph)[lastNode].y)/3;
 
         (*graph)[TEdge].attributes -> SetBool(RIVARA_ATTRIBUTE_R, false);
+        (*graph)[TEdge].error = (*graph)[newTNodeVertex].error = -1;
     }
 
     std::unique_ptr<std::vector<RivaraP1>> RivaraP1::FindAllMatches(std::shared_ptr<CachedGraph> g, std::shared_ptr<Image> image) 

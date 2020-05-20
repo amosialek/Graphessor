@@ -52,6 +52,8 @@ namespace Rivara
         (*graph)[newTVertex].y = ((*graph)[hangingNodeNeighbors[0]].y+(*graph)[hangingNode].y+(*graph)[lastNodeSet[0]].y)/3;
 
         (*graph)[TEdge].attributes->SetBool(RIVARA_ATTRIBUTE_R, false);
+
+        (*graph)[TEdge].error = (*graph)[newTVertex].error = -1;
     }
 
     std::unique_ptr<std::vector<RivaraP6>> RivaraP6::FindAllMatches(std::shared_ptr<CachedGraph> g)

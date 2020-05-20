@@ -50,6 +50,7 @@ namespace Rivara
         (*graph)[newTNodeVertex].y = ((*graph)[HNNeighbors[0]].y+(*graph)[hangingNode].y+(*graph)[lastNode].y)/3;
 
         (*graph)[TEdge].attributes->SetBool(RIVARA_ATTRIBUTE_R, false);
+        (*graph)[TEdge].error = (*graph)[newTNodeVertex].error = -1;
     }
 
 

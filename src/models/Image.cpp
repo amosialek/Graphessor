@@ -54,18 +54,16 @@ void Image::BilinearInterpolation(int channel, std::vector<Pixel> pixels)
             SetPixel(x, y, channel, GetInterpolatedPixel(minx,maxx,miny, maxy,x,y,channel));
 }
 
-void Image::Asdf(int channel, int width, std::shared_ptr<CachedGraph> graph)
+void Image::Interpolate(int channel, int width, std::shared_ptr<CachedGraph> graph)
 {
     std::set<vertex_descriptor> pixels;
-    pixels = graph -> GetCacheIterator(NODELABEL_P);
+    pixels = graph -> GetPixels();
     for(auto pixel : pixels)
     {
         this -> SetPixel(graph -> operator[](pixel).x, graph -> operator[](pixel).y, channel, this -> GetRGBChannelValue(graph->operator[](pixel), channel));
          //img._view[graph->operator[](pixel).y * (width+1) + graph -> operator[](pixel).x][channel] = this -> GetRGBChannelValue(graph->operator[](pixel), channel);
         spdlog::debug("Setting x={} y={} in channel {} to {}", graph ->operator[](pixel).x,graph ->operator[](pixel).y, channel, this -> GetRGBChannelValue(graph->operator[](pixel), channel));    
     }
-    auto IEdges = graph->GetCacheIterator(NODELABEL_I);
-    std::vector<vertex_descriptor> fullIEdges;
     auto PixelsForBilinearInterpolation = graph ->  GetPixelsForBilinearInterpolation();
     auto PixelsForBaricentricInterpolation = graph ->  GetPixelsForBaricentricInterpolation();
     auto PixelsForSVDInterpolation = graph ->  GetPixelsForSVDInterpolation();
@@ -77,7 +75,7 @@ void Image::Asdf(int channel, int width, std::shared_ptr<CachedGraph> graph)
     {
         BaricentricInterpolation(channel, v);
     }
-        for(auto v : PixelsForSVDInterpolation)
+    for(auto v : PixelsForSVDInterpolation)
     {
         // SVDInterpolation(channel, v);
     }
@@ -88,7 +86,7 @@ Image::Image(std::vector<std::shared_ptr<CachedGraph>> graphs)
 {
     int width = 0;
     int height = 0;
-    auto pixels = graphs[0] -> GetCacheIterator(NODELABEL_P);
+    auto pixels = graphs[0] -> GetPixels();
     for(auto pixel : pixels)
     {
         width = std::max(width ,graphs[0] -> operator[](pixel).x);
@@ -100,8 +98,8 @@ Image::Image(std::vector<std::shared_ptr<CachedGraph>> graphs)
     {
         view = boost::gil::view(img);
         //graphs[channel]->GetImage(this);
-        graphs[channel] -> GetCacheIterator(NODELABEL_P); // get pixels
-        Asdf(channel, width, graphs[channel]);
+        graphs[channel] -> GetPixels();
+        Interpolate(channel, width, graphs[channel]);
     }
     view = boost::gil::view(img);
 }

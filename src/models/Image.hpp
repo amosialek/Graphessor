@@ -52,7 +52,7 @@ class Image
         void BilinearInterpolation(int channel, std::vector<Pixel> pixels);
         void BaricentricInterpolation(int channel, std::vector<Pixel> pixels);
         void SVDInterpolation(int channel, std::vector<Pixel> pixels);
-        void Asdf(int channel, int width, std::shared_ptr<CachedGraph> graph);
+        void Interpolate(int channel, int width, std::shared_ptr<CachedGraph> graph);
         void SetSquare(int x, int y, int channel, int value, int width);      
 };
 

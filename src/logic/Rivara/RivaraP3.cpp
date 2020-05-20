@@ -61,6 +61,7 @@ namespace Rivara
 
         (*graph)[TEdge].attributes->SetBool(RIVARA_ATTRIBUTE_R, false);
         (*graph)[EEdgeToBreak].attributes->SetDouble(RIVARA_ATTRIBUTE_L, NL((*graph)[nodes[1]],newNNode));
+        (*graph)[TEdge].error = (*graph)[newTNodeVertex].error = -1;
 
         
     }
