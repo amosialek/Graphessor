@@ -85,9 +85,9 @@ namespace Rivara
                     tempNNodes1, tempNNodes2, intersection);
                 std::vector<vertex_descriptor> hangingNodeNeighbors;
                 hangingNodeNeighbors = where(vertices, [&intersection](vertex_descriptor v){return v!=intersection[0];});
-                auto tempENodes1 = g -> GetAdjacentVertices(hangingNodeNeighbors[0]);
-                auto x = g -> GetAdjacentVertices(hangingNodeNeighbors[1]);
-                tempENodes1.insert(tempENodes1.end(), x.begin(), x.end());
+                auto tempENodes1 = g -> GetAdjacentVertices(hangingNodeNeighbors[0], NODELABEL_E);
+                auto tempENodes2 = g -> GetAdjacentVertices(hangingNodeNeighbors[1], NODELABEL_E);
+                tempENodes1.insert(tempENodes1.end(), tempENodes2.begin(), tempENodes2.end());
                 std::set<vertex_descriptor> possibleHangingNodes;
                 for(auto EEdge : tempENodes1)
                 {
@@ -105,9 +105,12 @@ namespace Rivara
                         and std::abs((*g)[v].attributes->GetDouble(RIVARA_ATTRIBUTE_X) - expectedX) < 0.1
                         and std::abs((*g)[v].attributes->GetDouble(RIVARA_ATTRIBUTE_Y) - expectedY) < 0.1;
                     }).begin()));
-                auto hangingNodeENeighbors = g -> GetAdjacentVertices(hangingNode);
-                double lengthOfSplitEdge = (*g)[hangingNodeENeighbors[0]].attributes->GetDouble(RIVARA_ATTRIBUTE_L)
-                 + (*g)[hangingNodeENeighbors[1]].attributes->GetDouble(RIVARA_ATTRIBUTE_L);
+                auto hangingNodeENeighbors = g -> GetAdjacentVertices(hangingNode, NODELABEL_E);
+                std::vector<vertex_descriptor> hangingNodeENeighborsInThisTriangle;
+                Rivara::Intersection(
+                    hangingNodeENeighbors, tempENodes1, hangingNodeENeighborsInThisTriangle);
+                double lengthOfSplitEdge = (*g)[hangingNodeENeighborsInThisTriangle[0]].attributes->GetDouble(RIVARA_ATTRIBUTE_L)
+                 + (*g)[hangingNodeENeighborsInThisTriangle[1]].attributes->GetDouble(RIVARA_ATTRIBUTE_L);
                 if(true
                 and lengthOfSplitEdge>=(*g)[commonEEdges[0]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L)
                 and lengthOfSplitEdge>=(*g)[commonEEdges[1]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L)

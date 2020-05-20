@@ -75,3 +75,5 @@ target_link_libraries(example RivaraTest)
 target_link_libraries(example LogicTest)
 target_link_libraries(example Logic)
 # gtest_discover_tests(example)
+
+add_custom_target(docs docs/create_docs.sh)

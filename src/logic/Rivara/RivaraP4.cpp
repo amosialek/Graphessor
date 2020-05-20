@@ -14,7 +14,7 @@ namespace Rivara
     void RivaraP4::Perform()
     {
         spdlog::debug("Rivara P4");
-        auto EEdges = graph -> GetAdjacentVertices(NNode); 
+        auto EEdges = graph -> GetAdjacentVertices(NNode, NODELABEL_E); 
         std::vector<vertex_descriptor> nodes;
         for(auto e:EEdges)
         {
@@ -83,7 +83,7 @@ namespace Rivara
                 std::vector<vertex_descriptor> lastNodeSet;
                 Rivara::RelativeComplementOfBInA(
                     vertices, notBrokenEdgeNodes, lastNodeSet);
-                auto EEdges = g -> GetAdjacentVertices(lastNodeSet[0]);
+                auto EEdges = g -> GetAdjacentVertices(lastNodeSet[0], NODELABEL_E);
                 std::vector<vertex_descriptor> hangingNodes;
                 for(auto e: EEdges)
                 {
@@ -110,14 +110,25 @@ namespace Rivara
                         or (abs(vNode.attributes->GetDouble(RIVARA_ATTRIBUTE_X)-hangingNodePoint2X)<0.1
                         and abs(vNode.attributes->GetDouble(RIVARA_ATTRIBUTE_Y)-hangingNodePoint2Y)<0.1)
                         ;});
-                auto hangingNode0EEdges = g -> GetAdjacentVertices(hangingNodes[0]);
-                auto hangingNode1EEdges = g -> GetAdjacentVertices(hangingNodes[1]);
+                auto hangingNode0EEdges = g -> GetAdjacentVertices(hangingNodes[0], NODELABEL_E);
+                auto hangingNode1EEdges = g -> GetAdjacentVertices(hangingNodes[1], NODELABEL_E);
 
-                double L4 = (*g)[hangingNode0EEdges[0]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L);
-                double L5 = (*g)[hangingNode0EEdges[1]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L);
+                std::set<vertex_descriptor> verticesEEdges;
+                verticesEEdges.insert(EEdges.begin(), EEdges.end());
+                auto leftEEdges = g-> GetAdjacentVertices(notBrokenEdgeNodes[0], NODELABEL_E);
+                auto rightEEdges = g-> GetAdjacentVertices(notBrokenEdgeNodes[0], NODELABEL_E);
+                verticesEEdges.insert(leftEEdges.begin(), leftEEdges.end());
+                verticesEEdges.insert(rightEEdges.begin(), rightEEdges.end());
+                std::vector<vertex_descriptor> hangingNode0EEdgesInThisTriangle;
+                std::vector<vertex_descriptor> hangingNode1EEdgesInThisTriangle;
+                Intersection(hangingNode0EEdges, verticesEEdges, hangingNode0EEdgesInThisTriangle);
+                Intersection(hangingNode1EEdges, verticesEEdges, hangingNode1EEdgesInThisTriangle);
+                
+                double L4 = (*g)[hangingNode0EEdgesInThisTriangle[0]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L);
+                double L5 = (*g)[hangingNode0EEdgesInThisTriangle[1]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L);
 
-                double L6 = (*g)[hangingNode1EEdges[0]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L);
-                double L7 = (*g)[hangingNode1EEdges[1]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L);
+                double L6 = (*g)[hangingNode1EEdgesInThisTriangle[0]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L);
+                double L7 = (*g)[hangingNode1EEdgesInThisTriangle[1]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L);
 
                 double L3 = (*g)[commonEEdges[0]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L);
 

@@ -93,16 +93,18 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
 {
     for(int channel=0;channel<3;channel++)
     {
+        int i=0;
         auto graph = std::make_shared<RivaraCachedGraph>();
         channel_graphs.emplace_back(graph);
         auto S = graph -> AddVertex(*(new Pixel(0,0, NODELABEL_S)));
         (*graph)[S].attributes = std::make_shared<RivaraAttributes>();
         RivaraP0(graph, S, image).Perform();
+        debugWriter->WriteItOut(std::to_string(i++), *graph);
+
         auto aaaaaa = graph -> GetAdjacentVertices((*graph -> GetCacheIterator(NODELABEL_T).begin()));
 
-        
+        i=1;
         unsigned long long lastICount = 0;
-        int i=1;
         //debugWriter->WriteItOut(std::to_string(i++), *graph);
         while(lastICount < graph -> GetCacheIterator(NODELABEL_T).size())
         {
@@ -131,12 +133,14 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
             end = std::chrono::steady_clock::now();
             functionTime["P1"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
             std::cerr<<"iteration: "<<i<<std::endl;
-            begin = std::chrono::steady_clock::now();
-            debugWriter->WriteItOut(std::to_string(i++), *graph);
+            //begin = std::chrono::steady_clock::now();
+            //debugWriter->WriteItOut(std::to_string(i++), *graph);
+             i++;
             int productionsPerformed = 1;
             while(productionsPerformed>0)
             {
-                //debugWriter->WriteItOut(std::to_string(i++), *graph);
+                begin = std::chrono::steady_clock::now();
+                // debugWriter->WriteItOut(std::to_string(i++), *graph);
                 auto p2s = RivaraP2::FindAllMatches(graph);
                 for(auto p2 : *p2s)
                     p2.Perform();
@@ -144,8 +148,9 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
                 functionTime["P2"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
                 std::cerr<<"iteration: "<<i<<std::endl;
 
+                if(i>190)
+                    debugWriter->WriteItOut(std::to_string(i++), *graph);
                 begin = std::chrono::steady_clock::now();
-                //debugWriter->WriteItOut(std::to_string(i++), *graph);
                 auto p3s = RivaraP3::FindAllMatches(graph, image);
                 for(auto p3 : *p3s)
                     p3.Perform();

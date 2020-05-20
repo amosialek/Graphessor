@@ -16,18 +16,23 @@ namespace Rivara
         spdlog::debug("Rivara P6");
         auto vertices = graph -> GetAdjacentVertices(TEdge);
 
-        auto hangingNodeEEdges = graph -> GetAdjacentVertices(hangingNode);;
+        auto hangingNodeEEdges = graph -> GetAdjacentVertices(hangingNode, NODELABEL_E);
         std::vector<vertex_descriptor> hangingNodeNeighbors;
-        auto xd = graph->GetAdjacentVertices(hangingNodeEEdges[0]);
-        hangingNodeNeighbors.insert(hangingNodeNeighbors.end(), xd.begin(), xd.end());
-        graph->GetAdjacentVertices(hangingNodeEEdges[1]);
-        hangingNodeNeighbors.insert(hangingNodeNeighbors.end(), xd.begin(), xd.end());
+        std::vector<vertex_descriptor> xd;
+        for(auto eEdge : hangingNodeEEdges)
+        {
+            xd = graph->GetAdjacentVertices(eEdge);
+            hangingNodeNeighbors.insert(hangingNodeNeighbors.end(), xd.begin(), xd.end());
+        }
+
+        std::vector<vertex_descriptor> hangingNodeNeighborsInTriangle;
+        Intersection(hangingNodeNeighbors, vertices, hangingNodeNeighborsInTriangle);
 
         std::vector<vertex_descriptor> lastNodeSet;
 
         Rivara::RelativeComplementOfBInA(
             vertices, 
-            hangingNodeNeighbors,
+            hangingNodeNeighborsInTriangle,
             lastNodeSet);
 
         Pixel newEMiddleNode = GetNewEMiddleNode(graph, (*graph)[hangingNode], lastNodeSet[0]);
@@ -39,17 +44,17 @@ namespace Rivara
         graph -> AddEdge(hangingNode, newEMiddleVertex);
         graph -> AddEdge(lastNodeSet[0], newEMiddleVertex);
 
-        graph -> RemoveEdge(TEdge, hangingNodeNeighbors[0]);
+        graph -> RemoveEdge(TEdge, hangingNodeNeighborsInTriangle[0]);
         graph -> AddEdge(TEdge, hangingNode);
 
         graph -> AddEdge(newTVertex, hangingNode);
         graph -> AddEdge(newTVertex, lastNodeSet[0]);
-        graph -> AddEdge(newTVertex, hangingNodeNeighbors[0]);
+        graph -> AddEdge(newTVertex, hangingNodeNeighborsInTriangle[0]);
 
-        (*graph)[TEdge].x = ((*graph)[hangingNodeNeighbors[1]].x+(*graph)[hangingNode].x+(*graph)[lastNodeSet[0]].x)/3;
-        (*graph)[TEdge].y = ((*graph)[hangingNodeNeighbors[1]].y+(*graph)[hangingNode].y+(*graph)[lastNodeSet[0]].y)/3;
-        (*graph)[newTVertex].x = ((*graph)[hangingNodeNeighbors[0]].x+(*graph)[hangingNode].x+(*graph)[lastNodeSet[0]].x)/3;
-        (*graph)[newTVertex].y = ((*graph)[hangingNodeNeighbors[0]].y+(*graph)[hangingNode].y+(*graph)[lastNodeSet[0]].y)/3;
+        (*graph)[TEdge].x = ((*graph)[hangingNodeNeighborsInTriangle[1]].x+(*graph)[hangingNode].x+(*graph)[lastNodeSet[0]].x)/3;
+        (*graph)[TEdge].y = ((*graph)[hangingNodeNeighborsInTriangle[1]].y+(*graph)[hangingNode].y+(*graph)[lastNodeSet[0]].y)/3;
+        (*graph)[newTVertex].x = ((*graph)[hangingNodeNeighborsInTriangle[0]].x+(*graph)[hangingNode].x+(*graph)[lastNodeSet[0]].x)/3;
+        (*graph)[newTVertex].y = ((*graph)[hangingNodeNeighborsInTriangle[0]].y+(*graph)[hangingNode].y+(*graph)[lastNodeSet[0]].y)/3;
 
         (*graph)[TEdge].attributes->SetBool(RIVARA_ATTRIBUTE_R, false);
 
@@ -112,18 +117,25 @@ namespace Rivara
                         or (abs(vNode.attributes->GetDouble(RIVARA_ATTRIBUTE_X)-hangingNodePoint3X)<0.1
                         and abs(vNode.attributes->GetDouble(RIVARA_ATTRIBUTE_Y)-hangingNodePoint3Y)<0.1))
                         ;});
-                auto hangingNode0EEdges = g -> GetAdjacentVertices(hangingNodes[0]);
-                auto hangingNode1EEdges = g -> GetAdjacentVertices(hangingNodes[1]);
-                auto hangingNode2EEdges = g -> GetAdjacentVertices(hangingNodes[2]);
+                auto hangingNode0EEdges = g -> GetAdjacentVertices(hangingNodes[0], NODELABEL_E);
+                auto hangingNode1EEdges = g -> GetAdjacentVertices(hangingNodes[1], NODELABEL_E);
+                auto hangingNode2EEdges = g -> GetAdjacentVertices(hangingNodes[2], NODELABEL_E);
+                
+                std::vector<vertex_descriptor> hangingNode0EEdgesInThisTriangle;
+                std::vector<vertex_descriptor> hangingNode1EEdgesInThisTriangle;
+                std::vector<vertex_descriptor> hangingNode2EEdgesInThisTriangle;
+                Intersection(hangingNode0EEdges, secondEEdges, hangingNode0EEdgesInThisTriangle);
+                Intersection(hangingNode1EEdges, secondEEdges, hangingNode1EEdgesInThisTriangle);
+                Intersection(hangingNode2EEdges, secondEEdges, hangingNode2EEdgesInThisTriangle);
 
-                double L4 = (*g)[hangingNode0EEdges[0]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L);
-                double L5 = (*g)[hangingNode0EEdges[1]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L);
+                double L4 = (*g)[hangingNode0EEdgesInThisTriangle[0]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L);
+                double L5 = (*g)[hangingNode0EEdgesInThisTriangle[1]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L);
 
-                double L6 = (*g)[hangingNode1EEdges[0]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L);
-                double L7 = (*g)[hangingNode1EEdges[1]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L);
+                double L6 = (*g)[hangingNode1EEdgesInThisTriangle[0]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L);
+                double L7 = (*g)[hangingNode1EEdgesInThisTriangle[1]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L);
 
-                double L8 = (*g)[hangingNode2EEdges[0]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L);
-                double L9 = (*g)[hangingNode2EEdges[1]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L);
+                double L8 = (*g)[hangingNode2EEdgesInThisTriangle[0]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L);
+                double L9 = (*g)[hangingNode2EEdgesInThisTriangle[1]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L);
 
                 if((L4+L5)>=(L6+L7) and (L4+L5)>=(L8+L9))
                 {
