@@ -20,6 +20,7 @@ namespace Rivara
         auto nodes = graph -> GetAdjacentVertices(EEdgeToBreak);
         assert(nodes.size()==2 && "nodes should have 2 elements");
         auto vertices = graph -> GetAdjacentVertices(TEdge);
+        spdlog::debug("{}", TEdge);
         spdlog::debug("{} {} {}", vertices[0],  vertices[1], vertices[2]);
         std::vector<vertex_descriptor> lastNodeSet;
         Rivara::RelativeComplementOfBInA(
@@ -140,7 +141,7 @@ namespace Rivara
                 {
                     result -> emplace_back(g, commonEEdges[0], triangle, image);
                 }
-                if(true
+                else if(true
                     and lengthOfSplitEdge<(*g)[commonEEdges[1]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L)
                     and (*g)[commonEEdges[1]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L)>=(*g)[commonEEdges[0]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L)
                     and 
