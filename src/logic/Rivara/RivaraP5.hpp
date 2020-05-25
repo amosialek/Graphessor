@@ -22,7 +22,7 @@ namespace Rivara
                 std::shared_ptr<Image> image
                 );
             void Perform();
-            static std::unique_ptr<std::vector<RivaraP5>> FindAllMatches(std::shared_ptr<CachedGraph> g, std::shared_ptr<Image> image);
+            static std::unique_ptr<std::vector<RivaraP5>> FindAllMatches(std::shared_ptr<RivaraCachedGraph> g, std::shared_ptr<Image> image);
             std::vector<uint8_t> Serialize();   
     }; 
 }

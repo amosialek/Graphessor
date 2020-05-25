@@ -18,7 +18,7 @@ namespace Rivara
                 vertex_descriptor TEdge
                 );
             void Perform();
-            static std::unique_ptr<std::vector<RivaraP6>> FindAllMatches(std::shared_ptr<CachedGraph> g);
+            static std::unique_ptr<std::vector<RivaraP6>> FindAllMatches(std::shared_ptr<RivaraCachedGraph> g);
             std::vector<uint8_t> Serialize();   
     }; 
 }

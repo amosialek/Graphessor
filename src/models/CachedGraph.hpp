@@ -5,7 +5,7 @@
 
 class CachedGraph : public IGraph
 {
-    private:
+    protected:
         std::map<std::string, std::unique_ptr<std::set<vertex_descriptor>>> typeToVerticesCache;
         std::unique_ptr<PixelGraph> graph;
         void EnsureCacheExists(std::string type);
@@ -14,7 +14,7 @@ class CachedGraph : public IGraph
     public:
         CachedGraph();
         void AddEdge(vertex_descriptor v1,vertex_descriptor v2) override;
-        vertex_descriptor AddVertex(Pixel p) override;
+        virtual vertex_descriptor AddVertex(Pixel p) override;
         void RemoveEdge(vertex_descriptor v1,vertex_descriptor v2) override;
         void ChangeVertexType(vertex_descriptor v, std::string type) override;
         Pixel& operator[](vertex_descriptor v) override;

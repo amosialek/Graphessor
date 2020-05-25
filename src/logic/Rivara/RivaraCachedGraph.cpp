@@ -28,4 +28,32 @@ namespace Rivara
     {
         return GetCacheIterator(NODELABEL_N);
     }
+    void RivaraCachedGraph::RegisterHangingNode(vertex_descriptor v)
+    {
+        InsertCacheElement("H", v);
+    }
+    std::set<vertex_descriptor> RivaraCachedGraph::GetHangingNodes()
+    {
+        return GetCacheIterator("H");
+    }
+    void RivaraCachedGraph::DeregisterHangingNode(vertex_descriptor v)
+    {
+        typeToVerticesCache["H"]->erase(v);
+    }
+    vertex_descriptor RivaraCachedGraph::AddVertex(Pixel p)
+    {
+        std::vector<vertex_descriptor> noLongerHangingNodes;
+        auto hangingNodes = GetCacheIterator("H");
+        for(auto hn : hangingNodes)
+            if(!this->operator[](hn).attributes->GetBool(RIVARA_ATTRIBUTE_HN))
+                noLongerHangingNodes.emplace_back(hn);
+        vertex_descriptor v = CachedGraph::AddVertex(p);
+        if(p.attributes->GetBool(RIVARA_ATTRIBUTE_HN))
+        {
+            RegisterHangingNode(v);
+        }
+        for(auto nlhn:noLongerHangingNodes)
+            DeregisterHangingNode(nlhn);
+        return v;
+    } 
 }

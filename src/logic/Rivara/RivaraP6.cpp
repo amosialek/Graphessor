@@ -61,10 +61,11 @@ namespace Rivara
         (*graph)[TEdge].error = (*graph)[newTVertex].error = -1;
     }
 
-    std::unique_ptr<std::vector<RivaraP6>> RivaraP6::FindAllMatches(std::shared_ptr<CachedGraph> g)
+    std::unique_ptr<std::vector<RivaraP6>> RivaraP6::FindAllMatches(std::shared_ptr<RivaraCachedGraph> g)
     {
        std::unique_ptr<std::vector<RivaraP6>> result = std::make_unique<std::vector<RivaraP6>>();
-        auto triangles = g -> GetCacheIterator(NODELABEL_T);
+        //auto triangles = g -> GetCacheIterator(NODELABEL_T);
+        auto triangles = TrianglesWhichMightHaveHangingNode(*g);
         for(auto triangle : triangles)
         {
             std::vector<vertex_descriptor> secondEEdges;

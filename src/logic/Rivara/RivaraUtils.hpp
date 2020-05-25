@@ -3,6 +3,7 @@
 #include <math.h>
 #include "Pixel.hpp"
 #include "RivaraAttributes.hpp"
+#include "RivaraCachedGraph.hpp"
 #include "mygraph.hpp"
 #include "Image.hpp"
 
@@ -74,26 +75,6 @@ namespace Rivara
         return newTNode;
     }
     
-    inline Pixel GetNewNNode(std::shared_ptr<IGraph> graph,  std::vector<vertex_descriptor> nodes, std::shared_ptr<Image> image)
-    {
-        Pixel newNNode;
-        newNNode.attributes = std::make_shared<RivaraAttributes>();
-        newNNode.attributes -> SetDouble(RIVARA_ATTRIBUTE_X, ((*graph)[nodes[0]].attributes -> GetDouble(RIVARA_ATTRIBUTE_X) + (*graph)[nodes[1]].attributes -> GetDouble(RIVARA_ATTRIBUTE_X))/2);
-        newNNode.attributes -> SetDouble(RIVARA_ATTRIBUTE_Y, ((*graph)[nodes[0]].attributes -> GetDouble(RIVARA_ATTRIBUTE_Y) + (*graph)[nodes[1]].attributes -> GetDouble(RIVARA_ATTRIBUTE_Y))/2); 
-        newNNode.x = newNNode.attributes -> GetDouble(RIVARA_ATTRIBUTE_X);
-        newNNode.y = newNNode.attributes -> GetDouble(RIVARA_ATTRIBUTE_Y);
-        std::tie(newNNode.r, newNNode.g, newNNode.b) = image->getPixel(newNNode.attributes -> GetDouble(RIVARA_ATTRIBUTE_X), newNNode.attributes -> GetDouble(RIVARA_ATTRIBUTE_Y));
-        newNNode.label = NODELABEL_N;
-        return newNNode;
-    }
-
-    inline bool EdgeHasNoHangingNodes(IGraph& graph, vertex_descriptor v)
-    {
-        auto Nnodes = graph.GetAdjacentVertices(v);
-        return ( !(graph)[Nnodes[0]].attributes->GetBool(RIVARA_ATTRIBUTE_HN) 
-        and  !(graph)[Nnodes[1]].attributes->GetBool(RIVARA_ATTRIBUTE_HN));
-    }
-    
     template<typename T>
     inline void Intersection(std::set<T>& set1, std::set<T>& set2, std::set<T>& output)
     {
@@ -132,6 +113,53 @@ namespace Rivara
     {
         Intersection(set2, set1, output);
     }
+
+    inline Pixel GetNewNNode(std::shared_ptr<IGraph> graph,  std::vector<vertex_descriptor> nodes, std::shared_ptr<Image> image)
+    {
+        Pixel newNNode;
+        newNNode.attributes = std::make_shared<RivaraAttributes>();
+        newNNode.attributes -> SetDouble(RIVARA_ATTRIBUTE_X, ((*graph)[nodes[0]].attributes -> GetDouble(RIVARA_ATTRIBUTE_X) + (*graph)[nodes[1]].attributes -> GetDouble(RIVARA_ATTRIBUTE_X))/2);
+        newNNode.attributes -> SetDouble(RIVARA_ATTRIBUTE_Y, ((*graph)[nodes[0]].attributes -> GetDouble(RIVARA_ATTRIBUTE_Y) + (*graph)[nodes[1]].attributes -> GetDouble(RIVARA_ATTRIBUTE_Y))/2); 
+        newNNode.x = newNNode.attributes -> GetDouble(RIVARA_ATTRIBUTE_X);
+        newNNode.y = newNNode.attributes -> GetDouble(RIVARA_ATTRIBUTE_Y);
+        std::vector<vertex_descriptor> eedge;
+        auto v1 =  graph->GetAdjacentVertices(nodes[0],NODELABEL_E);
+        auto v2 = graph->GetAdjacentVertices(nodes[1],NODELABEL_E);
+        Intersection(v1,v2,eedge);
+        newNNode.attributes->SetBool(RIVARA_ATTRIBUTE_HN, !(*graph)[eedge[0]].attributes->GetBool(RIVARA_ATTRIBUTE_B));
+        std::tie(newNNode.r, newNNode.g, newNNode.b) = image->getPixel(newNNode.attributes -> GetDouble(RIVARA_ATTRIBUTE_X), newNNode.attributes -> GetDouble(RIVARA_ATTRIBUTE_Y));
+        newNNode.label = NODELABEL_N;
+        return newNNode;
+    }
+
+    inline bool EdgeHasNoHangingNodes(IGraph& graph, vertex_descriptor v)
+    {
+        auto Nnodes = graph.GetAdjacentVertices(v);
+        return ( !(graph)[Nnodes[0]].attributes->GetBool(RIVARA_ATTRIBUTE_HN) 
+        and  !(graph)[Nnodes[1]].attributes->GetBool(RIVARA_ATTRIBUTE_HN));
+    }
+
+    inline std::set<vertex_descriptor> TrianglesWhichMightHaveHangingNode(RivaraCachedGraph& graph)
+    {
+        std::set<vertex_descriptor> result;
+        auto HangingNodes = graph.GetHangingNodes();
+        for(auto hangingNode : HangingNodes)
+        {
+            auto HangingNodesENeighbors = graph.GetAdjacentVertices(hangingNode, NODELABEL_E);
+            for(auto eNode : HangingNodesENeighbors)
+            {
+                auto HangingNodesNNeighbors = graph.GetAdjacentVertices(eNode, NODELABEL_N);
+                for(auto nNode : HangingNodesNNeighbors)
+                {
+                    auto HangingNodesTNeighbors = graph.GetAdjacentVertices(nNode, NODELABEL_T);
+                    result.insert(HangingNodesTNeighbors.begin(), HangingNodesTNeighbors.end());
+                }
+            }
+        }
+        return result;
+    }
+    
+
 
     template<typename T>
     inline void RelativeComplementOfBInA(std::vector<T>& A, std::set<T>& B, std::vector<T>& output)

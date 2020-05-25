@@ -72,10 +72,11 @@ namespace Rivara
         
     }
 
-    std::unique_ptr<std::vector<RivaraP3>> RivaraP3::FindAllMatches(std::shared_ptr<CachedGraph> g, std::shared_ptr<Image> image)
+    std::unique_ptr<std::vector<RivaraP3>> RivaraP3::FindAllMatches(std::shared_ptr<RivaraCachedGraph> g, std::shared_ptr<Image> image)
     {
        std::unique_ptr<std::vector<RivaraP3>> result = std::make_unique<std::vector<RivaraP3>>();
-        auto triangles = g -> GetCacheIterator(NODELABEL_T);
+        //auto triangles = g -> GetCacheIterator(NODELABEL_T);
+        auto triangles = TrianglesWhichMightHaveHangingNode(*g);
         for(auto triangle : triangles)
         {
             std::vector<vertex_descriptor> secondEEdges;

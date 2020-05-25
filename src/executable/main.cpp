@@ -98,7 +98,9 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
         int i=0;
         auto graph = std::make_shared<RivaraCachedGraph>();
         channel_graphs.emplace_back(graph);
-        auto S = graph -> AddVertex(*(new Pixel(0,0, NODELABEL_S)));
+        auto SPixel = new Pixel(0,0, NODELABEL_S);
+        SPixel->attributes = std::make_unique<RivaraAttributes>();
+        auto S = graph -> AddVertex(*(SPixel));
         (*graph)[S].attributes = std::make_shared<RivaraAttributes>();
         RivaraP0(graph, S, image).Perform();
         //debugWriter->WriteItOut(std::to_string(i++), *graph);
