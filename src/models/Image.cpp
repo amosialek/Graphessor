@@ -161,7 +161,7 @@ void Image::BaricentricInterpolation(int channel, std::vector<Pixel> pixels)
                 w1 = w1Coefficient*(y2y3*(x-pixels[2].x) + x3x2 * (y-pixels[2].y));
                 w2 = w2Coefficient*(y3y1*(x-pixels[2].x) + x1x3*(y-pixels[2].y));
                 w3 = 1 - w1 - w2;
-                if(w1>=0 and w2>=0 and w3>=0)
+                if(w1>=-0.01 and w2>=-0.01 and w3>=-0.01)
                     SetPixel(x,y,channel,
                         w1 * GetRGBChannelValue(pixels[0],channel) 
                         + w2 * GetRGBChannelValue(pixels[1],channel)
