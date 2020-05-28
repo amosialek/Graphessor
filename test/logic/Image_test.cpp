@@ -119,6 +119,59 @@ TEST(ImageMagnifierComparisonTest, CompareWithInterpolation)
     
 }
 
+TEST(ImageMagnifierComparisonTest, CompareWithInterpolation2)
+{
+    uint8_t*** test_img;
+    test_img = new uint8_t**[5];
+    for(int i=0;i<5;i++)
+    {
+        test_img[i] = new uint8_t*[5];
+        for(int j=0;j<5;j++)
+            test_img[i][j] = new uint8_t[3];
+    }
+
+    uint8_t*** test_img2;
+    test_img2 = new uint8_t**[5];
+    for(int i=0;i<5;i++)
+    {
+        test_img2[i] = new uint8_t*[5];
+        for(int j=0;j<5;j++)
+            test_img2[i][j] = new uint8_t[3];
+    }
+
+    uint8_t array [5][5][3] =
+    {
+    {{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}},
+    {{0,0,0}, {0,0,0}, {0,0,0}, {100,0,0}, {0,0,0}},
+    {{0,0,0}, {0,0,0}, {0,100,0}, {0,0,0}, {100,0,0}},
+    {{0,0,0}, {0,0,0}, {0,0,0}, {100,0,0}, {0,0,0}},
+    {{0,0,0}, {100,0,0}, {100,0,0}, {0,0,0}, {100,0,0}}
+    };
+    for(int i=0;i<5;i++)
+        for(int j=0;j<5;j++)
+            for(int k=0;k<5;k++)
+                test_img[i][j][k]=array[i][j][k];
+
+    uint8_t array2 [5][5][3] =
+    {
+    {{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}},
+    {{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}},
+    {{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}},
+    {{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}},
+    {{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}
+    };
+    for(int i=0;i<5;i++)
+        for(int j=0;j<5;j++)
+            for(int k=0;k<5;k++)
+                test_img2[i][j][k]=array2[i][j][k];
+
+    auto image = new ImageMagnifier(test_img,5,5,3);    
+    auto image2 = new Image(test_img2,5,5,3);    
+
+    double a = image -> PSNR(image2);
+    EXPECT_DOUBLE_EQ(18.430435842453537,a);
+}
+
 TEST(ImageRestoringTest, BaricentricInterpolation)
 {
     uint8_t*** test_img;

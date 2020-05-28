@@ -2,6 +2,7 @@
 #include "GraphessorConstants.hpp"
 #include <iostream>
 #include "spdlog/spdlog.h"
+#include <cassert>
 
 
 Image::Image(std::string filename)
@@ -464,6 +465,30 @@ bool Image::PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int
     return !(has_neg && has_pos);
 }
 
+double Image::PSNR(Image* other)
+{
+    assert(this -> width() == other -> width() && "Cannot compare images of different width");
+    assert(this -> height() == other -> height() && "Cannot compare images of different height");
+    int r,g,b;
+    int otherR, otherG, otherB;
+    double sum=0;
+    for(int x=0;x<this->width() ;x++)
+        for(int y=0;y<this->height() ;y++)
+        {
+            std::tie(r,g,b) = getPixel(x,y);
+            std::tie(otherR,otherG,otherB) = other -> getPixel(x,y);
+
+            sum+=(r-otherR)*(r-otherR)+(b-otherB)*(b-otherB)+(g-otherG)*(g-otherG);
+        }
+    sum = sum / (255.0*255.0*3.0*width()*height());
+    return 10*log10(1/sum);
+}
+
+Image* Image::GetImageInternal()
+{
+    return this;
+}
+
 double ImageMagnifier::SquaredErrorOfInterpolation(int x1, int x2, int y1, int y2, int channel)
 {
     int originalRatio = ratio;
@@ -564,5 +589,19 @@ void ImageMagnifier::SetPixel(int x, int y, int channel, int value)
     int originalRatio = ratio;
     ratio = 1;
     Image::SetPixel(x/originalRatio, y/originalRatio, channel, value);
+    ratio = originalRatio;
+}
+
+Image* ImageMagnifier::GetImageInternal()
+{
+    ratio = 1;
+    return Image::GetImageInternal();
+}
+
+double ImageMagnifier::PSNR(Image* image)
+{
+    int originalRatio = ratio;
+    ratio = 1;
+    Image::PSNR(image->GetImageInternal());
     ratio = originalRatio;
 }

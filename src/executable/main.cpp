@@ -266,5 +266,6 @@ int main(int argc, char** argv) {
     GraphImageWriter::DrawPixels(channel_graphs[2],outputFileName+"_blue_graph.bmp");
     restoredImage -> save(outputFileName+".bmp");
     restoredImage -> Save3Colors(outputFileName);
+    std::cout<<"PSNR: "<<restoredImage -> PSNR(image.get())<<std::endl;;
 }
 

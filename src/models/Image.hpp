@@ -54,6 +54,8 @@ class Image
         void SVDInterpolation(int channel, std::vector<Pixel> pixels);
         void Interpolate(int channel, int width, std::shared_ptr<CachedGraph> graph);
         void SetSquare(int x, int y, int channel, int value, int width);      
+        virtual double PSNR(Image* other);
+        Image* GetImageInternal();
 };
 
 class ImageMagnifier : public Image
@@ -75,5 +77,7 @@ class ImageMagnifier : public Image
         int height() override;
         std::tuple<int,int> GetNearestPixelCoords(int x, int y) override;
         void SetPixel(int x, int y, int channel, int value) override;
+        double PSNR(Image* other) override;
+        Image* GetImageInternal();
 };
 #endif // __IMAGE_HPP__
