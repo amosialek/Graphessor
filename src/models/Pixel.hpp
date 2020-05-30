@@ -4,6 +4,9 @@
 #include <string>
 #include "Attributes.hpp"
 #include <memory>
+#include <cereal/types/memory.hpp>
+#include <cereal/archives/json.hpp>
+
 class Pixel
 {
 
@@ -21,6 +24,11 @@ class Pixel
         Pixel(const Pixel& other);
         Pixel& operator=(const Pixel& other); 
         
+        template<class Archive>
+        void serialize(Archive & archive)
+        {
+            archive( CEREAL_NVP(x), CEREAL_NVP(y), CEREAL_NVP(r), CEREAL_NVP(g), CEREAL_NVP(b), CEREAL_NVP(label), CEREAL_NVP(error), CEREAL_NVP(_break), CEREAL_NVP(visited), CEREAL_NVP(breakLevel), CEREAL_NVP(attributes) ); // serialize things by passing them to the archive
+        }
 };
 
 inline

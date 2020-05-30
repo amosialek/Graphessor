@@ -149,7 +149,7 @@ TEST(ImageMagnifierComparisonTest, CompareWithInterpolation2)
     };
     for(int i=0;i<5;i++)
         for(int j=0;j<5;j++)
-            for(int k=0;k<5;k++)
+            for(int k=0;k<3;k++)
                 test_img[i][j][k]=array[i][j][k];
 
     uint8_t array2 [5][5][3] =

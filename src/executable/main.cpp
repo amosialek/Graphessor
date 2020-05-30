@@ -104,7 +104,10 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
         (*graph)[S].attributes = std::make_shared<RivaraAttributes>();
         RivaraP0(graph, S, image).Perform();
         //debugWriter->WriteItOut(std::to_string(i++), *graph);
-
+        std::ofstream sertializedGraphFileStream("/media/albert/Nowy/poligon/test.txt");
+        graph->Serialize(sertializedGraphFileStream);
+        sertializedGraphFileStream.flush();
+        sertializedGraphFileStream.close();
         auto aaaaaa = graph -> GetAdjacentVertices((*graph -> GetCacheIterator(NODELABEL_T).begin()));
 
         i=1;
@@ -117,7 +120,7 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
             std::cerr<<"iteration: "<<i<<std::endl;
             std::chrono::steady_clock::time_point end;
             std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-            auto p7s = RivaraP7::FindAllMatches(graph, image, channel, i < 10 ? 0 : epsilon);
+            auto p7s = RivaraP7::FindAllMatches(graph, image, channel, epsilon);
             for(auto p7 : *p7s)
             {
                 p7.Perform();
@@ -139,7 +142,7 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
             std::cerr<<"iteration: "<<i<<std::endl;
             //begin = std::chrono::steady_clock::now();
             //debugWriter->WriteItOut(std::to_string(i++), *graph);
-             i++;
+            i++;
             int productionsPerformed = 1;
             while(productionsPerformed>0)
             {
@@ -210,6 +213,14 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
     }
 }
 
+void Deserialize(AbstractOutputWriter* debugWriter)
+{
+    std::ifstream serializedGraphFileStream("/media/albert/Nowy/poligon/test.txt");
+    auto graph = std::make_shared<RivaraCachedGraph>();
+    graph->Deserialize(serializedGraphFileStream);
+    debugWriter->WriteItOut("test", *graph);
+}
+
 int main(int argc, char** argv) {
 
     spdlog::set_pattern("[%H:%M:%S %z] [%n] [%^---%L---%$] [thread %t] %v");
@@ -260,12 +271,13 @@ int main(int argc, char** argv) {
         PerformRivara(channel_graphs, image, debugWriter, epsilon, file_logger);
     else
         PerformQuadTree(channel_graphs, image, debugWriter, epsilon, file_logger);
+    Deserialize(debugWriter);
     auto restoredImage = std::make_unique<Image>(channel_graphs);
     GraphImageWriter::DrawPixels(channel_graphs[0],outputFileName+"_red_graph.bmp");
     GraphImageWriter::DrawPixels(channel_graphs[1],outputFileName+"_green_graph.bmp");
     GraphImageWriter::DrawPixels(channel_graphs[2],outputFileName+"_blue_graph.bmp");
     restoredImage -> save(outputFileName+".bmp");
     restoredImage -> Save3Colors(outputFileName);
-    std::cout<<"PSNR: "<<restoredImage -> PSNR(image.get())<<std::endl;;
+    std::cout<<"PSNR: "<<restoredImage -> PSNR(image.get())<<std::endl;
 }
 

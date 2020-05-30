@@ -602,6 +602,7 @@ double ImageMagnifier::PSNR(Image* image)
 {
     int originalRatio = ratio;
     ratio = 1;
-    Image::PSNR(image->GetImageInternal());
+    auto result = Image::PSNR(image->GetImageInternal());
     ratio = originalRatio;
+    return result;
 }

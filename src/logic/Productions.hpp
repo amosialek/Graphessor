@@ -7,8 +7,7 @@
 #include "Production.hpp"
 #include "CachedGraph.hpp"
 #include "GraphessorConstants.hpp"
-#include <iostream>
-#include <linq.h>
+#include <iosfwd>
 #include <algorithm>
 #include <queue>
 #include "spdlog/spdlog.h"

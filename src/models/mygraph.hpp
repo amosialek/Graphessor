@@ -3,6 +3,7 @@
 
 #include "Pixel.hpp"
 #include <boost/graph/adjacency_list.hpp>
+#include <iosfwd>
 typedef boost::adjacency_list<
    boost::vecS,         //outEdge
    boost::vecS,         //vertex
@@ -30,6 +31,7 @@ class IGraph
         virtual std::vector<vertex_descriptor> GetAdjacentVertices(vertex_descriptor v)=0;
         virtual std::vector<vertex_descriptor> GetAdjacentVertices(vertex_descriptor v, std::string type)=0;
         virtual PixelGraph GetGraph()=0;
+        virtual void Serialize(std::ostream& stram)=0;  
 };
 
 
