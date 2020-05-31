@@ -30,7 +30,7 @@ namespace Rivara
             double y1 = (*g)[vertices[0]].attributes->GetDouble(RIVARA_ATTRIBUTE_Y);
             double y2 = (*g)[vertices[1]].attributes->GetDouble(RIVARA_ATTRIBUTE_Y);
             double y3 = (*g)[vertices[2]].attributes->GetDouble(RIVARA_ATTRIBUTE_Y);
-            if(abs(x1*y2+x2*y3+x3*y1-x1*y3-x2*y1-x3*y2)>16)
+            if(abs(x1*y2+x2*y3+x3*y1-x1*y3-x2*y1-x3*y2)>4)
             {    
                 if((*g)[triangle].error == -1)
                     (*g)[triangle].error = image -> CompareWithInterpolation(
