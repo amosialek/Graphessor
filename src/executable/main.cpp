@@ -120,7 +120,7 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
             std::cerr<<"iteration: "<<i<<std::endl;
             std::chrono::steady_clock::time_point end;
             std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-            auto p7s = RivaraP7::FindAllMatches(graph, image, channel, epsilon);
+            auto p7s = RivaraP7::FindAllMatches(graph, image, channel, i < 10 ? 0 : epsilon);
             for(auto p7 : *p7s)
             {
                 p7.Perform();

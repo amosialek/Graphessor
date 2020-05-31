@@ -134,7 +134,7 @@ namespace Rivara
                             !(
                                 (*g)[commonEEdges[1]].attributes -> GetBool(RIVARA_ATTRIBUTE_B)
                                 and 
-                                (*g)[commonEEdges[0]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L)!=(*g)[commonEEdges[1]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L)
+                                (*g)[commonEEdges[0]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L)==(*g)[commonEEdges[1]].attributes -> GetDouble(RIVARA_ATTRIBUTE_L)
                             )
                         )
                     )

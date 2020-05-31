@@ -29,8 +29,8 @@
             //"args": ["--input","test/logic/test_files/face_test.bmp", "--output", "../poligon/outs/iii", "--epsilon", "0.33"],
             // "args": ["--input","/media/albert/Nowy/Albert/agh/magisterka/poligon/bunny/bunny.bmp",  "--epsilon", "0.01","--output-file-template","/media/albert/Nowy/Albert/agh/magisterka/poligon/bunny/5/bunny"],
             // "args": ["--input","/media/albert/Nowy/Albert/agh/magisterka/poligon/japonia/Japonia2.bmp",  "--epsilon", "0.01","--output-file-template","/media/albert/Nowy/Albert/agh/magisterka/poligon/japonia/4_full_baricentric/japonia" ],
-            "args": ["--rivara", "--input","/media/albert/Nowy/Albert/agh/magisterka/poligon/japonia/Japonia2.bmp",  "--epsilon", "0.01","--output-file-template","/media/albert/Nowy/Albert/agh/magisterka/poligon/japonia/7_full_baricentric/japonia","--graph-output","/media/albert/Nowy/Albert/agh/magisterka/poligon/outs/test_C" ],
-            // "args": ["--rivara", "--input","/media/albert/Nowy/Albert/agh/magisterka/poligon/bunny/bunny.bmp",  "--epsilon", "0.01","--output-file-template","/media/albert/Nowy/Albert/agh/magisterka/poligon/bunny/6/bunny","--graph-output","/media/albert/Nowy/Albert/agh/magisterka/poligon/outs/test_D" ],
+            // "args": ["--rivara", "--input","/media/albert/Nowy/Albert/agh/magisterka/poligon/japonia/Japonia2.bmp",  "--epsilon", "0.01","--output-file-template","/media/albert/Nowy/Albert/agh/magisterka/poligon/japonia/8_full_baricentric/japonia","--graph-output","/media/albert/Nowy/Albert/agh/magisterka/poligon/outs/test_C" ],
+            "args": ["--rivara", "--input","/media/albert/Nowy/Albert/agh/magisterka/poligon/bunny/bunny.bmp",  "--epsilon", "0.01","--output-file-template","/media/albert/Nowy/Albert/agh/magisterka/poligon/bunny/7/bunny","--graph-output","/media/albert/Nowy/Albert/agh/magisterka/poligon/outs/test_D" ],
             "MIMode": "gdb",
             "cwd": "${workspaceFolder}",
             // "logging": {
