@@ -104,11 +104,6 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
         (*graph)[S].attributes = std::make_shared<RivaraAttributes>();
         RivaraP0(graph, S, image).Perform();
         //debugWriter->WriteItOut(std::to_string(i++), *graph);
-        std::ofstream sertializedGraphFileStream("/media/albert/Nowy/poligon/test.txt");
-        graph->Serialize(sertializedGraphFileStream);
-        sertializedGraphFileStream.flush();
-        sertializedGraphFileStream.close();
-        auto aaaaaa = graph -> GetAdjacentVertices((*graph -> GetCacheIterator(NODELABEL_T).begin()));
 
         i=1;
         unsigned long long lastICount = 0;
@@ -133,14 +128,9 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
             auto p1s = RivaraP1::FindAllMatches(graph, image);
             if(p1s->size()>0)
                 p1s -> front().Perform();
-            // for(auto p1 : *p1s)
-            // {
-            //     p1.Perform();
-            // }
             end = std::chrono::steady_clock::now();
             functionTime["P1"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
             std::cerr<<"iteration: "<<i<<std::endl;
-            //begin = std::chrono::steady_clock::now();
             //debugWriter->WriteItOut(std::to_string(i++), *graph);
             i++;
             int productionsPerformed = 1;

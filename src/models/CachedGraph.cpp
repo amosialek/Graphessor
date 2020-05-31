@@ -223,11 +223,6 @@ void CachedGraph::Serialize(std::ostream& stream)
 
     cereal::JSONOutputArchive jsonArchive(stream, cereal::JSONOutputArchive::Options::NoIndent());
     jsonArchive(pixels);
-    // for(auto v : vertices)
-    // {
-    //     p = ((*graph)[v]);
-    //     jsonArchive(p);
-    // }
 }  
 
 void CachedGraph::Deserialize(std::istream& stream)

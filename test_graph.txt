@@ -1,1 +1,0 @@
-example: /home/albert/Albert/agh/magisterka/Graphessor/src/logic/Rivara/RivaraAttributes.cpp:25: virtual double Rivara::RivaraAttributes::GetDouble(char): Assertion `false && "Double attribute not found:" + attributeName' failed.
