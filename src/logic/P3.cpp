@@ -80,11 +80,9 @@ void P3::Perform()
     }
     vertex_descriptor centerPixel = *common.begin();
     auto adjacentVertices = graph -> GetAdjacentVertices(centerPixel);
-    //vertex_descriptor leftI = *where(leftIEdges, [adjacentVertices](vertex_descriptor v){return adjacentVertices | linq::contains(v);}).begin();
-    //vertex_descriptor rightI = *where(rightIEdges, [adjacentVertices](vertex_descriptor v){return adjacentVertices | linq::contains(v);}).begin();
     auto FEdges =  where(adjacentVertices, [this](vertex_descriptor v){return (*graph)[v].label==NODELABEL_F;});
-    auto FEdgesOrdered = LINQ(from(v, FEdges) orderby(GetDistance((*graph)[v], (*graph)[BEdge])));
-    auto FEdge =*(FEdgesOrdered.begin());
+    std::sort(FEdges.begin(),FEdges.end(),[this](vertex_descriptor& v1, vertex_descriptor& v2){return GetDistance((*graph)[v1], (*graph)[BEdge])<GetDistance((*graph)[v2], (*graph)[BEdge]);});
+    auto FEdge =*(FEdges.begin());
     vertex_descriptor leftPixel = neighbours[0];
     vertex_descriptor rightPixel = neighbours[1];
     int x=((*graph)[leftPixel].x + (*graph)[rightPixel].x)/2,
@@ -101,9 +99,11 @@ void P3::Perform()
     graph -> AddEdge(newPixel, FEdge);
 
     auto temp = graph -> GetAdjacentVertices(leftPixel);
-    auto leftIEdge =  *(temp | linq::intersect(graph -> GetAdjacentVertices(centerPixel))).begin();
+    std::vector<vertex_descriptor> IEdges;
+    auto centerPixelAdjacencies = graph -> GetAdjacentVertices(centerPixel);
+    auto leftIEdge =  (*intersect(temp, centerPixelAdjacencies).begin());
     temp = graph -> GetAdjacentVertices(rightPixel);
-    auto rightIEdge = *(temp | linq::intersect(graph -> GetAdjacentVertices(centerPixel))).begin();
+    auto rightIEdge = (*intersect(temp, centerPixelAdjacencies).begin());
 
     graph -> AddEdge(newPixel, leftIEdge);
     graph -> AddEdge(newPixel, rightIEdge);

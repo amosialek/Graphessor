@@ -2,7 +2,6 @@
 #define P3_HPP
 
 #include "Productions.hpp"
-#include "linq.h"
 
 class P3 : public Production{
     private:

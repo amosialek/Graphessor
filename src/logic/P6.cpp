@@ -21,20 +21,13 @@ auto P6::PerformAndGetAdjacentEdges()
     for(auto v: adjacentVertices)
     {
         auto adjacentEdgesTemp = graph -> GetAdjacentVertices(v);
-        auto adjacentEdgesTemp2 = adjacentEdgesTemp 
-        | linq::where([this, v](vertex_descriptor IEdge2)
+        auto adjacentEdgesTemp2 = where(adjacentEdgesTemp,
+        [this, v](vertex_descriptor IEdge2)
         {
             return haveCommonEdge(*graph, IEdge, IEdge2, v);
         });
         adjacentEdges.insert(adjacentEdges.end(), adjacentEdgesTemp2.begin(), adjacentEdgesTemp2.end());
     }
-    // auto adjacentIEdges = adjacentEdges 
-    //     | linq::where([this](vertex_descriptor v){
-    //         return true
-    //             && (*graph)[v].label==NODELABEL_I 
-    //             && (*graph)[v]._break==0 
-    //             && (*graph)[v].breakLevel<(*graph)[IEdge].breakLevel;}
-    //             );
     std::vector<vertex_descriptor> adjacentIEdges;
     for(auto a : adjacentEdges)
     {

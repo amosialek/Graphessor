@@ -1,5 +1,4 @@
 BOOST 1.71.0
 CMAKE 3.10
-LINQ library: https://github.com/pfultz2/Linq (commit 7ff0a73fed52be5e11df3d79128ce7b11f430af2)
 spdlog: https://github.com/gabime/spdlog
 You may also need libboost-program-options-dev package
