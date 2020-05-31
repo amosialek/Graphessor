@@ -1,6 +1,6 @@
 #include "Pixel.hpp"
 #include "GraphessorConstants.hpp"
-//#include <iostream>
+
 Pixel::Pixel(int x, int y, int r, int g, int b)
 {
     this->x=x;
@@ -43,9 +43,9 @@ Pixel::Pixel(const Pixel& other)
     this->b=other.b;
     this->_break=other._break;
     this->label=other.label;
-    //std::cout<<"copied Pixel"<<std::endl;
     this->breakLevel=other.breakLevel;
     this->error = other.error;
+    this->attributes = other.attributes;
 }
 
 Pixel& Pixel::operator=(const Pixel& other)
@@ -59,6 +59,7 @@ Pixel& Pixel::operator=(const Pixel& other)
     this->label=other.label;
     this->breakLevel=other.breakLevel;
     this->error = other.error;
+    this->attributes = other.attributes;
     return *this;
 }
 

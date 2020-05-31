@@ -1,0 +1,13 @@
+cmake_minimum_required(VERSION 3.10.0)
+if(NOT TARGET spdlog)
+    # Stand-alone build
+    find_package(spdlog REQUIRED)
+endif()
+add_executable(Graphessor main.cpp)
+target_link_libraries (Graphessor Models)
+target_link_libraries (Graphessor IO)
+target_link_libraries (Graphessor Logic)
+target_link_libraries (Graphessor RivaraProductions)
+find_package(Boost COMPONENTS program_options REQUIRED)
+INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
+TARGET_LINK_LIBRARIES( Graphessor ${Boost_LIBRARIES} )

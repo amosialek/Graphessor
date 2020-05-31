@@ -14,7 +14,7 @@
 #include <boost/graph/graphviz.hpp>
 using namespace std;
 
-TEST(P1Test, StartingProduction)
+TEST(Productions, P1TestStartingProduction)
 {
     auto image = make_unique<Image>("./test_files/face.bmp"); 
     auto graph = make_shared<CachedGraph>();
@@ -23,7 +23,7 @@ TEST(P1Test, StartingProduction)
     p1->Perform();
 }
 
-TEST(P2Test, StartingProduction)
+TEST(Productions, P2TestStartingProduction)
 {
     auto image = make_unique<Image>("./test_files/face.bmp"); 
     auto graph = make_shared<CachedGraph>();
@@ -48,14 +48,14 @@ TEST(P2Test, StartingProduction)
     P2(graph, I, move(image)).Perform();
     //myEdgeWriter<CachedGraph> w(*graph);
     //boost::write_graphviz(cerr, graph,w );
-    EXPECT_EQ(graph->GetCacheIterator(NODELABEL_I).size(),4);
+    EXPECT_EQ(graph->GetCacheIterator(NODELABEL_I).size(),4u);
     for(auto IEdge : graph->GetCacheIterator(NODELABEL_I))
     {
         EXPECT_EQ((*graph)[IEdge].breakLevel,4);
     }
 }
 
-TEST(P3Test, P3AfterP2AfterP1)
+TEST(Productions, P3AfterP2AfterP1)
 {
     auto image = make_shared<Image>("./test_files/face.bmp"); 
     auto graph = make_shared<CachedGraph>();
@@ -74,12 +74,11 @@ TEST(P3Test, P3AfterP2AfterP1)
     EXPECT_EQ(1,1);
 }
 
-TEST(P4Test, BasicTest)
+TEST(Productions, P4BasicTest)
 {
     auto image = make_unique<Image>("./test_files/face.bmp"); 
     auto graph = make_shared<CachedGraph>();
     int r=255,g=255,b=255;
-    int width=10, height=10;
     auto p1 = graph -> AddVertex(*(make_unique<Pixel>(0,4,r,g,b)));
     auto p2 = graph -> AddVertex(*(make_unique<Pixel>(4,0,r,g,b)));
     auto p3 = graph -> AddVertex(*(make_unique<Pixel>(9,4,r,g,b)));
@@ -108,10 +107,10 @@ TEST(P4Test, BasicTest)
         p4.Perform();
     //myEdgeWriter<CachedGraph> w(*graph);
     //boost::write_graphviz(cerr, *graph, w);
-    EXPECT_EQ(4, graph->GetCacheIterator(NODELABEL_F).size());
+    EXPECT_EQ(4u, graph->GetCacheIterator(NODELABEL_F).size());
 }
 
-TEST(P6Test, OneOfTwo)
+TEST(Productions, P6OneOfTwo)
 {
     auto image = make_unique<Image>("./test_files/face.bmp"); 
     auto graph = make_shared<CachedGraph>();
@@ -135,8 +134,8 @@ TEST(P6Test, OneOfTwo)
     IEdges->push_back(IEdge1);
     IEdges->push_back(IEdge2);
     P6::PerformAllMatches(graph);
-    EXPECT_EQ((*graph)[IEdge1]._break,1);
-    EXPECT_EQ((*graph)[IEdge2]._break,0);
+    EXPECT_EQ((*graph)[IEdge1]._break, 1);
+    EXPECT_EQ((*graph)[IEdge2]._break, 0);
 }
 
 

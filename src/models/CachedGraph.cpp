@@ -1,7 +1,10 @@
 #include "CachedGraph.hpp"
 #include "spdlog/spdlog.h"
 #include "GraphessorConstants.hpp"
-
+#include <cereal/archives/json.hpp>
+#include <cereal/types/vector.hpp>
+#include <cereal/types/base_class.hpp>
+#include <cereal/types/polymorphic.hpp>
 
 void CachedGraph::EnsureCacheExists(std::string type)
 {
@@ -185,4 +188,69 @@ std::vector<std::vector<Pixel>> CachedGraph::GetPixelsForSVDInterpolation()
 {
     std::vector<std::vector<Pixel>> s;
     return s;
+}
+
+const std::set<vertex_descriptor>& CachedGraph::GetPixels()
+{
+    return GetCacheIterator(NODELABEL_P);
+}
+
+void CachedGraph::Serialize(std::ostream& stream)
+{
+    PixelGraph::vertex_iterator v, vend;
+    PixelGraph::edge_iterator e, eend;
+    std::set<vertex_descriptor> vertices;
+    std::vector<Pixel> pixels;
+    std::set<std::pair<vertex_descriptor, vertex_descriptor>> edges;
+    for (boost::tie(v, vend) = boost::vertices(*graph); v != vend; ++v)
+    {
+        vertices.insert(*v);
+        pixels.emplace_back((*graph)[*v]);
+    }
+    for (boost::tie(e, eend) = boost::edges(*graph); e != eend; ++e)
+    {
+        edges.insert(std::make_pair(boost::source(*e, *graph), boost::target(*e, *graph)));
+    }
+    stream<<vertices.size()<<" "<<edges.size()<<std::endl;
+    for(auto v : vertices)
+    {
+        stream<<v<<std::endl;
+    }
+    for(auto e : edges)
+    {
+        stream<<e.first<<" "<<e.second<<std::endl;
+    }
+
+    cereal::JSONOutputArchive jsonArchive(stream, cereal::JSONOutputArchive::Options::NoIndent());
+    jsonArchive(pixels);
+}  
+
+void CachedGraph::Deserialize(std::istream& stream)
+{
+    std::set<vertex_descriptor> vertices;
+    std::vector<Pixel> pixels;
+    std::set<std::pair<vertex_descriptor, vertex_descriptor>> edges;
+    int n,m;
+    stream>>n>>m;
+    vertex_descriptor v1,v2;
+    for(int i=0;i<n;i++)
+    {
+        stream>>v1;
+        vertices.insert(v1);
+    }
+    for(int i=0;i<m;i++)
+    {
+        stream>>v1>>v2;
+        edges.insert(std::make_pair(v1,v2));
+    }
+    cereal::JSONInputArchive jsonArchive(stream);
+    jsonArchive(pixels);
+    for(auto p : pixels)
+    {
+        AddVertex(p);
+    }
+    for(auto e : edges)
+    {
+        AddEdge(e.first,e.second);
+    }
 }

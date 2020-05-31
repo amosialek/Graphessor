@@ -3,6 +3,7 @@
 
 #include "Pixel.hpp"
 #include <boost/graph/adjacency_list.hpp>
+#include <iosfwd>
 typedef boost::adjacency_list<
    boost::vecS,         //outEdge
    boost::vecS,         //vertex
@@ -30,6 +31,7 @@ class IGraph
         virtual std::vector<vertex_descriptor> GetAdjacentVertices(vertex_descriptor v)=0;
         virtual std::vector<vertex_descriptor> GetAdjacentVertices(vertex_descriptor v, std::string type)=0;
         virtual PixelGraph GetGraph()=0;
+        virtual void Serialize(std::ostream& stram)=0;  
 };
 
 
@@ -48,8 +50,32 @@ public:
         s+="\",style=filled\n";
     }
     if(name[v].x>=0 && name[v].y>=0 )
-        s+= "pos=\""+std::to_string(name[v].x/4)+','+std::to_string(name[v].y/4)+"!\"\n";
+        s+= "pos=\""+std::to_string(name[v].x/100.0)+','+std::to_string(name[v].y/100.0)+"!\"\n";
     s+="label=\""+ name[v].label +"\"";
+    s+=']';
+    out<<s<<'\n';
+    }
+private:
+     Name& name;
+};
+
+template <class Name>
+class myEdgeWriterWithNodeId {
+public:
+    myEdgeWriterWithNodeId(Name& _name) : name(_name) {}
+    template <class VertexOrEdge>
+    void operator()(std::ostream& out, const VertexOrEdge& v) const {
+    char buffer[8];
+    std::string s = "[";
+    if(name[v].r!=-1){
+        sprintf(buffer,"#%02X%02X%02X",name[v].r,name[v].g,name[v].b);
+        s+= "fillcolor=\"";
+        s+=buffer;
+        s+="\",style=filled\n";
+    }
+    if(name[v].x>=0 && name[v].y>=0 )
+        s+= "pos=\""+std::to_string(name[v].x/100.0)+','+std::to_string(name[v].y/100.0)+"!\"\n";
+    s+="label=\""+ std::to_string(v) +"\"";
     s+=']';
     out<<s<<'\n';
     }
