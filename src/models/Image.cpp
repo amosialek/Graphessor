@@ -51,7 +51,7 @@ void Image::BilinearInterpolation(int channel, std::vector<Pixel> pixels)
         maxy = std::max(maxy, adjacentVertex.y);
     }
     for(int y=miny;y<=maxy;y++)
-        for(int x=minx;x<maxx;x++)
+        for(int x=minx;x<=maxx;x++)
             SetPixel(x, y, channel, GetInterpolatedPixel(minx,maxx,miny, maxy,x,y,channel));
 }
 
@@ -131,7 +131,7 @@ void Image::FillMissingSpacesBasedOnLargerBlocks(std::shared_ptr<IGraph> graph, 
                 maxy = std::max(maxy, graph ->operator[](v).y);
             }
             for(int y=miny;y<=maxy;y++)
-                for(int x=minx;x<maxx;x++)//img._view[miny*(width+1)+minx][channel]==0 || img._view[miny*(width+1)+maxx][channel]==0 || img._view[maxy*(width+1)+minx][channel]==0 ||img._view[maxy*(width+1)+maxx][channel]==0
+                for(int x=minx;x<=maxx;x++)//img._view[miny*(width+1)+minx][channel]==0 || img._view[miny*(width+1)+maxx][channel]==0 || img._view[maxy*(width+1)+minx][channel]==0 ||img._view[maxy*(width+1)+maxx][channel]==0
                     if(img._view[y*(width+1)+x][channel]==0)
                         img._view[y*(width+1)+x][channel]=this->GetInterpolatedPixel(minx,maxx,miny, maxy,x,y,channel);
         }
@@ -154,7 +154,7 @@ void Image::BaricentricInterpolation(int channel, std::vector<Pixel> pixels)
     double w1,w2,w3;
     Pixel p;
     for(int y = miny; y <= maxy; y++)
-        for(int x=minx;x<maxx;x++)//img._view[miny*(width+1)+minx][channel]==0 || img._view[miny*(width+1)+maxx][channel]==0 || img._view[maxy*(width+1)+minx][channel]==0 ||img._view[maxy*(width+1)+maxx][channel]==0
+        for(int x=minx;x<=maxx;x++)//img._view[miny*(width+1)+minx][channel]==0 || img._view[miny*(width+1)+maxx][channel]==0 || img._view[maxy*(width+1)+minx][channel]==0 ||img._view[maxy*(width+1)+maxx][channel]==0
         {
             std::tie(p.r,p.g,p.b) = getPixel(x,y);
             if(GetRGBChannelValue(p,channel)==0)
@@ -467,8 +467,8 @@ bool Image::PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int
 
 double Image::PSNR(Image* other)
 {
-    assert(this -> width() == other -> width() && "Cannot compare images of different width");
-    assert(this -> height() == other -> height() && "Cannot compare images of different height");
+    //assert(this -> width() == other -> width() && "Cannot compare images of different width");
+    //assert(this -> height() == other -> height() && "Cannot compare images of different height");
     int r,g,b;
     int otherR, otherG, otherB;
     double sum=0;
@@ -480,6 +480,7 @@ double Image::PSNR(Image* other)
 
             sum+=(r-otherR)*(r-otherR)+(b-otherB)*(b-otherB)+(g-otherG)*(g-otherG);
         }
+    std::cout<<"sum for PSNR "<<sum<<std::endl;
     sum = sum / (255.0*255.0*3.0*width()*height());
     return 10*log10(1/sum);
 }

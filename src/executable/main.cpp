@@ -1,4 +1,5 @@
 #include <iostream>
+#include <experimental/filesystem> //experimental is no longer needed in gcc 8+. It is left for gcc-7 compilers
 #include <boost/config.hpp>
 #include <boost/graph/graphviz.hpp>
 #include <boost/graph/adjacency_list.hpp>
@@ -41,12 +42,14 @@ void PerformQuadTree(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
         //debugWriter->WriteItOut(std::to_string(i++), *graph);
         while(lastICount < graph -> GetCacheIterator(NODELABEL_I).size())
         {
+
             spdlog::debug("Starting production loop, channel={}, i={}",channel,i);  
             lastICount = graph -> GetCacheIterator(NODELABEL_I).size();
+            if(i%50==0)
             std::cerr<<"iteration: "<<i<<std::endl;
             std::chrono::steady_clock::time_point end;
             std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-            auto p5s = P5::FindAllMatches(graph, image, channel, i < 10 ? 0 : epsilon);
+            auto p5s = P5::FindAllMatches(graph, image, channel, i < 2 ? 0 : epsilon);
             for(auto p5 : *p5s)
                 p5.Perform();
             end = std::chrono::steady_clock::now();
@@ -78,6 +81,7 @@ void PerformQuadTree(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
             end = std::chrono::steady_clock::now();
             functionTime["P4"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
             //debugWriter->WriteItOut(std::to_string(i++), *graph);
+            i++;
         }
         std::cerr<<"P2 "<<functionTime["P2"]<<std::endl;
         std::cerr<<"P3 "<<functionTime["P3"]<<std::endl;
@@ -112,7 +116,8 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
         {
             spdlog::debug("Starting production loop, channel={}, i={}",channel,i);  
             lastICount = graph -> GetCacheIterator(NODELABEL_T).size();
-            std::cerr<<"iteration: "<<i<<std::endl;
+            if(i%50==0)
+                std::cerr<<"iteration: "<<i<<std::endl;
             std::chrono::steady_clock::time_point end;
             std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
             auto p7s = RivaraP7::FindAllMatches(graph, image, channel, i < 10 ? 0 : epsilon);
@@ -122,7 +127,7 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
             }
             end = std::chrono::steady_clock::now();
             functionTime["P7"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-            std::cerr<<"iteration: "<<i<<std::endl;
+            //std::cerr<<"iteration: "<<i<<std::endl;
             //debugWriter->WriteItOut(std::to_string(i++), *graph);
             begin = std::chrono::steady_clock::now();
             auto p1s = RivaraP1::FindAllMatches(graph, image);
@@ -130,7 +135,7 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
                 p1s -> front().Perform();
             end = std::chrono::steady_clock::now();
             functionTime["P1"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-            std::cerr<<"iteration: "<<i<<std::endl;
+            //std::cerr<<"iteration: "<<i<<std::endl;
             //debugWriter->WriteItOut(std::to_string(i++), *graph);
             i++;
             int productionsPerformed = 1;
@@ -148,7 +153,7 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
                 }
                 end = std::chrono::steady_clock::now();
                 functionTime["P2"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-                std::cerr<<"iteration: "<<i<<std::endl;
+                //std::cerr<<"iteration: "<<i<<std::endl;
                 logger->flush();
                 //debugWriter->WriteItOut(std::to_string(i++), *graph);
                 begin = std::chrono::steady_clock::now();
@@ -161,7 +166,7 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
                 }   
                 end = std::chrono::steady_clock::now();
                 functionTime["P3"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-                std::cerr<<"iteration: "<<i<<std::endl;
+                //std::cerr<<"iteration: "<<i<<std::endl;
 
                 begin = std::chrono::steady_clock::now();
                 //debugWriter->WriteItOut(std::to_string(i++), *graph);
@@ -170,7 +175,7 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
                     p4.Perform();
                 end = std::chrono::steady_clock::now();
                 functionTime["P4"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-                std::cerr<<"iteration: "<<i<<std::endl;
+                //std::cerr<<"iteration: "<<i<<std::endl;
 
                 begin = std::chrono::steady_clock::now();
                 //debugWriter->WriteItOut(std::to_string(i++), *graph);
@@ -179,7 +184,7 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
                     p5.Perform();
                 end = std::chrono::steady_clock::now();
                 functionTime["P5"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-                std::cerr<<"iteration: "<<i<<std::endl;
+                //std::cerr<<"iteration: "<<i<<std::endl;
 
                 begin = std::chrono::steady_clock::now();
                 //debugWriter->WriteItOut(std::to_string(i++), *graph);
@@ -188,7 +193,7 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
                     p6.Perform();
                 end = std::chrono::steady_clock::now();
                 functionTime["P6"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-                std::cerr<<"iteration: "<<i<<std::endl;
+                //std::cerr<<"iteration: "<<i<<std::endl;
 
                 productionsPerformed = p2s->size()+p3s->size()+p4s->size()+p5s->size()+p6s->size();
             }
@@ -215,18 +220,17 @@ int main(int argc, char** argv) {
 
     spdlog::set_pattern("[%H:%M:%S %z] [%n] [%^---%L---%$] [thread %t] %v");
     spdlog::set_level(spdlog::level::debug); // Set global log level to debug
-    auto file_logger = spdlog::basic_logger_mt("basic_logger", "/media/albert/Nowy/poligon/logs/basic.txt");
-    spdlog::set_default_logger(file_logger); 
     bool isRivara;
 
     opt::options_description description("Allowed options");
     description.add_options()
     ("help", "produce help message")
-    ("epsilon", opt::value<double>(), "set epsilon")
+    ("epsilon", opt::value<double>()->default_value(0.01), "set epsilon")
     ("input", opt::value<std::string>(), "input bitmap file")
     ("graph-output", opt::value<std::string>(), "debug output file template")
-    ("log-file", opt::value<std::string>(), "log file ")
-    ("output-file-template", opt::value<std::string>(), "output file template")
+    ("output-directory", opt::value<std::string>(), "directory for output, debug output and log file")
+    ("output-file-template", opt::value<std::string>()->default_value("output"), "output file template")
+    ("log-file", opt::value<std::string>()->default_value("log.txt"), "log file name")
     ("rivara", opt::bool_switch(&isRivara), "use rivara productions instead of quadtrees");
 
     opt::variables_map vm;
@@ -248,9 +252,24 @@ int main(int argc, char** argv) {
     if (vm.count("output-file-template"))
         outputFileName = vm["output-file-template"].as<std::string>();
 
+    std::string logFileName;
+    if (vm.count("log-file"))
+        logFileName = vm["log-file"].as<std::string>();
+
+    std::string outputDirectory;
+    if (vm.count("output-directory"))
+        outputDirectory = vm["output-directory"].as<std::string>();
+
+    if(outputDirectory!="")
+        std::experimental::filesystem::create_directories(outputDirectory);
+    std::experimental::filesystem::path outputDirectoryPath = outputDirectory;
+
+    auto file_logger = spdlog::basic_logger_mt("basic_logger", (outputDirectoryPath/logFileName).c_str());
+    spdlog::set_default_logger(file_logger); 
+
     for(int i=0;i<argc;i++)
     {
-        //spdlog::debug("P1 {}",S);    
+        spdlog::debug("P1 {}",argv[i]);    
     }
 
     AbstractOutputWriter* debugWriter = WriterFactory::GetDebugWriter(graphOutputFileName);
@@ -262,12 +281,19 @@ int main(int argc, char** argv) {
     else
         PerformQuadTree(channel_graphs, image, debugWriter, epsilon, file_logger);
     Deserialize(debugWriter);
+    
+    for(auto g : channel_graphs)
+        g->DecreaseXAndYByRatio(4);
+
     auto restoredImage = std::make_unique<Image>(channel_graphs);
-    GraphImageWriter::DrawPixels(channel_graphs[0],outputFileName+"_red_graph.bmp");
-    GraphImageWriter::DrawPixels(channel_graphs[1],outputFileName+"_green_graph.bmp");
-    GraphImageWriter::DrawPixels(channel_graphs[2],outputFileName+"_blue_graph.bmp");
-    restoredImage -> save(outputFileName+".bmp");
-    restoredImage -> Save3Colors(outputFileName);
-    std::cout<<"PSNR: "<<restoredImage -> PSNR(image.get())<<std::endl;
+    //GraphImageWriter::DrawPixels(channel_graphs[0],(outputDirectoryPath/(outputFileName+"_red_graph.bmp")).c_str());
+    //GraphImageWriter::DrawPixels(channel_graphs[1],(outputDirectoryPath/(outputFileName+"_green_graph.bmp")).c_str());
+    //GraphImageWriter::DrawPixels(channel_graphs[2],(outputDirectoryPath/(outputFileName+"_blue_graph.bmp")).c_str());
+    auto image2 = std::make_shared<Image>(inputFileName);
+    restoredImage -> save((outputDirectoryPath/(outputFileName+".bmp")).c_str());
+    //restoredImage -> Save3Colors((outputDirectoryPath/outputFileName).c_str());
+    double PSNR = restoredImage -> PSNR(image2.get());
+    std::cout<<"PSNR: "<<PSNR<<std::endl; 
+    spdlog::debug("PSNR = {}",PSNR);  
 }
 

@@ -85,6 +85,7 @@ namespace Rivara
                 if(maybeBestEdge.has_value())
                 {
                     result->emplace_back(g, maybeBestEdge.value(), t, image);
+                    return result;
                 }
             }
         }

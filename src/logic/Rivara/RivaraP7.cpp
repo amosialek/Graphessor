@@ -23,31 +23,34 @@ namespace Rivara
         std::map<vertex_descriptor, double> triangleErrors;
         for(auto triangle : triangles)
         {
-            auto vertices = g -> GetAdjacentVertices(triangle);
-            double x1 = (*g)[vertices[0]].attributes->GetDouble(RIVARA_ATTRIBUTE_X);
-            double x2 = (*g)[vertices[1]].attributes->GetDouble(RIVARA_ATTRIBUTE_X);
-            double x3 = (*g)[vertices[2]].attributes->GetDouble(RIVARA_ATTRIBUTE_X);
-            double y1 = (*g)[vertices[0]].attributes->GetDouble(RIVARA_ATTRIBUTE_Y);
-            double y2 = (*g)[vertices[1]].attributes->GetDouble(RIVARA_ATTRIBUTE_Y);
-            double y3 = (*g)[vertices[2]].attributes->GetDouble(RIVARA_ATTRIBUTE_Y);
-            if(abs(x1*y2+x2*y3+x3*y1-x1*y3-x2*y1-x3*y2)>4)
-            {    
-                if((*g)[triangle].error == -1)
-                    (*g)[triangle].error = image -> CompareWithInterpolation(
-                        x1, x2, x3, y1, y2, y3, channel
-                    );
-                double error = (*g)[triangle].error;
-                maxError = std::max(maxError, error);
-                triangleErrors[triangle] = error;
-            }
-        }
-        if(maxError>epsilon)
-        {
-            for(auto triangle : triangleErrors)
+            if((*g)[triangle].error == -1 || ((*g)[triangle].error>epsilon && !(*g)[triangle].attributes->GetBool(RIVARA_ATTRIBUTE_R)))
             {
-                if(triangle.second>0.33 * maxError)
+                auto vertices = g -> GetAdjacentVertices(triangle);
+                double x1 = (*g)[vertices[0]].attributes->GetDouble(RIVARA_ATTRIBUTE_X);
+                double x2 = (*g)[vertices[1]].attributes->GetDouble(RIVARA_ATTRIBUTE_X);
+                double x3 = (*g)[vertices[2]].attributes->GetDouble(RIVARA_ATTRIBUTE_X);
+                double y1 = (*g)[vertices[0]].attributes->GetDouble(RIVARA_ATTRIBUTE_Y);
+                double y2 = (*g)[vertices[1]].attributes->GetDouble(RIVARA_ATTRIBUTE_Y);
+                double y3 = (*g)[vertices[2]].attributes->GetDouble(RIVARA_ATTRIBUTE_Y);
+                if(abs(x1*y2+x2*y3+x3*y1-x1*y3-x2*y1-x3*y2)>4)
+                {    
+                    if((*g)[triangle].error == -1)
+                        (*g)[triangle].error = image -> CompareWithInterpolation(
+                            x1, x2, x3, y1, y2, y3, channel
+                        );
+                    double error = (*g)[triangle].error;
+                    maxError = std::max(maxError, error);
+                    triangleErrors[triangle] = error;
+                }
+            }
+            if(maxError>epsilon)
+            {
+                for(auto triangle : triangleErrors)
                 {
-                    result->emplace_back(g, triangle.first);
+                    if(triangle.second>0.33 * maxError)
+                    {
+                        result->emplace_back(g, triangle.first);
+                    }
                 }
             }
         }

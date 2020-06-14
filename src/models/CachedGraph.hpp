@@ -29,6 +29,7 @@ class CachedGraph : public IGraph
         virtual const std::set<vertex_descriptor>& GetPixels();
         virtual void Serialize(std::ostream& stream) override;  
         void Deserialize(std::istream& stream);  
+        void DecreaseXAndYByRatio(int ratio);
 };
 
 #endif /* CACHEDGRAPH_HPP */

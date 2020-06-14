@@ -254,3 +254,12 @@ void CachedGraph::Deserialize(std::istream& stream)
         AddEdge(e.first,e.second);
     }
 }
+void CachedGraph::DecreaseXAndYByRatio(int ratio)
+{
+    PixelGraph::vertex_iterator v, vend;
+    for (boost::tie(v, vend) = boost::vertices(*graph); v != vend; ++v)
+    {
+        (*graph)[*v].x/=ratio;
+        (*graph)[*v].y/=ratio;
+    }
+}

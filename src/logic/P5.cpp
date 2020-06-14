@@ -60,7 +60,7 @@ std::unique_ptr<std::vector<P5>> P5::FindAllMatches(std::shared_ptr<CachedGraph>
     if(maxError > epsilon)
         for(auto IEdge : IEdges)
         {
-            if(IEdgeToError[IEdge] > 0.33 * maxError && IEdgeToError[IEdge] > epsilon)
+            if(/*IEdgeToError[IEdge] > 0.33 * maxError && */ IEdgeToError[IEdge] > epsilon)
                 {
                     result -> emplace_back(graph, IEdge);
                 }
