@@ -27,11 +27,11 @@ namespace Rivara{
             vertex_descriptor TVertex;
             std::vector<vertex_descriptor> nodes;
             std::unique_ptr<Rivara::RivaraP2> p2;
-            std::shared_ptr<CachedGraph> g; 
+            std::shared_ptr<RivaraCachedGraph> g; 
             std::shared_ptr<Image> image;   
         protected:
             RivaraProduction2Test() {
-                g = std::make_shared<CachedGraph>();
+                g = std::make_shared<RivaraCachedGraph>();
                 image = std::make_shared<Image>(10,10);
                 node1.attributes = std::make_shared<RivaraAttributes>();
                 node2.attributes = std::make_shared<RivaraAttributes>();

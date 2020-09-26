@@ -3,7 +3,7 @@
 
 namespace Rivara
 {
-    RivaraP3::RivaraP3(std::shared_ptr<IGraph> graph,
+    RivaraP3::RivaraP3(std::shared_ptr<RivaraCachedGraph> graph,
             vertex_descriptor EEdgeToBreak,
             vertex_descriptor TEdge,
             std::shared_ptr<Image> image) 
@@ -68,7 +68,8 @@ namespace Rivara
         (*graph)[TEdge].attributes->SetBool(RIVARA_ATTRIBUTE_R, false);
         (*graph)[EEdgeToBreak].attributes->SetDouble(RIVARA_ATTRIBUTE_L, NL((*graph)[nodes[1]],newNNode));
         (*graph)[TEdge].error = (*graph)[newTNodeVertex].error = -1;
-
+        graph->RegisterNotComputedElement(TEdge);
+        graph->RegisterNotComputedElement(newTNodeVertex);
         
     }
 

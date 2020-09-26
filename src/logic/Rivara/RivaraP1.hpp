@@ -3,23 +3,24 @@
 
 #include "Productions.hpp"
 #include "RivaraUtils.hpp"
+#include "RivaraCachedGraph.hpp"
 #include <optional>
 
 namespace Rivara
 {
     class RivaraP1 {
         private:
-            std::shared_ptr<IGraph> graph;
+            std::shared_ptr<RivaraCachedGraph> graph;
             vertex_descriptor EEdge;
             vertex_descriptor TEdge;
             std::shared_ptr<Image> image;
         public:
-            RivaraP1(std::shared_ptr<IGraph> graph,
+            RivaraP1(std::shared_ptr<RivaraCachedGraph> graph,
             vertex_descriptor EEdge,
             vertex_descriptor TEdge,
             std::shared_ptr<Image> image);
             void Perform();
-            static std::unique_ptr<std::vector<RivaraP1>> FindAllMatches(std::shared_ptr<CachedGraph> g, std::shared_ptr<Image> image);
+            static std::unique_ptr<std::vector<RivaraP1>> FindAllMatches(std::shared_ptr<RivaraCachedGraph> g, std::shared_ptr<Image> image);
             std::vector<uint8_t> Serialize();
 
             ///

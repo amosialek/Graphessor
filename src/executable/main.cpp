@@ -280,15 +280,15 @@ int main(int argc, char** argv) {
         PerformRivara(channel_graphs, image, debugWriter, epsilon, file_logger);
     else
         PerformQuadTree(channel_graphs, image, debugWriter, epsilon, file_logger);
-    Deserialize(debugWriter);
+    //Deserialize(debugWriter);
     
     for(auto g : channel_graphs)
         g->DecreaseXAndYByRatio(4);
 
     auto restoredImage = std::make_unique<Image>(channel_graphs);
-    //GraphImageWriter::DrawPixels(channel_graphs[0],(outputDirectoryPath/(outputFileName+"_red_graph.bmp")).c_str());
-    //GraphImageWriter::DrawPixels(channel_graphs[1],(outputDirectoryPath/(outputFileName+"_green_graph.bmp")).c_str());
-    //GraphImageWriter::DrawPixels(channel_graphs[2],(outputDirectoryPath/(outputFileName+"_blue_graph.bmp")).c_str());
+    // GraphImageWriter::DrawPixels(channel_graphs[0],(outputDirectoryPath/(outputFileName+"_red_graph.bmp")).c_str());
+    // GraphImageWriter::DrawPixels(channel_graphs[1],(outputDirectoryPath/(outputFileName+"_green_graph.bmp")).c_str());
+    // GraphImageWriter::DrawPixels(channel_graphs[2],(outputDirectoryPath/(outputFileName+"_blue_graph.bmp")).c_str());
     auto image2 = std::make_shared<Image>(inputFileName);
     restoredImage -> save((outputDirectoryPath/(outputFileName+".bmp")).c_str());
     //restoredImage -> Save3Colors((outputDirectoryPath/outputFileName).c_str());

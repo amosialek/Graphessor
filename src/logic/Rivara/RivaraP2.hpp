@@ -9,11 +9,11 @@ namespace Rivara
 {
     class RivaraP2 {
         private:
-            std::shared_ptr<IGraph> graph;
+            std::shared_ptr<RivaraCachedGraph> graph;
             vertex_descriptor hangingNode;
             vertex_descriptor TEdge;
         public:
-            RivaraP2(std::shared_ptr<IGraph> graph,
+            RivaraP2(std::shared_ptr<RivaraCachedGraph> graph,
                 vertex_descriptor EEdge,
                 vertex_descriptor TEdge);
             void Perform();

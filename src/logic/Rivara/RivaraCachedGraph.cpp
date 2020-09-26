@@ -40,6 +40,31 @@ namespace Rivara
     {
         typeToVerticesCache["H"]->erase(v);
     }
+    void RivaraCachedGraph::RegisterMarkedElement(vertex_descriptor v)
+    {
+        InsertCacheElement("M", v);
+    }
+    std::set<vertex_descriptor> RivaraCachedGraph::GetMarkedElements()
+    {
+        return GetCacheIterator("M");
+    }
+    void RivaraCachedGraph::DeregisterMarkedElement(vertex_descriptor v)
+    {
+        typeToVerticesCache["M"]->erase(v);
+    }
+    void RivaraCachedGraph::RegisterNotComputedElement(vertex_descriptor v)
+    {
+        InsertCacheElement("C", v);
+    }
+    std::set<vertex_descriptor>& RivaraCachedGraph::GetNotComputedElements()
+    {
+        return GetCacheIterator("C");
+    }
+    void RivaraCachedGraph::DeregisterNotComputedElement(vertex_descriptor v)
+    {
+        typeToVerticesCache["C"]->erase(v);
+    }
+
     vertex_descriptor RivaraCachedGraph::AddVertex(Pixel p)
     {
         std::vector<vertex_descriptor> noLongerHangingNodes;

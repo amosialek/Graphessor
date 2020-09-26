@@ -30,7 +30,10 @@
             // "args": ["--input","/media/albert/Nowy/Albert/agh/magisterka/poligon/bunny/bunny.bmp",  "--epsilon", "0.01","--output-file-template","/media/albert/Nowy/Albert/agh/magisterka/poligon/bunny/5/bunny"],
             // "args": ["--input","/media/albert/Nowy/Albert/agh/magisterka/poligon/japonia/Japonia2.bmp",  "--epsilon", "0.01","--output-file-template","/media/albert/Nowy/Albert/agh/magisterka/poligon/japonia/4_full_baricentric/japonia" ],
             // "args": ["--rivara", "--input","/media/albert/Nowy/Albert/agh/magisterka/poligon/japonia/Japonia2.bmp",  "--epsilon", "0.01","--output-file-template","/media/albert/Nowy/Albert/agh/magisterka/poligon/japonia/8_full_baricentric/japonia","--graph-output","/media/albert/Nowy/Albert/agh/magisterka/poligon/outs/test_C" ],
-            "args": ["--input","/media/albert/Nowy/Albert/agh/magisterka/poligon/lenna/lenna.bmp",  "--epsilon", "0.001","--output-file-template","lenna", "--output-directory", "/media/albert/Nowy/Albert/agh/magisterka/poligon/lenna/4/" ],
+            // "args": ["--input","/media/albert/Nowy/Albert/agh/magisterka/poligon/lenna/lenna.bmp",  "--epsilon", "0.001","--output-file-template","lenna", "--output-directory", "/media/albert/Nowy/Albert/agh/magisterka/poligon/lenna/4/" ],
+             "args": ["--rivara", "--input", "/home/albert/mnt/8/Albert_2020/agh/magisterka/poligon/house/house.bmp", "--epsilon", "0.01", "--output-file-template", "house", "--output-directory", "/home/albert/mnt/8/Albert_WorkingFolder/agh/magisterka/results/house/rivara/0/" ],
+
+
             "MIMode": "gdb",
             "cwd": "${workspaceFolder}",
             // "logging": {

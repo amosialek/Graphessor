@@ -2,7 +2,7 @@
 
 namespace Rivara
 {
-    RivaraP2::RivaraP2(std::shared_ptr<IGraph> graph,
+    RivaraP2::RivaraP2(std::shared_ptr<RivaraCachedGraph> graph,
             vertex_descriptor hangingNode,
             vertex_descriptor TEdge) 
             :
@@ -53,6 +53,8 @@ namespace Rivara
 
         (*graph)[TEdge].attributes->SetBool(RIVARA_ATTRIBUTE_R, false);
         (*graph)[TEdge].error = (*graph)[newTNodeVertex].error = -1;
+        graph->RegisterNotComputedElement(TEdge);
+        graph->RegisterNotComputedElement(newTNodeVertex);
     }
 
 

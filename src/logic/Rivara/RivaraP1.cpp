@@ -4,7 +4,7 @@
 
 namespace Rivara
 {
-    RivaraP1::RivaraP1(std::shared_ptr<IGraph> graph,
+    RivaraP1::RivaraP1(std::shared_ptr<RivaraCachedGraph> graph,
             vertex_descriptor EEdge,
             vertex_descriptor TEdge,
             std::shared_ptr<Image> image) 
@@ -18,6 +18,7 @@ namespace Rivara
     void RivaraP1::Perform()
     {
         spdlog::debug("Rivara P1");
+        graph->DeregisterMarkedElement(TEdge);
         auto nodes = graph -> GetAdjacentVertices(EEdge);
         auto lastNodes = graph -> GetAdjacentVertices(TEdge);
         spdlog::debug("{} {} {}", lastNodes[0],  lastNodes[1], lastNodes[2]);
@@ -63,13 +64,15 @@ namespace Rivara
         (*graph)[TEdge].error = (*graph)[newTNodeVertex].error = -1;
 
         spdlog::debug("{} {} {} {}", nodes[0],  nodes[1], lastNode, newNNodeVertex);
-
+        graph->RegisterNotComputedElement(TEdge);
+        graph->RegisterNotComputedElement(newTNodeVertex);
     }
 
-    std::unique_ptr<std::vector<RivaraP1>> RivaraP1::FindAllMatches(std::shared_ptr<CachedGraph> g, std::shared_ptr<Image> image) 
+    std::unique_ptr<std::vector<RivaraP1>> RivaraP1::FindAllMatches(std::shared_ptr<RivaraCachedGraph> g, std::shared_ptr<Image> image) 
     {
         auto result = std::make_unique<std::vector<RivaraP1>>();
-        auto triangles = g -> GetCacheIterator(NODELABEL_T);
+        //auto triangles = g -> GetCacheIterator(NODELABEL_T);
+        auto triangles = g -> GetMarkedElements();
         for(auto t : triangles)
         {
             if(!(*g)[t].attributes -> GetBool(RIVARA_ATTRIBUTE_R)) //if not marked

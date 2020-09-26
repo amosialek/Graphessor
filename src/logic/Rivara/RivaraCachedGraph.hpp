@@ -15,6 +15,14 @@ namespace Rivara
             void RegisterHangingNode(vertex_descriptor v);
             std::set<vertex_descriptor> GetHangingNodes();
             void DeregisterHangingNode(vertex_descriptor v);
+            void DeregisterMarkedElement(vertex_descriptor v);
+            std::set<vertex_descriptor> GetMarkedElements();
+            void RegisterMarkedElement(vertex_descriptor v);
+
+            void DeregisterNotComputedElement(vertex_descriptor v);
+            std::set<vertex_descriptor>& GetNotComputedElements();
+            void RegisterNotComputedElement(vertex_descriptor v);
+
             vertex_descriptor AddVertex(Pixel p) override;
     };
 }

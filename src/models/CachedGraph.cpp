@@ -62,7 +62,7 @@ Pixel& CachedGraph::operator[](vertex_descriptor v)
     return (*graph)[v];
 }
 
-const std::set<vertex_descriptor>& CachedGraph::GetCacheIterator(std::string type)
+std::set<vertex_descriptor>& CachedGraph::GetCacheIterator(std::string type)
 {
     EnsureCacheExists(type);
     return *(typeToVerticesCache[type]);
