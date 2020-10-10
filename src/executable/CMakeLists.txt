@@ -7,7 +7,7 @@ link_libraries(stdc++fs)
 add_executable(Graphessor main.cpp)
 target_link_libraries (Graphessor Models)
 target_link_libraries (Graphessor IO)
-target_link_libraries (Graphessor Logic)
+target_link_libraries (Graphessor RectangularProductions)
 target_link_libraries (Graphessor RivaraProductions)
 
 find_package(Boost COMPONENTS program_options REQUIRED)
