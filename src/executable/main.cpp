@@ -18,6 +18,7 @@
 #include "GraphImageWriter.hpp"
 #include "RivaraProductions.hpp"
 #include "RivaraCachedGraph.hpp"
+#include "ImageMagnifier.hpp"
 
 std::map<std::string, int> functionTime;
 

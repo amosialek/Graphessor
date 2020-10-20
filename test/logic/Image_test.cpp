@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "Image.hpp"
+#include "ImageMagnifier.hpp"
 #include "Productions.hpp"
 using namespace std;
 
