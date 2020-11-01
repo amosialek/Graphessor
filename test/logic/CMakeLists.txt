@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0.0)
 
-add_library(LogicTest Image_test.cpp Production_test.cpp)
+add_library(LogicTest Image_test.cpp Production_test.cpp Array2Dtest.cpp)
 target_link_libraries(LogicTest RivaraTest)
 target_include_directories(LogicTest PUBLIC "${PROJECT_SOURCE_DIR}/test/logic/RivaraTests")
 target_include_directories(LogicTest PUBLIC "${PROJECT_SOURCE_DIR}/test/logic")

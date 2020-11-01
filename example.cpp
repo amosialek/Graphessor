@@ -8,6 +8,7 @@
 #include "RivaraProduction4test.cpp"
 #include "RivaraProduction5test.cpp"
 #include "RivaraProduction6test.cpp"
+#include "Array2Dtest.cpp"
 using namespace std;
 int main()
 {

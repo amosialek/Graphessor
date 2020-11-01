@@ -31,6 +31,9 @@ void PerformQuadTree(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
     double epsilon,
     std::shared_ptr<spdlog::logger> logger)
 {
+    std::vector<std::shared_ptr<Array2D>> imageArrays = image->GetChannelsAsArrays();
+    std::shared_ptr<Array2D> interpolationArray = std::make_shared<Array2D>(image->width(), image->height());
+
     for(int channel=0;channel<3;channel++)
     {
         auto graph = std::make_shared<CachedGraph>();
@@ -50,7 +53,7 @@ void PerformQuadTree(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
             std::cerr<<"iteration: "<<i<<std::endl;
             std::chrono::steady_clock::time_point end;
             std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-            auto p5s = P5::FindAllMatches(graph, image, channel, i < 2 ? 0 : epsilon);
+            auto p5s = P5::FindAllMatches(graph, imageArrays[channel], interpolationArray, channel, i < 2 ? 0 : epsilon);
             for(auto p5 : *p5s)
                 p5.Perform();
             end = std::chrono::steady_clock::now();
@@ -115,13 +118,16 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
         //debugWriter->WriteItOut(std::to_string(i++), *graph);
         while(lastICount < graph -> GetCacheIterator(NODELABEL_T).size())
         {
+            std::vector<std::shared_ptr<Array2D>> imageArrays = image->GetChannelsAsArrays();
+            std::shared_ptr<Array2D> interpolationArray = std::make_shared<Array2D>(image->width(), image->height());
+
             spdlog::debug("Starting production loop, channel={}, i={}",channel,i);  
             lastICount = graph -> GetCacheIterator(NODELABEL_T).size();
             if(i%50==0)
                 std::cerr<<"iteration: "<<i<<std::endl;
             std::chrono::steady_clock::time_point end;
             std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-            auto p7s = RivaraP7::FindAllMatches(graph, image, channel, i < 10 ? 0 : epsilon);
+            auto p7s = RivaraP7::FindAllMatches(graph, imageArrays[channel], interpolationArray, channel, i < 10 ? 0 : epsilon);
             for(auto p7 : *p7s)
             {
                 p7.Perform();

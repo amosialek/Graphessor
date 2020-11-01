@@ -22,7 +22,8 @@ void P5::Perform()
 }
 
 std::unique_ptr<std::vector<P5>> P5::FindAllMatches(std::shared_ptr<CachedGraph> graph,
-    std::shared_ptr<Image> image,
+    std::shared_ptr<Array2D> image,
+    std::shared_ptr<Array2D> interpolation,
     int channel,
     double epsilon)
 {
@@ -30,14 +31,13 @@ std::unique_ptr<std::vector<P5>> P5::FindAllMatches(std::shared_ptr<CachedGraph>
     double sumError = 0;
     double maxError = 0;
     vertexToNeighbours.clear();
-    int width = image->width();
-    int height = image->height();
+    int width = image->width;
+    int height = image->height;
     for(auto v : graph -> GetCacheIterator(NODELABEL_I))
         vertexToNeighbours[v] = graph -> GetAdjacentVertices(v); 
     auto IEdges = graph -> GetCacheIterator(NODELABEL_I);
     for(auto IEdge : IEdges)
-    {
-        // spdlog::debug("TOPKEK");  
+    { 
         int minx = width;
         int maxx = 0;
         int miny = height;
@@ -50,7 +50,10 @@ std::unique_ptr<std::vector<P5>> P5::FindAllMatches(std::shared_ptr<CachedGraph>
             maxy = std::max(maxy, (*graph)[v].y); 
         } 
         if((*graph)[IEdge].error < 0)
-            (*graph)[IEdge].error = image->CompareWithInterpolation(minx, maxx, miny, maxy, channel);
+        {
+            interpolation->BilinearInterpolation(*image, minx, maxx, miny, maxy);
+            (*graph)[IEdge].error = image->CompareWith(*interpolation, minx, maxx, miny, maxy);
+        }
         IEdgeToError[IEdge] = (*graph)[IEdge].error;
         sumError += (*graph)[IEdge].error;
         maxError = std::max(maxError, (*graph)[IEdge].error);

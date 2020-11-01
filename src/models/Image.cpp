@@ -199,24 +199,24 @@ void Image::Save3Colors(std::string filename)
     boost::gil::write_view(filename+"_blue.bmp", blueView, boost::gil::bmp_tag());
 }
 
-long long Image::CompareWith(Image& other, int x0, int y0, int width, int height)
-{
-    long long sum = 0;
-    for(int y = y0; y < height; y++)
-    {
-        for(int x = x0; x < width; x++)
-        {
-            for(int channel=0; channel<3; channel++)
-                sum += abs(view[y * width + x][channel] - other.view[y * width + x][channel]);
-        }
-    }
-    return sum;
-}
+// long long Image::CompareWith(Image& other, int x0, int y0, int width, int height)
+// {
+//     long long sum = 0;
+//     for(int y = y0; y < height; y++)
+//     {
+//         for(int x = x0; x < width; x++)
+//         {
+//             for(int channel=0; channel<3; channel++)
+//                 sum += abs(view[y * width + x][channel] - other.view[y * width + x][channel]);
+//         }
+//     }
+//     return sum;
+// }
 
-long long Image::CompareWith(Image& other)
-{
-    return CompareWith(other, 0, 0, width(), height());
-}
+// long long Image::CompareWith(Image& other)
+// {
+//     return CompareWith(other, 0, 0, width(), height());
+// }
 
 int Image::width()
 {
@@ -279,63 +279,58 @@ double Image::GetInterpolatedPixel(int x1, int x2, int x3, int y1, int y2, int y
     return rInterpolated;
 }
 
-double Image::SquaredErrorOfInterpolation(int x1, int x2, int y1, int y2, int channel)
-{
-    double sum = 0;
-    //std::cout<<"x2 -x1, y2-y1: "<<x2-x1<<" "<<y2-y1<<std::endl;
-    if (x2-x1==0 or y2-y1==0) return 0;
+// double Image::SquaredErrorOfInterpolation(int x1, int x2, int y1, int y2, int channel)
+// {
+//     double sum = 0;
+//     if (x2-x1==0 or y2-y1==0) return 0;
+//     for(int x=x1;x<=x2;x++)
+//         for(int y=y1;y<=y2;y++)
+//         {
+//             int rOriginal;
+//             rOriginal = getPixelInternal(x, y, channel);
+//             double rInterpolated = GetInterpolatedPixel(x1,x2,y1,y2,x,y,channel);
+//             sum+=(rInterpolated - rOriginal)*(rInterpolated - rOriginal);
+//         }
+//     return sum;
+// }
 
-    for(int x=x1;x<=x2;x++)
-        for(int y=y1;y<=y2;y++)
-        {
-            int rOriginal;
-            rOriginal = getPixelInternal(x, y, channel);
-            double rInterpolated = GetInterpolatedPixel(x1,x2,y1,y2,x,y,channel);
-            sum+=(rInterpolated - rOriginal)*(rInterpolated - rOriginal);
-      //      std::cout<<x<<" "<<y<<" "<<rOriginal<<" "<<rInterpolated<<" "<<sum<<std::endl;
-            ;
-        }
-    return sum;
-}
+// double Image::SquaredErrorOfInterpolation(int x1, int x2, int x3, int y1, int y2, int y3, int channel)
+// {
+//     double sum = 0;
 
-double Image::SquaredErrorOfInterpolation(int x1, int x2, int x3, int y1, int y2, int y3, int channel)
-{
-    double sum = 0;
-    //std::cout<<"x2 -x1, y2-y1: "<<x2-x1<<" "<<y2-y1<<std::endl;
+//     int minx = std::min(x1, std::min(x2,x3));
+//     int miny = std::min(y1, std::min(y2,y3));
+//     int maxx = std::max(x1, std::max(x2,x3));
+//     int maxy = std::max(y1, std::max(y2,y3));
 
-    int minx = std::min(x1, std::min(x2,x3));
-    int miny = std::min(y1, std::min(y2,y3));
-    int maxx = std::max(x1, std::max(x2,x3));
-    int maxy = std::max(y1, std::max(y2,y3));
+//     if (maxx-minx==0 or maxy-miny==0) 
+//         return 0;
+//     double wDenominator = 1.0/((y2-y3) * (x1-x3) + (x3-x2) * (y1-y3));
+//     for(int x=minx;x<=maxx;x++)
+//         for(int y=miny;y<=maxy;y++)
+//             if(PointInTriangle(x,y,x1,y1,x2,y2,x3,y3))
+//             {
+//                 int rOriginal;
+//                 rOriginal = getPixelInternal(x, y, channel);
+//                 double rInterpolated = GetInterpolatedPixel(x1,x2,x3,y1,y2,y3,x,y,wDenominator,channel);
+//                 sum+=(rInterpolated - rOriginal)*(rInterpolated - rOriginal);
+//         //      std::cout<<x<<" "<<y<<" "<<rOriginal<<" "<<rInterpolated<<" "<<sum<<std::endl;
+//             }
+//     return sum;
+// }
 
-    if (maxx-minx==0 or maxy-miny==0) 
-        return 0;
-    double wDenominator = 1.0/((y2-y3) * (x1-x3) + (x3-x2) * (y1-y3));
-    for(int x=minx;x<=maxx;x++)
-        for(int y=miny;y<=maxy;y++)
-            if(PointInTriangle(x,y,x1,y1,x2,y2,x3,y3))
-            {
-                int rOriginal;
-                rOriginal = getPixelInternal(x, y, channel);
-                double rInterpolated = GetInterpolatedPixel(x1,x2,x3,y1,y2,y3,x,y,wDenominator,channel);
-                sum+=(rInterpolated - rOriginal)*(rInterpolated - rOriginal);
-        //      std::cout<<x<<" "<<y<<" "<<rOriginal<<" "<<rInterpolated<<" "<<sum<<std::endl;
-            }
-    return sum;
-}
+// double Image::CompareWithInterpolation(int x1, int x2, int y1, int y2, int channel)
+// {
+//     double maxSum = 255.0*255*(x2-x1+1)*(y2-y1+1);
+//     return SquaredErrorOfInterpolation(x1, x2, y1, y2, channel)/maxSum;
+// }
 
-double Image::CompareWithInterpolation(int x1, int x2, int y1, int y2, int channel)
-{
-    double maxSum = 255.0*255*(x2-x1+1)*(y2-y1+1);
-    return SquaredErrorOfInterpolation(x1, x2, y1, y2, channel)/maxSum;
-}
-
-double Image::CompareWithInterpolation(int x1, int x2, int x3, int y1, int y2, int y3, int channel)
-{
-    double maxSum = 255.0*255*abs(x1*y2+x2*y3+x3*y1-x1*y3-x2*y1-x3*y2) / 2;
-    double result =  SquaredErrorOfInterpolation(x1, x2, x3, y1, y2, y3, channel)/maxSum;
-    return result;
-}
+// double Image::CompareWithInterpolation(int x1, int x2, int x3, int y1, int y2, int y3, int channel)
+// {
+//     double maxSum = 255.0*255*abs(x1*y2+x2*y3+x3*y1-x1*y3-x2*y1-x3*y2) / 2;
+//     double result =  SquaredErrorOfInterpolation(x1, x2, x3, y1, y2, y3, channel)/maxSum;
+//     return result;
+// }
 
 void Image::save(std::string filename)
 {
@@ -445,25 +440,25 @@ void Image::DrawBlackLine(int x1, int y1, int x2, int y2)
     }
 }
 
-int Image::sign2 (int x1, int y1, int x2, int y2, int x3, int y3)
-{
-    return (x1 - x3) * (y2 - y3) - (x2 - x3) * (y1 - y3);
-}
+// int Image::sign2 (int x1, int y1, int x2, int y2, int x3, int y3)
+// {
+//     return (x1 - x3) * (y2 - y3) - (x2 - x3) * (y1 - y3);
+// }
 
-bool Image::PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int x3, int y3)
-{
-    int d1, d2, d3;
-    bool has_neg, has_pos;
+// bool Image::PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int x3, int y3)
+// {
+//     int d1, d2, d3;
+//     bool has_neg, has_pos;
 
-    d1 = sign2(px, py, x1, y1, x2, y2);
-    d2 = sign2(px, py, x2, y2, x3, y3);
-    d3 = sign2(px, py, x3, y3, x1, y1);
+//     d1 = sign2(px, py, x1, y1, x2, y2);
+//     d2 = sign2(px, py, x2, y2, x3, y3);
+//     d3 = sign2(px, py, x3, y3, x1, y1);
 
-    has_neg = (d1 < 0) && (d2 < 0) && (d3 < 0);
-    has_pos = (d1 > 0) && (d2 > 0) && (d3 > 0);
+//     has_neg = (d1 < 0) && (d2 < 0) && (d3 < 0);
+//     has_pos = (d1 > 0) && (d2 > 0) && (d3 > 0);
 
-    return !(has_neg && has_pos);
-}
+//     return !(has_neg && has_pos);
+// }
 
 double Image::PSNR(Image* other)
 {
@@ -488,4 +483,18 @@ double Image::PSNR(Image* other)
 Image* Image::GetImageInternal()
 {
     return this;
+}
+
+std::vector<std::shared_ptr<Array2D>> Image::GetChannelsAsArrays()
+{
+    std::vector<std::shared_ptr<Array2D>> result;
+
+    for(int channel=0;channel<3;channel++)
+    {
+        result.push_back(std::make_shared<Array2D>(width(), height()));
+        for(int x=0;x<width();x++)
+            for(int y=0;y<height();y++)
+                (*(result[channel]))[x][y] = view[y*width()+x][channel];
+    }
+    return result;
 }

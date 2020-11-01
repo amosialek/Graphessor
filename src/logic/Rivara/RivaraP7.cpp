@@ -15,7 +15,11 @@ namespace Rivara
         graph->RegisterMarkedElement(TEdge);
     }
 
-    std::unique_ptr<std::vector<RivaraP7>> RivaraP7::FindAllMatches(std::shared_ptr<RivaraCachedGraph> g, std::shared_ptr<Image> image, int channel, double epsilon)
+    std::unique_ptr<std::vector<RivaraP7>> RivaraP7::FindAllMatches(std::shared_ptr<RivaraCachedGraph> g,
+        std::shared_ptr<Array2D> image,
+        std::shared_ptr<Array2D> interpolation,
+        int channel,
+        double epsilon)
     {
         spdlog::debug("Rivara P7");
         std::unique_ptr<std::vector<RivaraP7>> result = std::make_unique<std::vector<RivaraP7>>();
@@ -34,9 +38,10 @@ namespace Rivara
                 if(abs(x1*y2+x2*y3+x3*y1-x1*y3-x2*y1-x3*y2)>16)
                 {    
                     if((*g)[triangle].error == -1)
-                        (*g)[triangle].error = image -> CompareWithInterpolation(
-                            x1, x2, x3, y1, y2, y3, channel
-                        );
+                    {
+                        interpolation->BaricentricInterpolation(*image,x1,x2,x3,y1,y2,y3);
+                        (*g)[triangle].error = image -> CompareWith(*interpolation, x1, x2, x3, y1, y2, y3);
+                    }
                     double error = (*g)[triangle].error;
                     if(error>epsilon) //TODO: highly efficient dirty hax. remove asap
                     {
@@ -67,9 +72,10 @@ namespace Rivara
                 if(abs(x1*y2+x2*y3+x3*y1-x1*y3-x2*y1-x3*y2)>4)
                 {    
                     if((*g)[triangle].error == -1)
-                        (*g)[triangle].error = image -> CompareWithInterpolation(
-                            x1, x2, x3, y1, y2, y3, channel
-                        );
+                    {
+                        interpolation->BaricentricInterpolation(*image,x1,x2,x3,y1,y2,y3);
+                        (*g)[triangle].error = image -> CompareWith(*interpolation, x1, x2, x3, y1, y2, y3);
+                    }
                     double error = (*g)[triangle].error;
                     if(error>epsilon) //TODO: highly efficient dirty hax. remove asap
                     {

@@ -2,6 +2,7 @@
 #define P5_HPP
 
 #include "Productions.hpp"
+#include "Array2D.hpp"
 
 class P5 : public Production{
     private:
@@ -13,7 +14,8 @@ class P5 : public Production{
         void Perform() override;
         std::vector<uint8_t> Serialize() override;
         static std::unique_ptr<std::vector<P5>> FindAllMatches(std::shared_ptr<CachedGraph> graph,
-            std::shared_ptr<Image> image,
+            std::shared_ptr<Array2D> image,
+            std::shared_ptr<Array2D> interpolation,
             int channel,
             double epsilon);
 }; 

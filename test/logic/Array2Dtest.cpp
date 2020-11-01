@@ -1,51 +1,47 @@
 #include "gtest/gtest.h"
-#include "ImageMagnifier.hpp"
+#include "Array2D.hpp"
 #include "Productions.hpp"
 using namespace std;
 
-// TEST(ImageComparisonTest,test1)
-// {
-//     auto image = new Image("./test_files/face.bmp"); 
-//     auto image2 = new Image("test_files/face_test.bmp"); 
-//     int a = image->CompareWith(*image2);;
-//     EXPECT_EQ(363,a);
-// }
+TEST(Array2DTest, SquaredError)
+{
+    uint8_t*** test_img;
+    test_img = new uint8_t**[5];
+    for(int i=0;i<5;i++)
+    {
+        test_img[i] = new uint8_t*[5];
+        for(int j=0;j<5;j++)
+            test_img[i][j] = new uint8_t[1];
+    }
 
+    std::vector<std::vector<double>> array  =
+    {
+    {{1}, {1}, {1}, {1}, {1}},
+    {{1}, {1}, {1}, {2}, {1}},
+    {{1}, {1}, {2}, {1}, {2}},
+    {{1}, {1}, {1}, {2}, {1}},
+    {{1}, {2}, {2}, {1}, {2}}
+    };
 
-// TEST(ImageComparisonTest, SquaredErrorOfInterpolation)
-// {
-//     uint8_t*** test_img;
-//     test_img = new uint8_t**[5];
-//     for(int i=0;i<5;i++)
-//     {
-//         test_img[i] = new uint8_t*[5];
-//         for(int j=0;j<5;j++)
-//             test_img[i][j] = new uint8_t[1];
-//     }
-
-//     uint8_t array [5][5][1] =
-//     {
-//     {{1}, {1}, {1}, {1}, {1}},
-//     {{1}, {1}, {1}, {2}, {1}},
-//     {{1}, {1}, {2}, {1}, {2}},
-//     {{1}, {1}, {1}, {2}, {1}},
-//     {{1}, {2}, {2}, {1}, {2}}
-//     };
-//     for(int i=0;i<5;i++)
-//         for(int j=0;j<5;j++)
-//             test_img[i][j][0]=array[i][j][0];
-
-//     auto image = new Image(test_img,5,5,1); 
-    
-//     double a = image->SquaredErrorOfInterpolation(0,1,0,1,0);
-//     EXPECT_DOUBLE_EQ(0,a);
-//     a = image->SquaredErrorOfInterpolation(2,4,0,1,0);
-//     EXPECT_DOUBLE_EQ(0.25,a);
-//     a = image->SquaredErrorOfInterpolation(0,1,2,4,0);
-//     EXPECT_DOUBLE_EQ(1,a);
-//     a = image->SquaredErrorOfInterpolation(2,4,2,4,0);
-//     EXPECT_DOUBLE_EQ(4,a);
-// }
+    auto image = new Array2D(array); 
+    auto interpolation = new Array2D(array); 
+    interpolation->FillWith(0);
+    interpolation->BilinearInterpolation(*image, 0,1,0,1);
+    double a = image->SquaredError(*interpolation, 0,1,0,1);
+    EXPECT_DOUBLE_EQ(0,a);
+    interpolation->FillWith(0);
+    interpolation->BilinearInterpolation(*image, 2,4,0,1);
+    a = image->SquaredError(*interpolation, 2,4,0,1);
+    EXPECT_DOUBLE_EQ(0.25,a);
+    interpolation->FillWith(0);
+    interpolation->BilinearInterpolation(*image, 0,1,2,4);
+    a = image->SquaredError(*interpolation, 0,1,2,4);
+    EXPECT_DOUBLE_EQ(1,a);
+    interpolation->FillWith(0);
+    interpolation->BilinearInterpolation(*image, 2,4,2,4);
+    a = image->SquaredError(*interpolation, 2,4,2,4);
+    EXPECT_DOUBLE_EQ(4,a);
+}
 
 // TEST(ImageComparisonTest, CompareWithInterpolation)
 // {

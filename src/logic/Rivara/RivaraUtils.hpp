@@ -6,6 +6,7 @@
 #include "RivaraCachedGraph.hpp"
 #include "mygraph.hpp"
 #include "Image.hpp"
+#include "Array2D.hpp"
 
 namespace Rivara
 {

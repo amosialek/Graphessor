@@ -4,6 +4,7 @@
 #include <string>
 #include <boost/gil/extension/io/bmp.hpp>
 #include "CachedGraph.hpp"
+#include "Array2D.hpp"
 
 
 class Image
@@ -25,17 +26,17 @@ class Image
     public:    
         void XYZ(int channel, int width, std::set<vertex_descriptor> pixels, std::shared_ptr<CachedGraph> graph, boost::gil::rgb8_image_t img, vertex_descriptor v);
         int GetRGBChannelValue(Pixel p, int channel);
-        virtual double SquaredErrorOfInterpolation(int xx1, int xx2, int yy1, int yy2, int channel);
-        virtual double SquaredErrorOfInterpolation(int x1, int x2, int x3, int y1, int y2, int y3, int channel);
+        //virtual double SquaredErrorOfInterpolation(int xx1, int xx2, int yy1, int yy2, int channel);
+        //virtual double SquaredErrorOfInterpolation(int x1, int x2, int x3, int y1, int y2, int y3, int channel);
         virtual double GetInterpolatedPixel(int x1, int x2, int y1, int y2, int x, int y, int channel);
         Image(std::string filename);
         Image(uint8_t*** pixels, int width, int height, int channels);
         Image(int width, int height);
         Image(std::vector<std::shared_ptr<CachedGraph>> graphs);
         long long CompareWith(Image& other);
-        virtual long long CompareWith(Image& other, int x, int y, int width, int height);
-        virtual double CompareWithInterpolation(int xx1, int xx2, int yy1, int yy2, int channel);
-        virtual double CompareWithInterpolation(int x1, int x2, int x3, int y1, int y2, int y3, int channel);
+        //virtual long long CompareWith(Image& other, int x, int y, int width, int height);
+        //virtual double CompareWithInterpolation(int xx1, int xx2, int yy1, int yy2, int channel);
+        //virtual double CompareWithInterpolation(int x1, int x2, int x3, int y1, int y2, int y3, int channel);
         virtual std::tuple<int, int, int> getPixel(int x, int y);
         virtual int width();
         virtual int height();
@@ -56,5 +57,6 @@ class Image
         void SetSquare(int x, int y, int channel, int value, int width);      
         virtual double PSNR(Image* other);
         Image* GetImageInternal();
+        std::vector<std::shared_ptr<Array2D>> GetChannelsAsArrays();
 };
 #endif // __IMAGE_HPP__

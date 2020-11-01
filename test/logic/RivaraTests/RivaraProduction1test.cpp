@@ -89,6 +89,7 @@ namespace Rivara{
 
                 nodes.push_back(node1Vertex);
                 nodes.push_back(node2Vertex);
+                g->RegisterMarkedElement(TVertex);
                 p1 = std::make_unique<Rivara::RivaraP1>(g, E1Vertex, TVertex, image); 
             }
 
