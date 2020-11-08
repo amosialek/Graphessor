@@ -1,5 +1,5 @@
 #!/bin/bash
-make
+make -j5
 cd build
 ./example #2> ../test_graph.txt
 cd ..

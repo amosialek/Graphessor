@@ -14,7 +14,7 @@ TEST(Array2DTest, SquaredError)
             test_img[i][j] = new uint8_t[1];
     }
 
-    std::vector<std::vector<double>> array  =
+    std::vector<std::vector<double>> array =
     {
     {{1}, {1}, {1}, {1}, {1}},
     {{1}, {1}, {1}, {2}, {1}},
@@ -43,41 +43,47 @@ TEST(Array2DTest, SquaredError)
     EXPECT_DOUBLE_EQ(4,a);
 }
 
-// TEST(ImageComparisonTest, CompareWithInterpolation)
-// {
-//     uint8_t*** test_img;
-//     test_img = new uint8_t**[5];
-//     for(int i=0;i<5;i++)
-//     {
-//         test_img[i] = new uint8_t*[5];
-//         for(int j=0;j<5;j++)
-//             test_img[i][j] = new uint8_t[1];
-//     }
+TEST(Array2DTest, CompareWithInterpolation)
+{
+    uint8_t*** test_img;
+    test_img = new uint8_t**[5];
+    for(int i=0;i<5;i++)
+    {
+        test_img[i] = new uint8_t*[5];
+        for(int j=0;j<5;j++)
+            test_img[i][j] = new uint8_t[1];
+    }
 
-//     uint8_t array [5][5][1] =
-//     {
-//     {{0}, {0}, {0}, {0}, {0}},
-//     {{0}, {0}, {0}, {100}, {0}},
-//     {{0}, {0}, {100}, {0}, {100}},
-//     {{0}, {0}, {0}, {100}, {0}},
-//     {{0}, {100}, {100}, {0}, {100}}
-//     };
-//     for(int i=0;i<5;i++)
-//         for(int j=0;j<5;j++)
-//             test_img[i][j][0]=array[i][j][0];
+    std::vector<std::vector<double>> array  =
+    {
+    {{0}, {0}, {0}, {0}, {0}},
+    {{0}, {0}, {0}, {100}, {0}},
+    {{0}, {0}, {100}, {0}, {100}},
+    {{0}, {0}, {0}, {100}, {0}},
+    {{0}, {100}, {100}, {0}, {100}}
+    };
 
-//     auto image = new Image(test_img,5,5,1); 
+    auto image = new Array2D(array); 
+    auto interpolation = new Array2D(array); 
     
-//     double a = image->CompareWithInterpolation(0,1,0,1,0);
-//     EXPECT_DOUBLE_EQ(0,a);
-//     a = image->CompareWithInterpolation(2,4,0,1,0);
-//     EXPECT_DOUBLE_EQ(2500.0/(255*255*6),a);
-//     a = image->CompareWithInterpolation(0,1,2,4,0);
-//     EXPECT_DOUBLE_EQ(10000.0/(255*255*6),a);
-//     a = image->CompareWithInterpolation(2,4,2,4,0);
-//     EXPECT_DOUBLE_EQ(40000.0/(255*255*9),a);
+    interpolation->FillWith(0);
+    interpolation->BilinearInterpolation(*image,0,1,0,1);
+    double a = image->CompareWith(*interpolation, 0,1,0,1);
+    EXPECT_DOUBLE_EQ(0,a);
+    interpolation->FillWith(0);
+    interpolation->BilinearInterpolation(*image,2,4,0,1);
+    a = image->CompareWith(*interpolation, 2,4,0,1);
+    EXPECT_DOUBLE_EQ(2500.0/(255*255*6),a);
+    interpolation->FillWith(0);
+    interpolation->BilinearInterpolation(*image,0,1,2,4);
+    a = image->CompareWith(*interpolation, 0,1,2,4);
+    EXPECT_DOUBLE_EQ(10000.0/(255*255*6),a);
+    interpolation->FillWith(0);
+    interpolation->BilinearInterpolation(*image,2,4,2,4);
+    a = image->CompareWith(*interpolation, 2,4,2,4);
+    EXPECT_DOUBLE_EQ(40000.0/(255*255*9),a);
     
-// }
+}
 
 // TEST(ImageMagnifierComparisonTest, CompareWithInterpolation)
 // {
@@ -168,45 +174,61 @@ TEST(Array2DTest, SquaredError)
 //     EXPECT_DOUBLE_EQ(18.430435842453537,a);
 // }
 
-// TEST(ImageRestoringTest, BaricentricInterpolation)
-// {
-//     uint8_t*** test_img;
-//     test_img = new uint8_t**[5];
-//     for(int i=0;i<5;i++)
-//     {
-//         test_img[i] = new uint8_t*[5];
-//         for(int j=0;j<5;j++)
-//             test_img[i][j] = new uint8_t[1];
-//     }
+TEST(Array2DTest, BaricentricInterpolation)
+{
+    uint8_t*** test_img;
+    test_img = new uint8_t**[5];
+    for(int i=0;i<5;i++)
+    {
+        test_img[i] = new uint8_t*[5];
+        for(int j=0;j<5;j++)
+            test_img[i][j] = new uint8_t[1];
+    }
 
-//     uint8_t array [5][5][1] =
-//     {
-//     {{200}, {0}, {0}, {0}, {0}},
-//     {{0}, {0}, {0}, {0}, {0}},
-//     {{0}, {0}, {0}, {0}, {0}},
-//     {{0}, {0}, {0}, {0}, {0}},
-//     {{0}, {0}, {0}, {0}, {100}}
-//     };
-//     for(int i=0;i<5;i++)
-//         for(int j=0;j<5;j++)
-//             test_img[i][j][0]=array[i][j][0];
+    std::vector<std::vector<double>> array =
+    {
+    {{200}, {0}, {0}, {0}, {0}},
+    {{0}, {0}, {0}, {0}, {0}},
+    {{0}, {0}, {0}, {0}, {0}},
+    {{0}, {0}, {0}, {0}, {0}},
+    {{0}, {0}, {0}, {0}, {100}}
+    };
+    auto interpolation = new Array2D(array); 
+    auto image = std::make_unique<Array2D>(array); 
+    interpolation -> FillWith(0);
+    interpolation -> BaricentricInterpolation(*image, 0,4,4,0,0,4);
+    auto error = interpolation -> SquaredError(*image,0,4,4,0,0,4);
+    auto comparison = interpolation -> CompareWith(*image,0,4,4,0,0,4);
+    EXPECT_EQ((*interpolation)[2][2],150);
 
-//     auto image = std::make_unique<Image>(test_img,5,5,1); 
-//     Pixel p1,p2,p3;
-//     p1.x=0;
-//     p1.y=0;
-//     p1.r=200;
-//     p2.x=4;
-//     p2.y=0;
-//     p2.r=0;
-//     p3.x=4;
-//     p3.y=4;
-//     p3.r=100;
-//     vector<Pixel> v{p1,p2,p3};
+    EXPECT_EQ(error, 143750);
+    EXPECT_EQ(comparison, 0.2763360246059208);
+}
 
-//     image -> BaricentricInterpolation(0, v);
-//     Pixel pixel22;
-//     std::tie(pixel22.r,pixel22.g, pixel22.b) = image -> getPixel(2,2);
-//     EXPECT_EQ(pixel22.r,150);
+TEST(Array2DTest, ArrayInitialization)
+{
+    uint8_t*** test_img;
+    test_img = new uint8_t**[5];
+    for(int i=0;i<5;i++)
+    {
+        test_img[i] = new uint8_t*[5];
+        for(int j=0;j<5;j++)
+            test_img[i][j] = new uint8_t[1];
+    }
 
-// }
+    std::vector<std::vector<double>> array =
+    {
+    {{1}, {0}, {0}, {0}, {0}},
+    {{0}, {2}, {0}, {0}, {0}},
+    {{0}, {0}, {3}, {0}, {0}},
+    {{0}, {0}, {0}, {4}, {0}},
+    {{0}, {0}, {0}, {0}, {5}}
+    };
+    auto image = std::make_unique<Array2D>(array); 
+    EXPECT_EQ((*image)[0][0], 1);
+    EXPECT_EQ((*image)[1][1], 2);
+    EXPECT_EQ((*image)[2][2], 3);
+    EXPECT_EQ((*image)[3][3], 4);
+    EXPECT_EQ((*image)[4][4], 5);
+}
+

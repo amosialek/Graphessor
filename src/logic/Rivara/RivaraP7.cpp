@@ -39,7 +39,8 @@ namespace Rivara
                 {    
                     if((*g)[triangle].error == -1)
                     {
-                        interpolation->BaricentricInterpolation(*image,x1,x2,x3,y1,y2,y3);
+                        interpolation -> FillWith(x1,x2,x3,y1,y2,y3, 0);
+                        interpolation -> BaricentricInterpolation(*image,x1,x2,x3,y1,y2,y3);
                         (*g)[triangle].error = image -> CompareWith(*interpolation, x1, x2, x3, y1, y2, y3);
                     }
                     double error = (*g)[triangle].error;
@@ -69,11 +70,16 @@ namespace Rivara
                 double y1 = (*g)[vertices[0]].attributes->GetDouble(RIVARA_ATTRIBUTE_Y);
                 double y2 = (*g)[vertices[1]].attributes->GetDouble(RIVARA_ATTRIBUTE_Y);
                 double y3 = (*g)[vertices[2]].attributes->GetDouble(RIVARA_ATTRIBUTE_Y);
-                if(abs(x1*y2+x2*y3+x3*y1-x1*y3-x2*y1-x3*y2)>4)
+                if(abs(x1*y2+x2*y3+x3*y1-x1*y3-x2*y1-x3*y2)>16)
                 {    
                     if((*g)[triangle].error == -1)
                     {
-                        interpolation->BaricentricInterpolation(*image,x1,x2,x3,y1,y2,y3);
+                        double minx = std::min(x1,std::min(x2,x3));
+                        double maxx = std::max(x1,std::max(x2,x3));
+                        double miny = std::min(y1,std::min(y2,y3));
+                        double maxy = std::max(y1,std::max(y2,y3));
+                        interpolation -> FillWith(minx, maxx, miny, maxy, 0);
+                        interpolation -> BaricentricInterpolation(*image,x1,x2,x3,y1,y2,y3);
                         (*g)[triangle].error = image -> CompareWith(*interpolation, x1, x2, x3, y1, y2, y3);
                     }
                     double error = (*g)[triangle].error;
@@ -99,6 +105,4 @@ namespace Rivara
         }
         return result; 
     }
-    
-
 }

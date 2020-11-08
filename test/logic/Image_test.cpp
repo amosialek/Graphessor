@@ -214,3 +214,48 @@ using namespace std;
 //     EXPECT_EQ(pixel22.r,150);
 
 // }
+
+TEST(ImageTest, CreateArrays)
+{
+    uint8_t*** test_img;
+    test_img = new uint8_t**[5];
+    for(int i=0;i<5;i++)
+    {
+        test_img[i] = new uint8_t*[5];
+        for(int j=0;j<5;j++)
+            test_img[i][j] = new uint8_t[1];
+    }
+
+    uint8_t array [3][5][5] =
+    {
+    {{1,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0}}
+    ,
+    {{2,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0}}
+    ,
+    {{3,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0}}
+    };
+
+    for(int k=0;k<3;k++)
+        for(int i=0;i<5;i++)
+            for(int j=0;j<5;j++)
+                test_img[i][j][k]=array[k][i][j];
+
+    auto image = std::make_unique<Image>(test_img,5,5,3); 
+    auto arrayVector = image -> GetChannelsAsArrays();
+    
+    EXPECT_EQ((*arrayVector[0])[0][0], 1);
+    EXPECT_EQ((*arrayVector[1])[0][0], 2);
+    EXPECT_EQ((*arrayVector[2])[0][0], 3);
+}

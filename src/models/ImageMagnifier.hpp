@@ -24,6 +24,8 @@ class ImageMagnifier : public Image
         void SetPixel(int x, int y, int channel, int value) override;
         double PSNR(Image* other) override;
         Image* GetImageInternal();
+        std::vector<std::shared_ptr<Array2D>> GetChannelsAsArrays() override;
+
 };
 
 #endif // __IMAGEMAGNIFIER_HPP__

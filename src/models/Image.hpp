@@ -57,6 +57,6 @@ class Image
         void SetSquare(int x, int y, int channel, int value, int width);      
         virtual double PSNR(Image* other);
         Image* GetImageInternal();
-        std::vector<std::shared_ptr<Array2D>> GetChannelsAsArrays();
+        virtual std::vector<std::shared_ptr<Array2D>> GetChannelsAsArrays();
 };
 #endif // __IMAGE_HPP__

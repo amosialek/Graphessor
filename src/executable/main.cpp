@@ -44,7 +44,7 @@ void PerformQuadTree(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
         unsigned long long lastICount = 0;
         int i=1;
         //debugWriter->WriteItOut(std::to_string(i++), *graph);
-        while(lastICount < graph -> GetCacheIterator(NODELABEL_I).size())
+        while(i<50 || lastICount < graph -> GetCacheIterator(NODELABEL_I).size())
         {
 
             spdlog::debug("Starting production loop, channel={}, i={}",channel,i);  
@@ -116,10 +116,10 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
         i=1;
         unsigned long long lastICount = 0;
         //debugWriter->WriteItOut(std::to_string(i++), *graph);
+        std::vector<std::shared_ptr<Array2D>> imageArrays = image->GetChannelsAsArrays();
         while(lastICount < graph -> GetCacheIterator(NODELABEL_T).size())
         {
-            std::vector<std::shared_ptr<Array2D>> imageArrays = image->GetChannelsAsArrays();
-            std::shared_ptr<Array2D> interpolationArray = std::make_shared<Array2D>(image->width(), image->height());
+            std::shared_ptr<Array2D> interpolationArray = std::make_shared<Array2D>(imageArrays[0]->width, imageArrays[0]->height);
 
             spdlog::debug("Starting production loop, channel={}, i={}",channel,i);  
             lastICount = graph -> GetCacheIterator(NODELABEL_T).size();

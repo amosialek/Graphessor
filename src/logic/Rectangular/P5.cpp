@@ -51,7 +51,8 @@ std::unique_ptr<std::vector<P5>> P5::FindAllMatches(std::shared_ptr<CachedGraph>
         } 
         if((*graph)[IEdge].error < 0)
         {
-            interpolation->BilinearInterpolation(*image, minx, maxx, miny, maxy);
+            //interpolation -> FillWith(0);
+            interpolation -> BilinearInterpolation(*image, minx, maxx, miny, maxy);
             (*graph)[IEdge].error = image->CompareWith(*interpolation, minx, maxx, miny, maxy);
         }
         IEdgeToError[IEdge] = (*graph)[IEdge].error;

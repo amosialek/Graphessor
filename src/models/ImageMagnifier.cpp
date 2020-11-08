@@ -117,3 +117,19 @@ double ImageMagnifier::PSNR(Image* image)
     ratio = originalRatio;
     return result;
 }
+
+std::vector<std::shared_ptr<Array2D>> ImageMagnifier::GetChannelsAsArrays()
+{
+    std::vector<std::shared_ptr<Array2D>> result;
+    int imgWidth = width();
+    int imgHeight = height();
+    
+    for(int channel=0;channel<3;channel++)
+    {
+        result.push_back(std::make_shared<Array2D>(imgWidth, imgHeight));
+        for(int x=0;x<imgWidth;x++)
+            for(int y=0;y<imgHeight;y++)
+                (*(result[channel]))[x][y] = view[y*imgWidth/ratio/ratio + x/ratio][channel];
+    }
+    return result;
+}

@@ -2,6 +2,26 @@
 #include "stdlib.h"
 #include <cassert>
 
+int sign2 (int x1, int y1, int x2, int y2, int x3, int y3)
+{
+    return (x1 - x3) * (y2 - y3) - (x2 - x3) * (y1 - y3);
+}
+
+bool PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int x3, int y3)
+{
+    int d1, d2, d3;
+    bool has_neg, has_pos;
+
+    d1 = sign2(px, py, x1, y1, x2, y2);
+    d2 = sign2(px, py, x2, y2, x3, y3);
+    d3 = sign2(px, py, x3, y3, x1, y1);
+
+    has_neg = (d1 < 0) && (d2 < 0) && (d3 < 0);
+    has_pos = (d1 > 0) && (d2 > 0) && (d3 > 0);
+
+    return !(has_neg && has_pos);
+}
+
     Array2D::Array2D(std::vector<std::vector<double>> array)
     {
         assert(array.size()>0 && "Sequence contains no elements");
@@ -17,7 +37,7 @@
         this -> height = height;
         this -> width = width;
         a.resize(width);
-        for(auto array1D:a)
+        for(auto &array1D:a)
         {
             array1D.resize(height, value);
         }
@@ -42,6 +62,27 @@
         for(int y=0;y<height;y++)
             for(int x=0;x<width;x++)
                 a[x][y]=value;
+    }
+
+    void Array2D::FillWith(int x1, int x2, int y1, int y2, double value)
+    {
+        if(x1>=0 and x2<=width and y1>=0 and y2<=height and x2>=x1 and y2>=y1)
+            for(int y=y1;y<y2;y++)
+                for(int x=x1;x<x2;x++)
+                    a[x][y]=value;
+    }
+
+    void Array2D::FillWith(int x1, int x2, int x3, int y1, int y2, int y3, double value)
+    {
+        int minx = std::min(x1,std::min(x2,x3));
+        int maxx = std::max(x1,std::max(x2,x3));
+        int miny = std::min(y1,std::min(y2,y3));
+        int maxy = std::max(y1,std::max(y2,y3));
+        if(minx>=0 and maxx<=width and miny>=0 and maxy<=height)
+        for(int y=miny;y<maxy;y++)
+            for(int x=minx;x<maxx;x++)
+                if(PointInTriangle(x,y,x1,y1,x2,y2,x3,y3))
+                    a[x][y]=value;
     }
 
     void Array2D::Subtract(const Array2D& other)
@@ -83,27 +124,6 @@
         return sum;
     }
 
-int sign2 (int x1, int y1, int x2, int y2, int x3, int y3)
-{
-    return (x1 - x3) * (y2 - y3) - (x2 - x3) * (y1 - y3);
-}
-
-bool PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int x3, int y3)
-{
-    int d1, d2, d3;
-    bool has_neg, has_pos;
-
-    d1 = sign2(px, py, x1, y1, x2, y2);
-    d2 = sign2(px, py, x2, y2, x3, y3);
-    d3 = sign2(px, py, x3, y3, x1, y1);
-
-    has_neg = (d1 < 0) && (d2 < 0) && (d3 < 0);
-    has_pos = (d1 > 0) && (d2 > 0) && (d3 > 0);
-
-    return !(has_neg && has_pos);
-}
-
-
 double Array2D::SquaredError(Array2D& other, int x1, int x2, int x3, int y1, int y2, int y3)
 {
     double sum = 0;
@@ -115,7 +135,6 @@ double Array2D::SquaredError(Array2D& other, int x1, int x2, int x3, int y1, int
 
     if (maxx-minx==0 or maxy-miny==0) 
         return 0;
-    double wDenominator = 1.0/((y2-y3) * (x1-x3) + (x3-x2) * (y1-y3));
     for(int x=minx;x<=maxx;x++)
         for(int y=miny;y<=maxy;y++)
             if(PointInTriangle(x,y,x1,y1,x2,y2,x3,y3))
@@ -181,7 +200,8 @@ void Array2D::BaricentricInterpolation(Array2D& base, int x1, int x2, int x3, in
                 w1 = w1Coefficient*(y2y3*(x-x3) + x3x2 * (y-y3));
                 w2 = w2Coefficient*(y3y1*(x-x3) + x1x3*(y-y3));
                 w3 = 1 - w1 - w2;
-                if(w1>=-0.01 and w2>=-0.01 and w3>=-0.01)
+                if(PointInTriangle(x,y,x1,y1,x2,y2,x3,y3))
+                //if(w1>=-0.01 and w2>=-0.01 and w3>=-0.01)
                     a[x][y] = w1 * base.a[x1][y1]
                             + w2 * base.a[x2][y2]
                             + w3 * base.a[x3][y3];
@@ -189,7 +209,7 @@ void Array2D::BaricentricInterpolation(Array2D& base, int x1, int x2, int x3, in
         }
 }
 
-std::vector<double> Array2D::operator[](int x)
+std::vector<double>& Array2D::operator[](int x)
 {
     return a[x];
 }
