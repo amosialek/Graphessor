@@ -9,6 +9,7 @@
 #include "RivaraProduction5test.cpp"
 #include "RivaraProduction6test.cpp"
 #include "Array2Dtest.cpp"
+#include "PbiHelperTest.cpp"
 using namespace std;
 int main()
 {

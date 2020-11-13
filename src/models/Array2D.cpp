@@ -25,10 +25,10 @@ bool PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int x3, in
     Array2D::Array2D(std::vector<std::vector<double>> array)
     {
         assert(array.size()>0 && "Sequence contains no elements");
-        height = array.size();
-        width = array[0].size();
-        for(int i=0;i<height;i++)
-            assert(array[i].size()==width && "Matrix cannot have various row lenghts");
+        width = array.size();
+        height = array[0].size();
+        for(int i=0;i<width;i++)
+            assert(array[i].size()==height && "Matrix cannot have various row lenghts");
         a = array;
     }
 
@@ -67,8 +67,8 @@ bool PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int x3, in
     void Array2D::FillWith(int x1, int x2, int y1, int y2, double value)
     {
         if(x1>=0 and x2<=width and y1>=0 and y2<=height and x2>=x1 and y2>=y1)
-            for(int y=y1;y<y2;y++)
-                for(int x=x1;x<x2;x++)
+            for(int y=y1;y<=y2;y++)
+                for(int x=x1;x<=x2;x++)
                     a[x][y]=value;
     }
 
@@ -79,8 +79,8 @@ bool PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int x3, in
         int miny = std::min(y1,std::min(y2,y3));
         int maxy = std::max(y1,std::max(y2,y3));
         if(minx>=0 and maxx<=width and miny>=0 and maxy<=height)
-        for(int y=miny;y<maxy;y++)
-            for(int x=minx;x<maxx;x++)
+        for(int y=miny;y<=maxy;y++)
+            for(int x=minx;x<=maxx;x++)
                 if(PointInTriangle(x,y,x1,y1,x2,y2,x3,y3))
                     a[x][y]=value;
     }
@@ -100,7 +100,7 @@ bool PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int x3, in
                 a[x][y]-=func(x,y);
     }
 
-    double Array2D::DotProduct(double (*func)(double, double))
+    double Array2D::MultiplyElementWiseAndSum(double (*func)(double, double))
     {
         double sum = 0;
 
@@ -108,6 +108,26 @@ bool PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int x3, in
             for(int x=0;x<width;x++)
                 sum+=a[x][y]*func(x, y);
 
+        return sum;
+    }
+
+    double Array2D::MultiplyElementWiseAndSum(double (*func)(double, double), int x1, int x2, int y1, int y2)
+    {
+        double sum = 0;
+
+        for(int y=y1;y<=y2;y++)
+            for(int x=x1;x<=x2;x++)
+                sum+=a[x][y]*func(x, y);
+        return sum;
+    }
+
+    double Array2D::MultiplyElementWiseAndSum(std::function<double(double, double)>func, int x1, int x2, int y1, int y2)
+    {
+        double sum = 0;
+
+        for(int y=y1;y<=y2;y++)
+            for(int x=x1;x<=x2;x++)
+                sum+=a[x][y]*func(x, y);
         return sum;
     }
 
@@ -212,4 +232,9 @@ void Array2D::BaricentricInterpolation(Array2D& base, int x1, int x2, int x3, in
 std::vector<double>& Array2D::operator[](int x)
 {
     return a[x];
+}
+
+Array2D Array2D::GetCopy()
+{
+    return Array2D(a);
 }
