@@ -48,3 +48,13 @@ TEST(PbiHelperTests, GetSquareInterpolationOfYEdge)
     auto coefficient = GetSquareInterpolationOfYEdge(a,0,0,10);
     ASSERT_TRUE(abs(coefficient+0.5)<0.1);
 }
+
+TEST(PbiHelperTests, GetSquareInterpolationOfRectangle)
+{
+    Array2D a = Array2D(11,11);
+    for(int x=0;x<11;x++)
+        for(int y=0;y<11;y++)
+            a[x][y] = x*(10.0-x)*y*(10.0-y)/2.0;
+    auto coefficient = GetSquareInterpolationOfRectangle(a, 0, 10, 0, 10);
+    ASSERT_TRUE(abs(coefficient+0.5)<0.1);
+}
