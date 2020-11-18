@@ -39,7 +39,7 @@ std::function<double(double, double)> QuadratureIntegralFunctionByX(std::functio
 
 std::function<double(double, double)> QuadratureIntegralFunction2D(std::function<double(double, double)> f)
 {
-    return [f](double x, double y){return f(floor(x)+1,floor(y)+1)-f(floor(x),floor(y));};
+    return [f](double x, double y){return f(floor(x)+1,floor(y)+1)-f(floor(x+1),floor(y))-f(floor(x),floor(y+1))+f(floor(x),floor(y));};
 }
 
 double GetSquareInterpolationOfEdge(Array2D& array,int x1, int x2, int y)
@@ -62,14 +62,20 @@ double GetSquareInterpolationOfYEdge(Array2D& array,int x, int y1, int y2)
 
 double GetSquareInterpolationOfRectangle(Array2D& array,int x1, int x2, int y1, int y2)
 {
+    std::function<double(double, double)> testingFunction = [x1,x2,y1,y2](double x, double y){return (x-x1)*(x-x2)*(y-y1)*(y-y2);};
+    std::function<double(double, double)> testingFunctionSquared = Multiply(testingFunction, testingFunction);
     auto yIntegral = TransposeFunction(GetXSquareIntegral(y1,y2));
     auto xIntegral = GetXSquareIntegral(x1,x2);
-    auto integral = Multiply(xIntegral, yIntegral);
+    auto integral = Multiply(Multiply(xIntegral, yIntegral),[](double x, double y){return -1.0;});
     auto ySquaredIntegral = TransposeFunction(GetX4Integral(y1,y2));
     auto xSquaredIntegral = GetX4Integral(x1,x2);
     auto squaredIntegral = Multiply(xSquaredIntegral, ySquaredIntegral);
     Array2D array2 = array.GetCopy();
     double sum = array2.MultiplyElementWiseAndSum(QuadratureIntegralFunction2D(integral),x1,x2,y1,y2);
-    double denominator = Get2DIntegralValue(squaredIntegral, x1, x2, y1, y2);
+    double denominator = 0;
+    for(int i=0;i<11;i++)
+        for(int j=0;j<11;j++)
+            denominator += testingFunctionSquared(i,j);
+    double denominator2 = Get2DIntegralValue(squaredIntegral, x1, x2, y1, y2);
     return sum/denominator;
 }

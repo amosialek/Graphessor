@@ -56,5 +56,5 @@ TEST(PbiHelperTests, GetSquareInterpolationOfRectangle)
         for(int y=0;y<11;y++)
             a[x][y] = x*(10.0-x)*y*(10.0-y)/2.0;
     auto coefficient = GetSquareInterpolationOfRectangle(a, 0, 10, 0, 10);
-    ASSERT_TRUE(abs(coefficient+0.5)<0.1);
+     ASSERT_TRUE(abs(coefficient+0.5)<0.1);
 }
