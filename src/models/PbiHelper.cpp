@@ -7,15 +7,22 @@ std::function<double(double, double)> Multiply(std::function<double(double, doub
     return [f,g](double x, double y){return f(x,y) * g(x,y);};
 }
 
+///
+/// integral of (x-x1)(x-x2)
+///
 std::function<double(double, double)> GetXSquareIntegral(double x1, double x2)
 {
     return [x1,x2](double x, double y){return x*x*x/3 -(x*x)*(x1+x2)/2.0+x1*x2*x;};
 }
 
+///
+/// integral of ((x-x1)(x-x2))^2
+///
 std::function<double(double, double)> GetX4Integral(double x1, double x2)
 {
     return [x1,x2](double x, double y){return x*x*x*x*x/5 - x*x*x*(x1+x2)*x/2 + x*x*4*x1*x2*x/3 + x*x*x1*x1*x/3 + x*x*x2*x2*x/3 - x*x1*x1*x2*x - x*x1*x2*x2*x + x1*x1*x2*x2*x;};
 }
+
 
 double GetXIntegralValue(std::function<double(double, double)> integral, double a, double b, double y)
 {

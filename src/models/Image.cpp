@@ -29,6 +29,46 @@ Image::Image(int width, int height)
     view = boost::gil::view(img);
 }
 
+Image::Image(std::vector<std::shared_ptr<Array2D>> arrays)
+{
+    int width = arrays[0]->width;
+    int height = arrays[0]->height;
+    img = boost::gil::rgb8_image_t(width+1, height+1);
+    boost::gil::fill_pixels(img._view, boost::gil::rgb8_pixel_t(0,0,0));
+    for(int channel=0;channel<3;channel++)
+    {
+        view = boost::gil::view(img);
+        for(int x=0;x<width;x++)
+            for(int y=0;y<height;y++)
+                SetPixel(x,y,channel,arrays[channel]->operator[](x)[y]);
+    }
+    view = boost::gil::view(img);
+}
+
+
+Image::Image(std::vector<std::shared_ptr<CachedGraph>> graphs)
+{
+    int width = 0;
+    int height = 0;
+    auto pixels = graphs[0] -> GetPixels();
+    for(auto pixel : pixels)
+    {
+        width = std::max(width ,graphs[0] -> operator[](pixel).x);
+        height = std::max(height ,graphs[0] -> operator[](pixel).y);
+    }
+    img = boost::gil::rgb8_image_t(width+1, height+1);
+    boost::gil::fill_pixels(img._view, boost::gil::rgb8_pixel_t(0,0,0));
+    for(int channel=0;channel<3;channel++)
+    {
+        view = boost::gil::view(img);
+        //graphs[channel]->GetImage(this);
+        graphs[channel] -> GetPixels();
+        Interpolate(channel, width, graphs[channel]);
+    }
+    view = boost::gil::view(img);
+}
+
+
 int Image::GetRGBChannelValue(Pixel p, int channel)
 {
     if (channel==0)
@@ -81,28 +121,6 @@ void Image::Interpolate(int channel, int width, std::shared_ptr<CachedGraph> gra
         // SVDInterpolation(channel, v);
     }
         
-}
-
-Image::Image(std::vector<std::shared_ptr<CachedGraph>> graphs)
-{
-    int width = 0;
-    int height = 0;
-    auto pixels = graphs[0] -> GetPixels();
-    for(auto pixel : pixels)
-    {
-        width = std::max(width ,graphs[0] -> operator[](pixel).x);
-        height = std::max(height ,graphs[0] -> operator[](pixel).y);
-    }
-    img = boost::gil::rgb8_image_t(width+1, height+1);
-    boost::gil::fill_pixels(img._view, boost::gil::rgb8_pixel_t(0,0,0));
-    for(int channel=0;channel<3;channel++)
-    {
-        view = boost::gil::view(img);
-        //graphs[channel]->GetImage(this);
-        graphs[channel] -> GetPixels();
-        Interpolate(channel, width, graphs[channel]);
-    }
-    view = boost::gil::view(img);
 }
 
 void Image::FillMissingSpacesBasedOnLargerBlocks(std::shared_ptr<IGraph> graph, std::set<vertex_descriptor>& pixels, int channel, int width)

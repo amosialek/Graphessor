@@ -25,6 +25,8 @@ std::map<std::string, int> functionTime;
 namespace opt=boost::program_options;
 using namespace Rivara;
 
+
+
 void PerformQuadTree(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
     std::shared_ptr<Image> image,
     AbstractOutputWriter* debugWriter,
@@ -44,7 +46,7 @@ void PerformQuadTree(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
         unsigned long long lastICount = 0;
         int i=1;
         //debugWriter->WriteItOut(std::to_string(i++), *graph);
-        while(i<50 || lastICount < graph -> GetCacheIterator(NODELABEL_I).size())
+        while(i<10 && lastICount < graph -> GetCacheIterator(NODELABEL_I).size())
         {
 
             spdlog::debug("Starting production loop, channel={}, i={}",channel,i);  
@@ -101,7 +103,7 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
     double epsilon,
     std::shared_ptr<spdlog::logger> logger)
 {
-    for(int channel=0;channel<3;channel++)
+    for(int channel=0;channel<1;channel++)
     {
         int i=0;
         auto graph = std::make_shared<RivaraCachedGraph>();
@@ -293,14 +295,13 @@ int main(int argc, char** argv) {
         g->DecreaseXAndYByRatio(4);
 
     auto restoredImage = std::make_unique<Image>(channel_graphs);
-    // GraphImageWriter::DrawPixels(channel_graphs[0],(outputDirectoryPath/(outputFileName+"_red_graph.bmp")).c_str());
+    GraphImageWriter::DrawPixels(channel_graphs[0],(outputDirectoryPath/(outputFileName+"_red_graph.bmp")).c_str());
     // GraphImageWriter::DrawPixels(channel_graphs[1],(outputDirectoryPath/(outputFileName+"_green_graph.bmp")).c_str());
     // GraphImageWriter::DrawPixels(channel_graphs[2],(outputDirectoryPath/(outputFileName+"_blue_graph.bmp")).c_str());
     auto image2 = std::make_shared<Image>(inputFileName);
     restoredImage -> save((outputDirectoryPath/(outputFileName+".bmp")).c_str());
-    //restoredImage -> Save3Colors((outputDirectoryPath/outputFileName).c_str());
+    restoredImage -> Save3Colors((outputDirectoryPath/outputFileName).c_str());
     double PSNR = restoredImage -> PSNR(image2.get());
     std::cout<<"PSNR: "<<PSNR<<std::endl; 
     spdlog::debug("PSNR = {}",PSNR);  
 }
-

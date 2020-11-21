@@ -129,7 +129,7 @@ std::vector<std::shared_ptr<Array2D>> ImageMagnifier::GetChannelsAsArrays()
         result.push_back(std::make_shared<Array2D>(imgWidth, imgHeight));
         for(int x=0;x<imgWidth;x++)
             for(int y=0;y<imgHeight;y++)
-                (*(result[channel]))[x][y] = view[y*imgWidth/ratio/ratio + x/ratio][channel];
+                (*(result[channel]))[x][y] = view[y/ratio*imgWidth/ratio + x/ratio][channel];
     }
     return result;
 }

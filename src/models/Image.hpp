@@ -33,6 +33,7 @@ class Image
         Image(uint8_t*** pixels, int width, int height, int channels);
         Image(int width, int height);
         Image(std::vector<std::shared_ptr<CachedGraph>> graphs);
+        Image(std::vector<std::shared_ptr<Array2D>> arrays);
         long long CompareWith(Image& other);
         //virtual long long CompareWith(Image& other, int x, int y, int width, int height);
         //virtual double CompareWithInterpolation(int xx1, int xx2, int yy1, int yy2, int channel);
