@@ -252,7 +252,11 @@ int main(int argc, char** argv) {
     std::string inputFileName;
     if (vm.count("input"))
         inputFileName = vm["input"].as<std::string>();
-
+    if(!std::experimental::filesystem::exists(inputFileName))
+    {    
+        std::cerr<<"Input file '"<<inputFileName<<"' doesn't exist"<<std::endl;
+        return 1;
+    }
     std::string graphOutputFileName;
     if (vm.count("graph-output"))
         graphOutputFileName = vm["graph-output"].as<std::string>();

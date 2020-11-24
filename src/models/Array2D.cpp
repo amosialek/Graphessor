@@ -32,6 +32,18 @@ bool PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int x3, in
         a = array;
     }
 
+    Array2D::Array2D(std::vector<std::vector<double>>& array, int x1, int x2, int y1, int y2)
+    {
+        assert(array.size()>0 && "Sequence contains no elements");
+        a.resize(x2-x1+1);
+        for(int x=0;x<=x2-x1;x++)
+            for(int y=0;y<=y2-y1;y++)
+            {
+                a[x].emplace_back(array[x+x1][y+y1]);
+            }
+        
+    }
+
     Array2D::Array2D(int width, int height, double value)
     {
         this -> height = height;
@@ -93,10 +105,17 @@ bool PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int x3, in
     }
 
 
-    void Array2D::Subtract(double (*func)(double, double))
+    void Array2D::Subtract(std::function<double (double, double)>func)
     {
         for(int y=0;y<height;y++)
             for(int x=0;x<width;x++)
+                a[x][y]-=func(x,y);
+    }
+
+    void Array2D::Subtract(std::function<double (double, double)>func, int x1, int x2, int y1, int y2)
+    {
+        for(int y=y1;y<=y2;y++)
+            for(int x=x1;x<=x2;x++)
                 a[x][y]-=func(x,y);
     }
 
@@ -237,4 +256,9 @@ std::vector<double>& Array2D::operator[](int x)
 Array2D Array2D::GetCopy()
 {
     return Array2D(a);
+}
+
+Array2D Array2D::GetCopy(int x1, int x2, int y1, int y2)
+{
+    return Array2D(a,x1,x2,y1,y2);
 }

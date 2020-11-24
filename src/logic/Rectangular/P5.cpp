@@ -1,4 +1,5 @@
 #include "P5.hpp"
+#include "PbiHelper.cpp"
 
 std::map<vertex_descriptor,std::vector<vertex_descriptor>> vertexToNeighbours;
 std::map<vertex_descriptor, double> IEdgeToError;
@@ -53,6 +54,15 @@ std::unique_ptr<std::vector<P5>> P5::FindAllMatches(std::shared_ptr<CachedGraph>
         {
             //interpolation -> FillWith(0);
             interpolation -> BilinearInterpolation(*image, minx, maxx, miny, maxy);
+            auto minyFuncoefficient = GetSquareInterpolationOfEdge(*interpolation, minx, maxx, miny);
+            auto maxyFuncoefficient = GetSquareInterpolationOfEdge(*interpolation, minx, maxx, maxy);
+            auto minxFuncoefficient = GetSquareInterpolationOfYEdge(*interpolation, minx, miny, maxy);
+            auto maxxFuncoefficient = GetSquareInterpolationOfYEdge(*interpolation, maxx, miny, maxy);
+            interpolation->Subtract([minx, maxx, miny, maxy, minyFuncoefficient](double x, double y){return -minyFuncoefficient*(maxx-x)*(x-minx)*(maxy-y)/(maxy-miny);},minx, maxx, miny, maxy);
+            interpolation->Subtract([minx, maxx, miny, maxy, maxyFuncoefficient](double x, double y){return -maxyFuncoefficient*(maxx-x)*(x-minx)*(y-miny)/(maxy-miny);},minx, maxx, miny, maxy);
+            interpolation->Subtract([minx, maxx, miny, maxy, minxFuncoefficient](double x, double y){return -minxFuncoefficient*(maxy-y)*(y-miny)*(maxx-x)/(maxx-minx);},minx, maxx, miny, maxy);
+            interpolation->Subtract([minx, maxx, miny, maxy, maxxFuncoefficient](double x, double y){return -maxxFuncoefficient*(maxy-y)*(y-miny)*(x-minx)/(maxx-minx);},minx, maxx, miny, maxy);
+
             (*graph)[IEdge].error = image->CompareWith(*interpolation, minx, maxx, miny, maxy);
         }
         IEdgeToError[IEdge] = (*graph)[IEdge].error;

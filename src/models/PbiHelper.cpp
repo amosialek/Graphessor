@@ -49,25 +49,25 @@ std::function<double(double, double)> QuadratureIntegralFunction2D(std::function
     return [f](double x, double y){return f(floor(x)+1,floor(y)+1)-f(floor(x+1),floor(y))-f(floor(x),floor(y+1))+f(floor(x),floor(y));};
 }
 
-double GetSquareInterpolationOfEdge(Array2D& array,int x1, int x2, int y)
+double GetSquareInterpolationOfEdge(Array2D& array, int x1, int x2, int y)
 {
     std::function<double(double, double)> integral = GetXSquareIntegral(x1,x2);
-    Array2D array2 = array.GetCopy();
-    double sum = array2.MultiplyElementWiseAndSum(QuadratureIntegralFunctionByX(integral),x1,x2,y,y);
+    Array2D array2 = array.GetCopy(x1,x2,y,y);
+    double sum = array2.MultiplyElementWiseAndSum(QuadratureIntegralFunctionByX(integral),0,x2-x1,0,0);
     double denominator = GetXIntegralValue(GetX4Integral(x1,x2),x1,x2,y);
     return sum/denominator;
 }
 
-double GetSquareInterpolationOfYEdge(Array2D& array,int x, int y1, int y2)
+double GetSquareInterpolationOfYEdge(Array2D& array, int x, int y1, int y2)
 {
     std::function<double(double, double)> integral = GetXSquareIntegral(y1,y2);
-    Array2D array2 = array.GetCopy();
-    double sum = array2.MultiplyElementWiseAndSum(TransposeFunction(QuadratureIntegralFunctionByX(integral)),x,x,y1,y2);
+    Array2D array2 = array.GetCopy(x,x,y1,y2);
+    double sum = array2.MultiplyElementWiseAndSum(TransposeFunction(QuadratureIntegralFunctionByX(integral)),0,0,0,y2-y1);
     double denominator = GetXIntegralValue(GetX4Integral(y1,y2),y1,y2,x);
     return sum/denominator;
 }
 
-double GetSquareInterpolationOfRectangle(Array2D& array,int x1, int x2, int y1, int y2)
+double GetSquareInterpolationOfRectangle(Array2D& array, int x1, int x2, int y1, int y2)
 {
     std::function<double(double, double)> testingFunction = [x1,x2,y1,y2](double x, double y){return (x-x1)*(x-x2)*(y-y1)*(y-y2);};
     std::function<double(double, double)> testingFunctionSquared = Multiply(testingFunction, testingFunction);
