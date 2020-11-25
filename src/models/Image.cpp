@@ -93,6 +93,7 @@ void Image::BilinearInterpolation(int channel, std::vector<Pixel> pixels)
     for(int y=miny;y<=maxy;y++)
         for(int x=minx;x<=maxx;x++)
             SetPixel(x, y, channel, GetInterpolatedPixel(minx,maxx,miny, maxy,x,y,channel));
+            
 }
 
 void Image::Interpolate(int channel, int width, std::shared_ptr<CachedGraph> graph)

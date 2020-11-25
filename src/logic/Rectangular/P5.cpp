@@ -57,7 +57,7 @@ std::unique_ptr<std::vector<P5>> P5::FindAllMatches(std::shared_ptr<CachedGraph>
             auto imageCopy = image->GetCopy(minx, maxx, miny, maxy);
             auto interpolationCopy = interpolation->GetCopy(minx, maxx, miny, maxy);
 
-            auto tmperror = image->CompareWith(*interpolation, minx, maxx, miny, maxy);
+            //auto tmperror = image->CompareWith(*interpolation, minx, maxx, miny, maxy);
 
             imageCopy.Subtract(interpolationCopy);
 
