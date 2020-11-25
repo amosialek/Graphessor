@@ -36,6 +36,8 @@ bool PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int x3, in
     {
         assert(array.size()>0 && "Sequence contains no elements");
         a.resize(x2-x1+1);
+        width=x2-x1+1;
+        height=y2-y1+1;
         for(int x=0;x<=x2-x1;x++)
             for(int y=0;y<=y2-y1;y++)
             {
@@ -101,7 +103,7 @@ bool PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int x3, in
     {
         for(int y=0;y<height;y++)
             for(int x=0;x<width;x++)
-                a[x][y]-=other.a[y][x];
+                a[x][y]-=other.a[x][y];
     }
 
 

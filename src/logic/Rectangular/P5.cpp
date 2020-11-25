@@ -54,14 +54,21 @@ std::unique_ptr<std::vector<P5>> P5::FindAllMatches(std::shared_ptr<CachedGraph>
         {
             //interpolation -> FillWith(0);
             interpolation -> BilinearInterpolation(*image, minx, maxx, miny, maxy);
-            auto minyFuncoefficient = GetSquareInterpolationOfEdge(*interpolation, minx, maxx, miny);
-            auto maxyFuncoefficient = GetSquareInterpolationOfEdge(*interpolation, minx, maxx, maxy);
-            auto minxFuncoefficient = GetSquareInterpolationOfYEdge(*interpolation, minx, miny, maxy);
-            auto maxxFuncoefficient = GetSquareInterpolationOfYEdge(*interpolation, maxx, miny, maxy);
-            interpolation->Subtract([minx, maxx, miny, maxy, minyFuncoefficient](double x, double y){return -minyFuncoefficient*(maxx-x)*(x-minx)*(maxy-y)/(maxy-miny);},minx, maxx, miny, maxy);
-            interpolation->Subtract([minx, maxx, miny, maxy, maxyFuncoefficient](double x, double y){return -maxyFuncoefficient*(maxx-x)*(x-minx)*(y-miny)/(maxy-miny);},minx, maxx, miny, maxy);
-            interpolation->Subtract([minx, maxx, miny, maxy, minxFuncoefficient](double x, double y){return -minxFuncoefficient*(maxy-y)*(y-miny)*(maxx-x)/(maxx-minx);},minx, maxx, miny, maxy);
-            interpolation->Subtract([minx, maxx, miny, maxy, maxxFuncoefficient](double x, double y){return -maxxFuncoefficient*(maxy-y)*(y-miny)*(x-minx)/(maxx-minx);},minx, maxx, miny, maxy);
+            auto imageCopy = image->GetCopy(minx, maxx, miny, maxy);
+            auto interpolationCopy = interpolation->GetCopy(minx, maxx, miny, maxy);
+
+            auto tmperror = image->CompareWith(*interpolation, minx, maxx, miny, maxy);
+
+            imageCopy.Subtract(interpolationCopy);
+
+            auto minyFuncoefficient = GetSquareInterpolationOfEdge(imageCopy, 0, maxx-minx, 0);
+            auto maxyFuncoefficient = GetSquareInterpolationOfEdge(imageCopy, 0, maxx-minx, maxy-miny);
+            auto minxFuncoefficient = GetSquareInterpolationOfYEdge(imageCopy, 0, 0, maxy-miny);
+            auto maxxFuncoefficient = GetSquareInterpolationOfYEdge(imageCopy, maxx-minx, 0, maxy-miny);
+            interpolation->Subtract([minx, maxx, miny, maxy, minyFuncoefficient](double x, double y){return minyFuncoefficient*(maxx-x)*(x-minx)*(maxy-y)/(maxy-miny);},minx, maxx, miny, maxy);
+            interpolation->Subtract([minx, maxx, miny, maxy, maxyFuncoefficient](double x, double y){return maxyFuncoefficient*(maxx-x)*(x-minx)*(y-miny)/(maxy-miny);},minx, maxx, miny, maxy);
+            interpolation->Subtract([minx, maxx, miny, maxy, minxFuncoefficient](double x, double y){return minxFuncoefficient*(maxy-y)*(y-miny)*(maxx-x)/(maxx-minx);},minx, maxx, miny, maxy);
+            interpolation->Subtract([minx, maxx, miny, maxy, maxxFuncoefficient](double x, double y){return maxxFuncoefficient*(maxy-y)*(y-miny)*(x-minx)/(maxx-minx);},minx, maxx, miny, maxy);
 
             (*graph)[IEdge].error = image->CompareWith(*interpolation, minx, maxx, miny, maxy);
         }
