@@ -8,6 +8,7 @@ class Array2D
 {
     private:
         std::vector<std::vector<double>> a;
+        int xOffset=0, yOffset=0;
     public:
         int height;
         int width;

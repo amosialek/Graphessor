@@ -1,5 +1,5 @@
 #include "P5.hpp"
-#include "PbiHelper.cpp"
+#include "PbiHelper.hpp"
 
 std::map<vertex_descriptor,std::vector<vertex_descriptor>> vertexToNeighbours;
 std::map<vertex_descriptor, double> IEdgeToError;

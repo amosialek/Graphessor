@@ -34,6 +34,8 @@ bool PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int x3, in
 
     Array2D::Array2D(std::vector<std::vector<double>>& array, int x1, int x2, int y1, int y2)
     {
+        xOffset = x1;
+        yOffset = y1;
         assert(array.size()>0 && "Sequence contains no elements");
         a.resize(x2-x1+1);
         width=x2-x1+1;
@@ -66,7 +68,7 @@ bool PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int x3, in
         {
             a[x].resize(height);
             for(int y=0;y<height;y++)
-                a[x][y] = func(x,y);
+                a[x][y] = func(x+xOffset,y+yOffset);
         }
 
     }
@@ -111,14 +113,14 @@ bool PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int x3, in
     {
         for(int y=0;y<height;y++)
             for(int x=0;x<width;x++)
-                a[x][y]-=func(x,y);
+                a[x][y]-=func(x+xOffset,y+yOffset);
     }
 
     void Array2D::Subtract(std::function<double (double, double)>func, int x1, int x2, int y1, int y2)
     {
         for(int y=y1;y<=y2;y++)
             for(int x=x1;x<=x2;x++)
-                a[x][y]-=func(x,y);
+                a[x][y]-=func(x+xOffset,y+yOffset);
     }
 
     double Array2D::MultiplyElementWiseAndSum(double (*func)(double, double))
@@ -127,7 +129,7 @@ bool PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int x3, in
 
         for(int y=0;y<height;y++)
             for(int x=0;x<width;x++)
-                sum+=a[x][y]*func(x, y);
+                sum+=a[x][y]*func(x+xOffset,y+yOffset);
 
         return sum;
     }
@@ -138,7 +140,7 @@ bool PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int x3, in
 
         for(int y=y1;y<=y2;y++)
             for(int x=x1;x<=x2;x++)
-                sum+=a[x][y]*func(x, y);
+                sum+=a[x][y]*func(x+xOffset,y+yOffset);
         return sum;
     }
 
@@ -148,7 +150,7 @@ bool PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int x3, in
 
         for(int y=y1;y<=y2;y++)
             for(int x=x1;x<=x2;x++)
-                sum+=a[x][y]*func(x, y);
+                sum+=a[x][y]*func(x+xOffset,y+yOffset);
         return sum;
     }
 

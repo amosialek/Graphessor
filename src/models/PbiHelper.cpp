@@ -1,5 +1,4 @@
-#include<functional>
-#include"Array2D.hpp"
+#include "PbiHelper.hpp"
 #include <math.h> 
 
 std::function<double(double, double)> Multiply(std::function<double(double, double)> f, std::function<double(double, double)> g)

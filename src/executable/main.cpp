@@ -19,6 +19,7 @@
 #include "RivaraProductions.hpp"
 #include "RivaraCachedGraph.hpp"
 #include "ImageMagnifier.hpp"
+#include "RectangularInterpolation.hpp"
 
 std::map<std::string, int> functionTime;
 
@@ -283,30 +284,59 @@ int main(int argc, char** argv) {
         spdlog::debug("P1 {}",argv[i]);    
     }
 
+    CachedGraph g;
+    std::ifstream s("/home/albert/Albert/agh/doktorat/outputs/MPaszynski1/2020_12_05/1/serializedGraph");
+    g.Deserialize(s);
+    s.close();
+    
+
     AbstractOutputWriter* debugWriter = WriterFactory::GetDebugWriter(graphOutputFileName);
     std::vector<std::shared_ptr<CachedGraph>> channel_graphs;
     auto image = std::make_shared<ImageMagnifier>(inputFileName);
+    auto image3 = std::make_shared<Image>(inputFileName);
     //image -> Save3Colors("/media/albert/Nowy/poligon/bunny_orig");
     if(isRivara)
         PerformRivara(channel_graphs, image, debugWriter, epsilon, file_logger);
     else
     {
         std::vector<std::shared_ptr<Array2D>> vectorsForImage;
+        std::vector<std::shared_ptr<Array2D>> imageArrays = image3->GetChannelsAsArrays();
+        std::shared_ptr<Array2D> interpolationArray2 = std::make_shared<Array2D>(image3->width(), image3->height());
+        RectangularInterpolation2(imageArrays[0], interpolationArray2, std::make_shared<CachedGraph>(g));
+        std::vector<std::shared_ptr<Array2D>> vectorsForImage2;
+        vectorsForImage2.push_back(std::make_shared<Array2D>(image3->width(), image3->height()));
+        vectorsForImage2.push_back(interpolationArray2);
+        vectorsForImage2.push_back(std::make_shared<Array2D>(image3->width(), image3->height()));
+        Image interpolationImage2 = Image(vectorsForImage2);
+        interpolationImage2.save((outputDirectoryPath/(outputFileName+"_interpolation2.bmp")).c_str());
         for(int channel=0;channel<3;channel++)
         {
             std::shared_ptr<Array2D> interpolationArray = std::make_shared<Array2D>(image->width(), image->height());
-            std::vector<std::shared_ptr<Array2D>> imageArrays = image->GetChannelsAsArrays();
             PerformQuadTree(channel_graphs, image, debugWriter, epsilon, interpolationArray, channel, imageArrays, file_logger);
             vectorsForImage.push_back(interpolationArray);
         }
+        //std::shared_ptr<Array2D> interpolationArray2 = std::make_shared<Array2D>(image->width(), image->height());
         
+        //RectangularInterpolation2(imageArrays[0], interpolationArray2, channel_graphs[0]);
+        //std::vector<std::shared_ptr<Array2D>> vectorsForImage2;
+        //vectorsForImage2.push_back(std::make_shared<Array2D>(image->width(), image->height()));
+        //vectorsForImage2.push_back(interpolationArray2);
+        //vectorsForImage2.push_back(std::make_shared<Array2D>(image->width(), image->height()));
+
         Image interpolationImage = Image(vectorsForImage);
+        //Image interpolationImage2 = Image(vectorsForImage2);
         interpolationImage.save((outputDirectoryPath/(outputFileName+"_interpolation.bmp")).c_str());
+        //interpolationImage2.save((outputDirectoryPath/(outputFileName+"_interpolation2.bmp")).c_str());
+        
     }
     //Deserialize(debugWriter);
     
     for(auto g : channel_graphs)
         g->DecreaseXAndYByRatio(4);
+
+    std::ofstream graphOutput("/home/albert/Albert/agh/doktorat/outputs/MPaszynski1/2020_12_05/1/serializedGraph");
+    channel_graphs[0]->Serialize(graphOutput);
+    graphOutput.close();
 
     auto restoredImage = std::make_unique<Image>(channel_graphs);
     GraphImageWriter::DrawPixels(channel_graphs[0],(outputDirectoryPath/(outputFileName+"_red_graph.bmp")).c_str());

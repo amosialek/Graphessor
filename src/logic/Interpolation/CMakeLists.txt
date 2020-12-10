@@ -4,3 +4,4 @@ add_library(Interpolations RectangularInterpolation.hpp RectangularInterpolation
 target_link_libraries(Interpolations Models)
 target_include_directories(Interpolations PUBLIC "${PROJECT_SOURCE_DIR}/src/models")
 target_include_directories(Interpolations PUBLIC "${PROJECT_SOURCE_DIR}/src/logic")
+target_include_directories(Interpolations PUBLIC "${PROJECT_SOURCE_DIR}/src/logic/Interpolation")
