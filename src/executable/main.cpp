@@ -285,7 +285,7 @@ int main(int argc, char** argv) {
     }
 
     CachedGraph g;
-    std::ifstream s("/home/albert/Albert/agh/doktorat/outputs/MPaszynski1/2020_12_05/1/serializedGraph");
+    std::ifstream s("/media/albert/Nowy/Albert/agh/doktorat/outputs/MPaszynski1/2020_12_17/1/serializedGraph");
     g.Deserialize(s);
     s.close();
     
@@ -308,7 +308,7 @@ int main(int argc, char** argv) {
         vectorsForImage2.push_back(interpolationArray2);
         vectorsForImage2.push_back(std::make_shared<Array2D>(image3->width(), image3->height()));
         Image interpolationImage2 = Image(vectorsForImage2);
-        interpolationImage2.save((outputDirectoryPath/(outputFileName+"_interpolation2.bmp")).c_str());
+        interpolationImage2.save((outputDirectoryPath/(outputFileName+"_interpolation3.bmp")).c_str());
         for(int channel=0;channel<3;channel++)
         {
             std::shared_ptr<Array2D> interpolationArray = std::make_shared<Array2D>(image->width(), image->height());
@@ -334,7 +334,7 @@ int main(int argc, char** argv) {
     for(auto g : channel_graphs)
         g->DecreaseXAndYByRatio(4);
 
-    std::ofstream graphOutput("/home/albert/Albert/agh/doktorat/outputs/MPaszynski1/2020_12_05/1/serializedGraph");
+    std::ofstream graphOutput("/home/albert/Albert/agh/doktorat/outputs/MPaszynski1/2020_12_10/1/serializedGraph");
     channel_graphs[0]->Serialize(graphOutput);
     graphOutput.close();
 
