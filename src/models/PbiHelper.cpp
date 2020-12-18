@@ -30,7 +30,7 @@ double GetXIntegralValue(std::function<double(double, double)> integral, double 
 
 double Get2DIntegralValue(std::function<double(double, double)> integral, double x1, double x2, double y1, double y2)
 {
-    return integral(x2,y2)-integral(x1,y1);
+    return integral(x2,y2) - integral(x2,y1) - integral(x1,y2) + integral(x1,y1);
 }
 
 std::function<double(double, double)> TransposeFunction(std::function<double(double, double)> f)
@@ -76,11 +76,11 @@ double GetSquareInterpolationOfRectangle(Array2D& array, int x1, int x2, int y1,
     auto ySquaredIntegral = TransposeFunction(GetX4Integral(y1,y2));
     auto xSquaredIntegral = GetX4Integral(x1,x2);
     auto squaredIntegral = Multiply(xSquaredIntegral, ySquaredIntegral);
-    Array2D array2 = array.GetCopy();
-    double sum = array2.MultiplyElementWiseAndSum(QuadratureIntegralFunction2D(integral),x1,x2,y1,y2);
+    Array2D array2 = array.GetCopy(x1,x2,y1,y2);
+    double sum = array2.MultiplyElementWiseAndSum(QuadratureIntegralFunction2D(integral),0,x2-x1,0,y2-y1);
     double denominator = 0;
-    for(int i=0;i<11;i++)
-        for(int j=0;j<11;j++)
+    for(int i=x1;i<x2;i++)
+        for(int j=y1;j<y2;j++)
             denominator += testingFunctionSquared(i,j);
     double denominator2 = Get2DIntegralValue(squaredIntegral, x1, x2, y1, y2);
     return sum/denominator;

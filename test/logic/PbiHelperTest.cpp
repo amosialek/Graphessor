@@ -51,10 +51,20 @@ TEST(PbiHelperTests, GetSquareInterpolationOfYEdge)
 
 TEST(PbiHelperTests, GetSquareInterpolationOfRectangle)
 {
-    Array2D a = Array2D(11,11);
-    for(int x=0;x<11;x++)
-        for(int y=0;y<11;y++)
-            a[x][y] = x*(10.0-x)*y*(10.0-y)/2.0;
-    auto coefficient = GetSquareInterpolationOfRectangle(a, 0, 10, 0, 10);
+    Array2D a = Array2D(1001,1001);
+    for(int x=0;x<1001;x++)
+        for(int y=0;y<1001;y++)
+            a[x][y] = x*(1000.0-x)*y*(1000.0-y)/2.0;
+    auto coefficient = GetSquareInterpolationOfRectangle(a, 0, 1000, 0, 1000);
+     ASSERT_TRUE(abs(coefficient+0.5)<0.1);
+}
+
+TEST(PbiHelperTests, GetSquareInterpolationOfRectangle2)
+{
+    Array2D a = Array2D(5001,5001);
+    for(int x=4000;x<5001;x++)
+        for(int y=4000;y<5001;y++)
+            a[x][y] = (x-4000)*(5000.0-x)*(y-4000)*(5000.0-y)/2.0;
+    auto coefficient = GetSquareInterpolationOfRectangle(a, 4000, 5000, 4000, 5000);
      ASSERT_TRUE(abs(coefficient+0.5)<0.1);
 }

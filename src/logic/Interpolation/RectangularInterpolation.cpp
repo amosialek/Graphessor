@@ -156,7 +156,7 @@ void BaricentricInterpolation(std::vector<Pixel> pixels, std::shared_ptr<Array2D
         }
 }
 
-void PrepareBilinearInterpolation1(std::shared_ptr<Array2D> image, std::shared_ptr<Array2D> interpolation, std::shared_ptr<CachedGraph> graph)
+void DoLinearInterpolation1(std::shared_ptr<Array2D> image, std::shared_ptr<Array2D> interpolation, std::shared_ptr<CachedGraph> graph)
 {
     auto IEdges = graph->GetCacheIterator(NODELABEL_I);
     for(auto IEdge : IEdges)
@@ -177,7 +177,7 @@ void PrepareBilinearInterpolation1(std::shared_ptr<Array2D> image, std::shared_p
     }
 }
 
-void PrepareBilinearInterpolation2(std::shared_ptr<Array2D> image, std::shared_ptr<Array2D> interpolation, std::shared_ptr<CachedGraph> graph)
+void DoLinearInterpolation2(std::shared_ptr<Array2D> image, std::shared_ptr<Array2D> interpolation, std::shared_ptr<CachedGraph> graph)
 {
     std::set<vertex_descriptor> pixels;
     pixels = graph -> GetPixels();
@@ -200,12 +200,10 @@ void PrepareBilinearInterpolation2(std::shared_ptr<Array2D> image, std::shared_p
 
 }
 
-void RectangularInterpolation2(std::shared_ptr<Array2D> image, std::shared_ptr<Array2D> interpolation, std::shared_ptr<CachedGraph> graph)
+void EdgeInterpolation(std::shared_ptr<Array2D> image, std::shared_ptr<Array2D> interpolation, std::shared_ptr<CachedGraph> graph)
 {
-    PrepareBilinearInterpolation2(image, interpolation, graph);
     auto imageCopy = image->GetCopy(0, image->width-1, 0, image->height-1);
-    auto interpolationCopy = interpolation->GetCopy(0, interpolation->width-1, 0, interpolation->height-1);
-    imageCopy.Subtract(interpolationCopy);
+    imageCopy.Subtract(*interpolation);
 
     auto fedges = graph->GetCacheIterator(NODELABEL_F);
     auto bedges = graph->GetCacheIterator(NODELABEL_B);
@@ -247,11 +245,17 @@ void RectangularInterpolation2(std::shared_ptr<Array2D> image, std::shared_ptr<A
                     maxY = std::max((*graph)[pixel].y, maxY);
                 }
             }
-            auto interpolationFunctionLowerX = Multiply(interpolationFunctionOnLine,[minX, x2](double x, double y){return (x-minX)/(x2-minX);});
-            auto interpolationFunctionHigherX = Multiply(interpolationFunctionOnLine,[x2, maxX](double x, double y){return (maxX-x)/(maxX-x2);});
+
+            std::function<double(double, double)> interpolationFunctionLowerX =
+                x2==minX
+                ? [](double x, double y){return 0.0;}
+                : Multiply(interpolationFunctionOnLine,[minX, x2](double x, double y){return (x-minX)/(x2-minX);});
+            std::function<double(double, double)> interpolationFunctionHigherX =
+                x2==maxX
+                ? [](double x, double y){return 0.0;}
+                : Multiply(interpolationFunctionOnLine,[x2, maxX](double x, double y){return (maxX-x)/(maxX-x2);});
             interpolation->Subtract(interpolationFunctionLowerX, minX, x2, minY, maxY);
             interpolation->Subtract(interpolationFunctionHigherX, x2+1, maxX, minY, maxY);
-            
         }
         else
         {
@@ -269,11 +273,49 @@ void RectangularInterpolation2(std::shared_ptr<Array2D> image, std::shared_ptr<A
                     maxY = std::max((*graph)[pixel].y, maxY);
                 }
             }
-            auto interpolationFunctionLowerY = Multiply(interpolationFunctionOnLine,[minY, y2](double x, double y){return (y-minY)/(y2-minY);});
-            auto interpolationFunctionHigherY = Multiply(interpolationFunctionOnLine,[y2, maxY](double x, double y){return (maxY-y)/(maxY-y2);});
+            std::function<double(double, double)> interpolationFunctionLowerY = 
+                y2==minY
+                ? [](double x, double y){return 0.0;}
+                : Multiply(interpolationFunctionOnLine,[minY, y2](double x, double y){return (y-minY)/(y2-minY);});
+            std::function<double(double, double)> interpolationFunctionHigherY = 
+                y2==maxY
+                ? [](double x, double y){return 0.0;}
+                : Multiply(interpolationFunctionOnLine,[y2, maxY](double x, double y){return (maxY-y)/(maxY-y2);});
             interpolation->Subtract(interpolationFunctionLowerY, minX, maxX, minY, y2);
             interpolation->Subtract(interpolationFunctionHigherY, minX, maxX, y2+1, maxY);
         }
-        
     }
+}
+
+void InteriorInterpolation(std::shared_ptr<Array2D> image, std::shared_ptr<Array2D> interpolation, std::shared_ptr<CachedGraph> graph)
+{
+    auto imageCopy = image->GetCopy(0, image->width-1, 0, image->height-1);
+    imageCopy.Subtract(*interpolation);
+
+    auto IEdges = graph->GetCacheIterator(NODELABEL_I);
+    for(auto IEdge : IEdges)
+    {
+        auto pixels = graph->GetAdjacentVertices(IEdge, NODELABEL_P);
+        int minX = (*graph)[pixels[0]].x;
+        int maxX = (*graph)[pixels[0]].x;
+        int minY = (*graph)[pixels[0]].y;
+        int maxY = (*graph)[pixels[0]].y;
+        for(auto pixel : pixels)
+            {
+                minX = std::min((*graph)[pixel].x, minX);
+                maxX = std::max((*graph)[pixel].x, maxX);
+                minY = std::min((*graph)[pixel].y, minY);
+                maxY = std::max((*graph)[pixel].y, maxY);
+            }
+        double coefficient = GetSquareInterpolationOfRectangle(imageCopy, minX, maxX, minY, maxY);
+        auto interpolationFunction = [minX, maxX, minY, maxY, coefficient](double x, double y){return coefficient * (x - minX) * (x - maxX) * (y - minY) * (y - maxY);};
+        interpolation->Subtract(interpolationFunction, minX, maxX, minY, maxY);
+    }
+}
+
+void RectangularInterpolation2(std::shared_ptr<Array2D> image, std::shared_ptr<Array2D> interpolation, std::shared_ptr<CachedGraph> graph)
+{
+    DoLinearInterpolation2(image, interpolation, graph);
+    EdgeInterpolation(image, interpolation, graph);
+    InteriorInterpolation(image, interpolation, graph);
 }

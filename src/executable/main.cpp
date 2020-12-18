@@ -285,7 +285,7 @@ int main(int argc, char** argv) {
     }
 
     CachedGraph g;
-    std::ifstream s("/media/albert/Nowy/Albert/agh/doktorat/outputs/MPaszynski1/2020_12_17/1/serializedGraph");
+    std::ifstream s("/media/albert/Nowy/Albert/agh/doktorat/outputs/MPaszynski1/2020_12_17/2/serializedGraph");
     g.Deserialize(s);
     s.close();
     
