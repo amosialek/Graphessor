@@ -60,13 +60,13 @@ std::unique_ptr<std::vector<P5>> P5::FindAllMatches(std::shared_ptr<CachedGraph>
             //auto tmperror = image->CompareWith(*interpolation, minx, maxx, miny, maxy);
 
             imageCopy.Subtract(interpolationCopy);
-
-            auto minyFuncoefficient = GetSquareInterpolationOfEdge(imageCopy, 0, maxx-minx, 0);
-            auto maxyFuncoefficient = GetSquareInterpolationOfEdge(imageCopy, 0, maxx-minx, maxy-miny);
+            int xDiff = maxx-minx;
+            auto minyFuncoefficient = GetSquareInterpolationOfEdge(imageCopy, 0, xDiff, 0);
+            auto maxyFuncoefficient = GetSquareInterpolationOfEdge(imageCopy, 0, xDiff, maxy-miny);
             auto minxFuncoefficient = GetSquareInterpolationOfYEdge(imageCopy, 0, 0, maxy-miny);
-            auto maxxFuncoefficient = GetSquareInterpolationOfYEdge(imageCopy, maxx-minx, 0, maxy-miny);
-            interpolation->Subtract([minx, maxx, miny, maxy, minyFuncoefficient](double x, double y){return minyFuncoefficient*(maxx-x)*(x-minx)*(maxy-y)/(maxy-miny);},minx, maxx, miny, maxy);
-            interpolation->Subtract([minx, maxx, miny, maxy, maxyFuncoefficient](double x, double y){return maxyFuncoefficient*(maxx-x)*(x-minx)*(y-miny)/(maxy-miny);},minx, maxx, miny, maxy);
+            auto maxxFuncoefficient = GetSquareInterpolationOfYEdge(imageCopy, xDiff, 0, maxy-miny);
+            interpolation->Subtract([xDiff, miny, maxy, minyFuncoefficient](double x, double y){return minyFuncoefficient*(xDiff-x)*(x)*(maxy-y)/(maxy-miny);},minx, maxx, miny, maxy, minx, 0);
+            interpolation->Subtract([xDiff, miny, maxy, maxyFuncoefficient](double x, double y){return maxyFuncoefficient*(xDiff-x)*(x)*(y-miny)/(maxy-miny);},minx, maxx, miny, maxy, minx, 0);
             interpolation->Subtract([minx, maxx, miny, maxy, minxFuncoefficient](double x, double y){return minxFuncoefficient*(maxy-y)*(y-miny)*(maxx-x)/(maxx-minx);},minx, maxx, miny, maxy);
             interpolation->Subtract([minx, maxx, miny, maxy, maxxFuncoefficient](double x, double y){return maxxFuncoefficient*(maxy-y)*(y-miny)*(x-minx)/(maxx-minx);},minx, maxx, miny, maxy);
 

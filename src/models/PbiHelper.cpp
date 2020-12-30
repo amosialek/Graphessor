@@ -1,5 +1,6 @@
 #include "PbiHelper.hpp"
 #include <math.h> 
+#include <cassert>
 
 std::function<double(double, double)> Multiply(std::function<double(double, double)> f, std::function<double(double, double)> g)
 {
@@ -50,10 +51,20 @@ std::function<double(double, double)> QuadratureIntegralFunction2D(std::function
 
 double GetSquareInterpolationOfEdge(Array2D& array, int x1, int x2, int y)
 {
-    std::function<double(double, double)> integral = GetXSquareIntegral(x1,x2);
+    int offset = x1;
     Array2D array2 = array.GetCopy(x1,x2,y,y);
+    array2.xOffset = 0;
+    x1-=offset;
+    x2-=offset;
+    std::function<double(double, double)> integral = GetXSquareIntegral(x1,x2);
     double sum = array2.MultiplyElementWiseAndSum(QuadratureIntegralFunctionByX(integral),0,x2-x1,0,0);
     double denominator = GetXIntegralValue(GetX4Integral(x1,x2),x1,x2,y);
+    if(denominator==0)
+    {
+        assert(sum==0 && "GetSquareInterpolationOfEdge: denominator = 0");
+        if(sum==0)
+            return 0.0;
+    }
     return sum/denominator;
 }
 

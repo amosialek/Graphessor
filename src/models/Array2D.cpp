@@ -123,6 +123,14 @@ bool PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int x3, in
                 a[x][y]-=func(x+xOffset,y+yOffset);
     }
 
+    void Array2D::Subtract(std::function<double (double, double)>func, int x1, int x2, int y1, int y2, int funcOffsetX, int funcOffsetY)
+    {
+        for(int y=y1;y<=y2;y++)
+            for(int x=x1;x<=x2;x++)
+                a[x][y]-=func(x+xOffset-funcOffsetX,y+yOffset-funcOffsetY);
+    }
+
+
     double Array2D::MultiplyElementWiseAndSum(double (*func)(double, double))
     {
         double sum = 0;

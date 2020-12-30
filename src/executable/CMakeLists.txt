@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10.0)
 if(NOT TARGET spdlog)
     # Stand-alone build
-    find_package(spdlog REQUIRED)
+    find_package(spdlog CONFIG REQUIRED)
 endif()
 link_libraries(stdc++fs)
 add_executable(Graphessor main.cpp)
