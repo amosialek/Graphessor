@@ -1,7 +1,6 @@
 #include "Array2D.hpp"
 #include "stdlib.h"
 #include <cassert>
-
 int sign2 (int x1, int y1, int x2, int y2, int x3, int y3)
 {
     return (x1 - x3) * (y2 - y3) - (x2 - x3) * (y1 - y3);
@@ -273,4 +272,16 @@ Array2D Array2D::GetCopy()
 Array2D Array2D::GetCopy(int x1, int x2, int y1, int y2)
 {
     return Array2D(a,x1,x2,y1,y2);
+}
+
+void Array2D::Dump(std::ostream& s)
+{
+    for(int y=0;y<height;y++)
+    {
+        for(int x=0;x<width;x++)    
+        {
+            s<<a[x][y]<<';';
+        }
+        s<<'\n';
+    }
 }

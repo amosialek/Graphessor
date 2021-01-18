@@ -70,29 +70,54 @@ double GetSquareInterpolationOfEdge(Array2D& array, int x1, int x2, int y)
 
 double GetSquareInterpolationOfYEdge(Array2D& array, int x, int y1, int y2)
 {
-    std::function<double(double, double)> integral = GetXSquareIntegral(y1,y2);
+    int offset = y1;
     Array2D array2 = array.GetCopy(x,x,y1,y2);
+    array2.yOffset = 0;
+    y1-=offset;
+    y2-=offset;
+
+    std::function<double(double, double)> integral = GetXSquareIntegral(y1,y2);
     double sum = array2.MultiplyElementWiseAndSum(TransposeFunction(QuadratureIntegralFunctionByX(integral)),0,0,0,y2-y1);
     double denominator = GetXIntegralValue(GetX4Integral(y1,y2),y1,y2,x);
+    if(denominator==0)
+    {
+        assert(sum==0 && "GetSquareInterpolationOfYEdge: denominator = 0");
+        if(sum==0)
+            return 0.0;
+    }
     return sum/denominator;
 }
 
 double GetSquareInterpolationOfRectangle(Array2D& array, int x1, int x2, int y1, int y2)
 {
-    std::function<double(double, double)> testingFunction = [x1,x2,y1,y2](double x, double y){return (x-x1)*(x-x2)*(y-y1)*(y-y2);};
+    int xDiff = x2-x1;
+    int yDiff = y2-y1;
+    if(xDiff<=1 or yDiff<=1) //no sense of interpolating flat rectangles
+        return 0;
+    int xOffset = x1;
+    int yOffset = y1;
+    std::function<double(double, double)> testingFunction = [xDiff, yDiff](double x, double y){return (x)*(x-xDiff)*(y)*(y-yDiff);};
     std::function<double(double, double)> testingFunctionSquared = Multiply(testingFunction, testingFunction);
-    auto yIntegral = TransposeFunction(GetXSquareIntegral(y1,y2));
-    auto xIntegral = GetXSquareIntegral(x1,x2);
+    auto yIntegral = TransposeFunction(GetXSquareIntegral(0,yDiff));
+    auto xIntegral = GetXSquareIntegral(0,xDiff);
     auto integral = Multiply(Multiply(xIntegral, yIntegral),[](double x, double y){return -1.0;});
-    auto ySquaredIntegral = TransposeFunction(GetX4Integral(y1,y2));
-    auto xSquaredIntegral = GetX4Integral(x1,x2);
+    auto ySquaredIntegral = TransposeFunction(GetX4Integral(0,yDiff));
+    auto xSquaredIntegral = GetX4Integral(0,xDiff);
     auto squaredIntegral = Multiply(xSquaredIntegral, ySquaredIntegral);
     Array2D array2 = array.GetCopy(x1,x2,y1,y2);
+    array2.xOffset = 0;
+    array2.yOffset = 0;
     double sum = array2.MultiplyElementWiseAndSum(QuadratureIntegralFunction2D(integral),0,x2-x1,0,y2-y1);
     double denominator = 0;
-    for(int i=x1;i<x2;i++)
-        for(int j=y1;j<y2;j++)
+    for(int i=0;i<xDiff;i++)
+        for(int j=0;j<yDiff;j++)
             denominator += testingFunctionSquared(i,j);
-    double denominator2 = Get2DIntegralValue(squaredIntegral, x1, x2, y1, y2);
+    double denominator2 = Get2DIntegralValue(squaredIntegral, 0, xDiff, 0, yDiff);
+    if(denominator==0)
+    {
+        assert(sum==0 && "GetSquareInterpolationOfRectangle: denominator = 0");
+        if(sum==0)
+            return 0.0;
+    }
     return sum/denominator;
 }

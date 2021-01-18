@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <functional>
+#include <ostream>
 
 class Array2D
 {
@@ -34,6 +35,7 @@ class Array2D
         double CompareWith(Array2D& other, int x1, int x2, int x3, int y1, int y2, int y3);
         void BilinearInterpolation(Array2D& base, int x1, int x2, int y1, int y2);
         void BaricentricInterpolation(Array2D& base, int x1, int x2, int x3, int y1, int y2, int y3);
+        void Dump(std::ostream& s);
         std::vector<double>& operator[](int x);
 };
 

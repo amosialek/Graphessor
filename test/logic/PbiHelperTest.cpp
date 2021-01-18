@@ -54,19 +54,19 @@ TEST(PbiHelperTests, GetSquareInterpolationOfEdge2)
     Array2D a = Array2D(2000,2000);
     a.FillWith(0);
     a[1787][1999]=-0.5;
-    auto fun = GetX4Integral(1786,1788);
-    double a1 = fun(1786,1999);
-    double a2 = fun(1787,1999);
-    double a3 = fun(1788,1999);
-    double x = 1786.0;
-    double res = x*x*x*x*x/5 - x*x*x*(1786.0+1788.0)*x/2 + x*x*4*1786.0*1788.0*x/3 + x*x*1786.0*1786.0*x/3 + x*x*1788.0*1788.0*x/3 - x*1786*1786.0*1788.0*x - x*1786.0*1788.0*1788.0*x + 1786.0*1786.0*1788.0*1788.0*x;
-    x = 1786.0;
-    double res2 = x*x*x*x*x/5 - x*x*x*(1786.0+1788.0)*x/2 + x*x*4*1786.0*1788.0*x/3 + x*x*1786.0*1786.0*x/3 + x*x*1788.0*1788.0*x/3 - x*1786*1786.0*1788.0*x - x*1786.0*1788.0*1788.0*x + 1786.0*1786.0*1788.0*1788.0*x;
-    x = 1786.0;
-    double res3 = x*x*x*x*x/5 - x*x*x*(1786.0+1788.0)*x/2 + x*x*4*1786.0*1788.0*x/3 + x*x*1786.0*1786.0*x/3 + x*x*1788.0*1788.0*x/3 - x*1786*1786.0*1788.0*x - x*1786.0*1788.0*1788.0*x + 1786.0*1786.0*1788.0*1788.0*x;
     double y = GetSquareInterpolationOfEdge(a, 1786, 1788, 1999);
-    std::cerr<<y;
-    //int x2=0;
+    ASSERT_FALSE(std::isnan(y));
+    ASSERT_NE(y,0);
+}
+
+TEST(PbiHelperTests, GetSquareInterpolationOfYEdge2)
+{
+    Array2D a = Array2D(2000,2000);
+    a.FillWith(0);
+    a[1999][1787]=-0.5;
+    double y = GetSquareInterpolationOfYEdge(a, 1999, 1786, 1788);
+    ASSERT_FALSE(std::isnan(y));
+    ASSERT_NE(y,0);
 }
 
 TEST(PbiHelperTests, GetSquareInterpolationOfRectangle)

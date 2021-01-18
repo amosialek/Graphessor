@@ -52,7 +52,7 @@ void PerformQuadTree(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
     RectangularInterpolation2(imageArrays3[0], interpolationArray2, g);
 
     double L2 = imageArrays3[0] -> SquaredError(*interpolationArray2,0,imageArrays3[0]->width-1, 0, imageArrays3[0]->height-1);
-    L2=L2/(imageArrays3[0]->width* imageArrays3[0]->height/*255.0*255.0*/);    
+    L2=L2/(imageArrays3[0]->width* imageArrays3[0]->height*255.0*255.0);    
 
     std::vector<std::shared_ptr<Array2D>> vectorsForImage;
     vectorsForImage.push_back(interpolationArray2);
@@ -115,14 +115,17 @@ void PerformQuadTree(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
         RectangularInterpolation2(imageArrays3[0], interpolationArray2, g);
 
         L2 = imageArrays3[0] -> SquaredError(*interpolationArray2,0,imageArrays3[0]->width-1, 0, imageArrays3[0]->height-1);
-        L2=L2/(imageArrays3[0]->width* imageArrays3[0]->height/*255.0*255.0*/);
+        L2=L2/(imageArrays3[0]->width* imageArrays3[0]->height*255.0*255.0);
+        double L2original = imageArrays[0] -> SquaredError(*interpolationArray,0,imageArrays[0]->width-1,0,imageArrays[0]->height-1)/255.0/255.0/imageArrays[0]->height/imageArrays[0]->width;
         vectorsForImage.clear();
-        spdlog::debug("i = {}, L2 error = {}", i, L2);  
+        spdlog::debug("i = {}, interpolated L2 error = {}", i, L2); 
+        spdlog::debug("i = {}, original L2 error = {}", i, L2original);  
         vectorsForImage.push_back(interpolationArray2);
         vectorsForImage.push_back(std::make_shared<Array2D>(interpolationArray2 -> width, interpolationArray2 -> height));
         vectorsForImage.push_back(std::make_shared<Array2D>(interpolationArray2 -> width, interpolationArray2 -> height));
         interpolationImage = Image(vectorsForImage);
-        interpolationImage.save((outputDirectoryPath/(outputFileName+std::to_string(i)+"_interpolation.bmp")).c_str());
+        interpolationImage.save((outputDirectoryPath/(outputFileName+'_'+std::to_string(i)+"_interpolation.bmp")).c_str());
+        GraphImageWriter::DrawPixels(g, (outputDirectoryPath/(outputFileName+'_'+std::to_string(i)+"_graph.bmp")).c_str());
 
         i++;
     }
