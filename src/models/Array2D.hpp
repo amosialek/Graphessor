@@ -26,6 +26,7 @@ class Array2D
         void Subtract(std::function<double(double, double)>func);
         void Subtract(std::function<double(double, double)>func, int x1, int x2, int y1, int y2);
         void Subtract(std::function<double(double, double)>func, int x1, int x2, int y1, int y2, int funcOffsetX, int funcOffsetY);
+        double MultiplyElementWiseAndSum(Array2D other, int x1, int x2, int y1, int y2);
         double MultiplyElementWiseAndSum(double (*func)(double, double));
         double MultiplyElementWiseAndSum(double (*func)(double, double), int x1, int x2, int y1, int y2);
         double MultiplyElementWiseAndSum(std::function<double(double, double)>func, int x1, int x2, int y1, int y2);

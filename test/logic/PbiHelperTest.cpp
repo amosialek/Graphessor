@@ -88,3 +88,28 @@ TEST(PbiHelperTests, GetSquareInterpolationOfRectangle2)
     auto coefficient = GetSquareInterpolationOfRectangle(a, 4000, 5000, 4000, 5000);
      ASSERT_TRUE(abs(coefficient+0.5)<0.1);
 }
+
+TEST(PbiHelperTests, integralOfTestFunction_checkCorrectness)
+{
+    double correctAnswers[]{1/6.0, 0, 1/30.0, 0, 1/70.0, 0 , 1/126.0, 0, 1/198.0, 0, 1/286.0}; //values from wolfram alpha
+    for(int n=0;n<=10;n++)
+    {
+        ASSERT_TRUE(abs(correctAnswers[n]-integralOfTestFunction[n](1.0, 0.0))<0.01);
+    }
+}
+
+TEST(PbiHelperTests, GetNthOrderInterpolationOfEdge)
+{
+    int sampling = 100;
+    Array2D a = Array2D(sampling, 1);
+    std::function<double(double, double)> f = [sampling](double x, double y){return (x/sampling)*(1.0-x/sampling)/2.0;};
+    auto fDelta = [sampling](double x, double y){return (2*x/sampling-1.0);};
+    for(int n=0;n<=10;n++)
+    {
+        for(int x=0;x<sampling;x++)
+            a[x][0] = f(x,0);
+        auto coefficient = GetNthOrderInterpolationOfEdge(a, 0, sampling - 1, 0, n);
+        f = Multiply(f, fDelta);
+        ASSERT_TRUE(abs(coefficient-0.5)<0.01);
+    }
+}

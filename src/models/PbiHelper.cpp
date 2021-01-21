@@ -1,5 +1,4 @@
 #include "PbiHelper.hpp"
-#include <math.h> 
 #include <cassert>
 
 std::function<double(double, double)> Multiply(std::function<double(double, double)> f, std::function<double(double, double)> g)
@@ -62,6 +61,37 @@ double GetSquareInterpolationOfEdge(Array2D& array, int x1, int x2, int y)
     if(denominator==0)
     {
         assert(sum==0 && "GetSquareInterpolationOfEdge: denominator = 0");
+        if(sum==0)
+            return 0.0;
+    }
+    return sum/denominator;
+}
+
+Array2D GetFunctionSplitToNElements(std::function<double(double, double)> f, int x1, int x2, int elements)
+{
+    double delta = 1.0 * (x2-x1) / elements;
+    Array2D a = Array2D(elements, 1);
+    for(int i=0;i<elements;i++)
+        a[i][0] = f(i * delta, 0);
+    return a;
+}
+
+double GetNthOrderInterpolationOfEdge(Array2D& array, int x1, int x2, int y, int n)
+{
+    int offset = x1;
+    Array2D array2 = array.GetCopy(x1,x2,y,y);
+    array2.xOffset = 0;
+    x1-=offset;
+    x2-=offset;
+    double sum = 0;
+    Array2D functionArray = GetFunctionSplitToNElements(integralOfTestFunction[n], 0,1, x2-x1+1);
+    for(int i = functionArray.width - 1; i >= 1; i--)
+        functionArray[i][0]-=functionArray[i-1][0];
+    sum = array2.MultiplyElementWiseAndSum(functionArray,x1,x2,0,0);
+    double denominator = integralOfTestFunctionSquaredOnZeroOneRange[n];
+    if(denominator==0)
+    {
+        assert(sum==0 && "GetNthOrderInterpolationOfEdge: denominator = 0");
         if(sum==0)
             return 0.0;
     }

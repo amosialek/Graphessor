@@ -130,6 +130,16 @@ bool PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int x3, in
     }
 
 
+    double Array2D::MultiplyElementWiseAndSum(Array2D other, int x1, int x2, int y1, int y2)
+    {
+        double sum = 0;
+
+        for(int y=y1;y<=y2;y++)
+            for(int x=x1;x<=x2;x++)
+                sum+=a[x][y]*other[x+xOffset][y+yOffset];
+        return sum;
+    }
+
     double Array2D::MultiplyElementWiseAndSum(double (*func)(double, double))
     {
         double sum = 0;
