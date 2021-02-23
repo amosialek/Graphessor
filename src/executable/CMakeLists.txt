@@ -1,4 +1,16 @@
 cmake_minimum_required(VERSION 3.10.0)
+
+
+find_package(LAPACK)
+find_library(LAPACKE_LIBRARY
+          NAMES "liblapacke.a"
+          HINTS "/usr/lib/")
+if(LAPACK_FOUND)
+   set(lapackblas_libraries ${LAPACK_LIBRARIES})
+else ()
+   message(FATAL_ERROR, "no lapack found")
+endif()
+
 if(NOT TARGET spdlog)
     # Stand-alone build
     find_package(spdlog CONFIG REQUIRED)
@@ -19,3 +31,8 @@ TARGET_LINK_LIBRARIES( Graphessor ${Boost_LIBRARIES} )
 add_executable(f2bitmap fun2bitmap.cpp)
 target_link_libraries (f2bitmap Models)
 TARGET_LINK_LIBRARIES(f2bitmap ${Boost_LIBRARIES} )
+
+add_executable(lapackTests lapackTests.cpp)
+
+target_link_libraries(lapackTests ${LAPACKE_LIBRARY})
+target_link_libraries(lapackTests ${lapackblas_libraries})

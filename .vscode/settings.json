@@ -75,6 +75,7 @@
         "*.ipp": "cpp",
         "any": "cpp",
         "filesystem": "cpp",
-        "bit": "cpp"
+        "bit": "cpp",
+        "charconv": "cpp"
     }
 }

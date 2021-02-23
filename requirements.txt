@@ -3,3 +3,5 @@ CMAKE 3.10
 spdlog: https://github.com/gabime/spdlog
 You may also need libboost-program-options-dev package
 cereal
+lapack
+lapacke

@@ -30,6 +30,43 @@ std::string outputFileName;
 std::shared_ptr<Image> image3;
 std::vector<std::shared_ptr<Array2D>> imageArrays3;
 
+double countL2Error(std::shared_ptr<Array2D> interpolationArray, std::vector<std::shared_ptr<Array2D>> imageArrays, std::vector<std::shared_ptr<CachedGraph>>& channel_graphs)
+{
+    std::shared_ptr<CachedGraph> g = std::make_shared<CachedGraph>(*channel_graphs[0]);
+
+    g->DecreaseXAndYByRatio(4);
+    std::shared_ptr<Array2D> interpolationArray2 = std::make_shared<Array2D>(interpolationArray->width/4, interpolationArray->height/4);
+    
+    RectangularInterpolation2(imageArrays3[0], interpolationArray2, g);
+
+    double L2 = imageArrays3[0] -> SquaredError(*interpolationArray2,0,imageArrays3[0]->width-1, 0, imageArrays3[0]->height-1);
+    L2=L2/(imageArrays3[0]->width* imageArrays3[0]->height*255.0*255.0);    
+    std::vector<std::shared_ptr<Array2D>> vectorsForImage;
+    interpolationArray2 = std::make_shared<Array2D>(interpolationArray->width/4, interpolationArray->height/4);
+    vectorsForImage.push_back(interpolationArray2);
+    vectorsForImage.push_back(std::make_shared<Array2D>(interpolationArray2 -> width, interpolationArray2 -> height));
+    vectorsForImage.push_back(std::make_shared<Array2D>(interpolationArray2 -> width, interpolationArray2 -> height));
+    Image interpolationImage = Image(vectorsForImage);
+    g = std::make_shared<CachedGraph>(*channel_graphs[0]);
+    g->DecreaseXAndYByRatio(4);
+    
+    RectangularInterpolation2(imageArrays3[0], interpolationArray2, g);
+
+    L2 = imageArrays3[0] -> SquaredError(*interpolationArray2,0,imageArrays3[0]->width-1, 0, imageArrays3[0]->height-1);
+    L2=L2/(imageArrays3[0]->width* imageArrays3[0]->height*255.0*255.0);
+    double L2original = imageArrays[0] -> SquaredError(*interpolationArray,0,imageArrays[0]->width-1,0,imageArrays[0]->height-1)/255.0/255.0/imageArrays[0]->height/imageArrays[0]->width;
+    vectorsForImage.clear();
+    spdlog::debug("interpolated L2 error = {}",  L2); 
+    spdlog::debug("original L2 error = {}",  L2original);  
+    vectorsForImage.push_back(interpolationArray2);
+    vectorsForImage.push_back(std::make_shared<Array2D>(interpolationArray2 -> width, interpolationArray2 -> height));
+    vectorsForImage.push_back(std::make_shared<Array2D>(interpolationArray2 -> width, interpolationArray2 -> height));
+    interpolationImage = Image(vectorsForImage);
+    interpolationImage.save((outputDirectoryPath/(outputFileName+"_L2_interpolation.bmp")).c_str());
+    GraphImageWriter::DrawPixels(g, (outputDirectoryPath/(outputFileName+"_L2_graph.bmp")).c_str());
+}
+
+
 void PerformQuadTree(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
     std::shared_ptr<Image> image,
     AbstractOutputWriter* debugWriter,
@@ -44,23 +81,6 @@ void PerformQuadTree(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
     channel_graphs.emplace_back(graph);
     auto S = graph -> AddVertex(*(new Pixel(0,0, NODELABEL_S)));
     P1(graph, S, image).Perform();
-    std::shared_ptr<CachedGraph> g = std::make_shared<CachedGraph>(*channel_graphs[0]);
-
-    g->DecreaseXAndYByRatio(4);
-    std::shared_ptr<Array2D> interpolationArray2 = std::make_shared<Array2D>(interpolationArray->width/4, interpolationArray->height/4);
-    
-    RectangularInterpolation2(imageArrays3[0], interpolationArray2, g);
-
-    double L2 = imageArrays3[0] -> SquaredError(*interpolationArray2,0,imageArrays3[0]->width-1, 0, imageArrays3[0]->height-1);
-    L2=L2/(imageArrays3[0]->width* imageArrays3[0]->height*255.0*255.0);    
-
-    std::vector<std::shared_ptr<Array2D>> vectorsForImage;
-    vectorsForImage.push_back(interpolationArray2);
-    vectorsForImage.push_back(std::make_shared<Array2D>(interpolationArray2 -> width, interpolationArray2 -> height));
-    vectorsForImage.push_back(std::make_shared<Array2D>(interpolationArray2 -> width, interpolationArray2 -> height));
-    Image interpolationImage = Image(vectorsForImage);
-    interpolationImage.save((outputDirectoryPath/(outputFileName+"_"+std::to_string(1)+"_interpolation.bmp")).c_str());
-    spdlog::debug("i = 0, L2 error = {}",L2);  
 
     unsigned long long lastICount = 0;
     int i=1;
@@ -106,26 +126,6 @@ void PerformQuadTree(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
         end = std::chrono::steady_clock::now();
         functionTime["P4"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
         //debugWriter->WriteItOut(std::to_string(i++), *graph);
-
-
-        g = std::make_shared<CachedGraph>(*channel_graphs[0]);
-        g->DecreaseXAndYByRatio(4);
-        interpolationArray2 = std::make_shared<Array2D>(interpolationArray->width/4, interpolationArray->height/4);
-        
-        RectangularInterpolation2(imageArrays3[0], interpolationArray2, g);
-
-        L2 = imageArrays3[0] -> SquaredError(*interpolationArray2,0,imageArrays3[0]->width-1, 0, imageArrays3[0]->height-1);
-        L2=L2/(imageArrays3[0]->width* imageArrays3[0]->height*255.0*255.0);
-        double L2original = imageArrays[0] -> SquaredError(*interpolationArray,0,imageArrays[0]->width-1,0,imageArrays[0]->height-1)/255.0/255.0/imageArrays[0]->height/imageArrays[0]->width;
-        vectorsForImage.clear();
-        spdlog::debug("i = {}, interpolated L2 error = {}", i, L2); 
-        spdlog::debug("i = {}, original L2 error = {}", i, L2original);  
-        vectorsForImage.push_back(interpolationArray2);
-        vectorsForImage.push_back(std::make_shared<Array2D>(interpolationArray2 -> width, interpolationArray2 -> height));
-        vectorsForImage.push_back(std::make_shared<Array2D>(interpolationArray2 -> width, interpolationArray2 -> height));
-        interpolationImage = Image(vectorsForImage);
-        interpolationImage.save((outputDirectoryPath/(outputFileName+'_'+std::to_string(i)+"_interpolation.bmp")).c_str());
-        GraphImageWriter::DrawPixels(g, (outputDirectoryPath/(outputFileName+'_'+std::to_string(i)+"_graph.bmp")).c_str());
 
         i++;
     }
@@ -335,42 +335,23 @@ int main(int argc, char** argv) {
     auto image = std::make_shared<ImageMagnifier>(inputFileName);
     image3 = std::make_shared<Image>(inputFileName);
     imageArrays3 = image3->GetChannelsAsArrays();
-    //image -> Save3Colors("/media/albert/Nowy/poligon/bunny_orig");
     if(isRivara)
         PerformRivara(channel_graphs, image, debugWriter, epsilon, file_logger);
     else
     {
         std::vector<std::shared_ptr<Array2D>> vectorsForImage;
         std::vector<std::shared_ptr<Array2D>> imageArrays = image->GetChannelsAsArrays();
-        // std::shared_ptr<Array2D> interpolationArray2 = std::make_shared<Array2D>(image3->width(), image3->height());
-        // RectangularInterpolation2(imageArrays[0], interpolationArray2, std::make_shared<CachedGraph>(g));
-        // std::vector<std::shared_ptr<Array2D>> vectorsForImage2;
-        // vectorsForImage2.push_back(std::make_shared<Array2D>(image3->width(), image3->height()));
-        // vectorsForImage2.push_back(interpolationArray2);
-        // vectorsForImage2.push_back(std::make_shared<Array2D>(image3->width(), image3->height()));
-        // Image interpolationImage2 = Image(vectorsForImage2);
-        // interpolationImage2.save((outputDirectoryPath/(outputFileName+"_interpolation3.bmp")).c_str());
         for(int channel=0;channel<3;channel++)
         {
             std::shared_ptr<Array2D> interpolationArray = std::make_shared<Array2D>(image->width(), image->height());
             PerformQuadTree(channel_graphs, image, debugWriter, epsilon, interpolationArray, channel, imageArrays, file_logger);
             vectorsForImage.push_back(interpolationArray);
         }
-        //std::shared_ptr<Array2D> interpolationArray2 = std::make_shared<Array2D>(image->width(), image->height());
-        
-        //RectangularInterpolation2(imageArrays[0], interpolationArray2, channel_graphs[0]);
-        //std::vector<std::shared_ptr<Array2D>> vectorsForImage2;
-        //vectorsForImage2.push_back(std::make_shared<Array2D>(image->width(), image->height()));
-        //vectorsForImage2.push_back(interpolationArray2);
-        //vectorsForImage2.push_back(std::make_shared<Array2D>(image->width(), image->height()));
 
         Image interpolationImage = Image(vectorsForImage);
-        //Image interpolationImage2 = Image(vectorsForImage2);
         interpolationImage.save((outputDirectoryPath/(outputFileName+"_interpolation.bmp")).c_str());
-        //interpolationImage2.save((outputDirectoryPath/(outputFileName+"_interpolation2.bmp")).c_str());
         
     }
-    //Deserialize(debugWriter);
     
     for(auto g : channel_graphs)
         g->DecreaseXAndYByRatio(4);
