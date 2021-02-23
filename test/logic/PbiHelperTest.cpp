@@ -49,6 +49,26 @@ TEST(PbiHelperTests, GetSquareInterpolationOfYEdge)
     ASSERT_TRUE(abs(coefficient+0.5)<0.1);
 }
 
+TEST(PbiHelperTests, GetSquareInterpolationOfEdge2)
+{
+    Array2D a = Array2D(2000,2000);
+    a.FillWith(0);
+    a[1787][1999]=-0.5;
+    double y = GetSquareInterpolationOfEdge(a, 1786, 1788, 1999);
+    ASSERT_FALSE(std::isnan(y));
+    ASSERT_NE(y,0);
+}
+
+TEST(PbiHelperTests, GetSquareInterpolationOfYEdge2)
+{
+    Array2D a = Array2D(2000,2000);
+    a.FillWith(0);
+    a[1999][1787]=-0.5;
+    double y = GetSquareInterpolationOfYEdge(a, 1999, 1786, 1788);
+    ASSERT_FALSE(std::isnan(y));
+    ASSERT_NE(y,0);
+}
+
 TEST(PbiHelperTests, GetSquareInterpolationOfRectangle)
 {
     Array2D a = Array2D(1001,1001);
@@ -67,4 +87,29 @@ TEST(PbiHelperTests, GetSquareInterpolationOfRectangle2)
             a[x][y] = (x-4000)*(5000.0-x)*(y-4000)*(5000.0-y)/2.0;
     auto coefficient = GetSquareInterpolationOfRectangle(a, 4000, 5000, 4000, 5000);
      ASSERT_TRUE(abs(coefficient+0.5)<0.1);
+}
+
+TEST(PbiHelperTests, integralOfTestFunction_checkCorrectness)
+{
+    double correctAnswers[]{1/6.0, 0, 1/30.0, 0, 1/70.0, 0 , 1/126.0, 0, 1/198.0, 0, 1/286.0}; //values from wolfram alpha
+    for(int n=0;n<=10;n++)
+    {
+        ASSERT_TRUE(abs(correctAnswers[n]-integralOfTestFunction[n](1.0, 0.0))<0.01);
+    }
+}
+
+TEST(PbiHelperTests, GetNthOrderInterpolationOfEdge)
+{
+    int sampling = 100;
+    Array2D a = Array2D(sampling, 1);
+    std::function<double(double, double)> f = [sampling](double x, double y){return (x/sampling)*(1.0-x/sampling)/2.0;};
+    auto fDelta = [sampling](double x, double y){return (2*x/sampling-1.0);};
+    for(int n=0;n<=10;n++)
+    {
+        for(int x=0;x<sampling;x++)
+            a[x][0] = f(x,0);
+        auto coefficient = GetNthOrderInterpolationOfEdge(a, 0, sampling - 1, 0, n);
+        f = Multiply(f, fDelta);
+        ASSERT_TRUE(abs(coefficient-0.5)<0.01);
+    }
 }

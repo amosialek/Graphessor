@@ -230,8 +230,10 @@ void EdgeInterpolation(std::shared_ptr<Array2D> image, std::shared_ptr<Array2D> 
         distinctIEdges.insert(neighbourIEdges2.begin(), neighbourIEdges2.end());
         if(isVertivcal)
         {
+            int yDiff = std::abs(y1-y2);
+            int yOffset = std::min(y1,y2);
             coefficient = GetSquareInterpolationOfYEdge(imageCopy, (*graph)[vertices[0]].x,std::min(y1,y2), std::max(y1,y2));
-            auto interpolationFunctionOnLine = [y1,y2,coefficient](double x, double y){return -coefficient*(y-y1)*(y-y2);};
+            auto interpolationFunctionOnLine = [yDiff,coefficient](double x, double y){return -coefficient*(y)*(y-yDiff);};
             
             distinctIEdges = where(distinctIEdges,[graph, y1, y2](vertex_descriptor v){return (*graph)[v].y>=std::min(y1,y2) && (*graph)[v].y<=std::max(y1,y2);});
             for(auto IEdge : distinctIEdges)
@@ -254,13 +256,15 @@ void EdgeInterpolation(std::shared_ptr<Array2D> image, std::shared_ptr<Array2D> 
                 x2==maxX
                 ? [](double x, double y){return 0.0;}
                 : Multiply(interpolationFunctionOnLine,[x2, maxX](double x, double y){return (maxX-x)/(maxX-x2);});
-            interpolation->Subtract(interpolationFunctionLowerX, minX, x2, minY, maxY);
-            interpolation->Subtract(interpolationFunctionHigherX, x2+1, maxX, minY, maxY);
+            interpolation->Subtract(interpolationFunctionLowerX, minX, x2, minY, maxY, 0, yOffset);
+            interpolation->Subtract(interpolationFunctionHigherX, x2+1, maxX, minY, maxY, 0 , yOffset);
         }
         else
         {
+            int xDiff = std::abs(x1-x2);
+            int xOffset = std::min(x1,x2);
             coefficient = GetSquareInterpolationOfEdge(imageCopy, std::min(x1,x2), std::max(x1,x2), (*graph)[vertices[1]].y);
-            auto interpolationFunctionOnLine = [x1,x2,coefficient](double x, double y){return -coefficient*(x-x1)*(x-x2);};
+            auto interpolationFunctionOnLine = [xDiff, coefficient](double x, double y){return -coefficient*(x)*(x-xDiff);};
             distinctIEdges = where(distinctIEdges,[graph, x1, x2](vertex_descriptor v){return (*graph)[v].x>=std::min(x1,x2) && (*graph)[v].x<=std::max(x1,x2);});
             for(auto IEdge : distinctIEdges)
             {
@@ -281,8 +285,8 @@ void EdgeInterpolation(std::shared_ptr<Array2D> image, std::shared_ptr<Array2D> 
                 y2==maxY
                 ? [](double x, double y){return 0.0;}
                 : Multiply(interpolationFunctionOnLine,[y2, maxY](double x, double y){return (maxY-y)/(maxY-y2);});
-            interpolation->Subtract(interpolationFunctionLowerY, minX, maxX, minY, y2);
-            interpolation->Subtract(interpolationFunctionHigherY, minX, maxX, y2+1, maxY);
+            interpolation->Subtract(interpolationFunctionLowerY, minX, maxX, minY, y2, xOffset, 0);
+            interpolation->Subtract(interpolationFunctionHigherY, minX, maxX, y2+1, maxY, xOffset, 0);
         }
     }
 }
@@ -308,8 +312,10 @@ void InteriorInterpolation(std::shared_ptr<Array2D> image, std::shared_ptr<Array
                 maxY = std::max((*graph)[pixel].y, maxY);
             }
         double coefficient = GetSquareInterpolationOfRectangle(imageCopy, minX, maxX, minY, maxY);
-        auto interpolationFunction = [minX, maxX, minY, maxY, coefficient](double x, double y){return coefficient * (x - minX) * (x - maxX) * (y - minY) * (y - maxY);};
-        interpolation->Subtract(interpolationFunction, minX, maxX, minY, maxY);
+        int xDiff = maxX-minX;
+        int yDiff = maxY-minY;
+        auto interpolationFunction = [xDiff, yDiff, coefficient](double x, double y){return coefficient * (x) * (x - xDiff) * (y) * (y - yDiff);};
+        interpolation->Subtract(interpolationFunction, minX, maxX, minY, maxY, minX, minY);
     }
 }
 

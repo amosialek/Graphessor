@@ -232,3 +232,13 @@ TEST(Array2DTest, ArrayInitialization)
     EXPECT_EQ((*image)[4][4], 5);
 }
 
+TEST(Array2DTest, OffsettedSubtract)
+{
+    auto image = std::make_unique<Array2D>(5,5); 
+    image->FillWith(5);
+    auto f = [](double x, double y){return x+y;};
+    image->Subtract(f,3,4,3,4,3,3);
+    EXPECT_EQ((*image)[4][4], 3);
+    EXPECT_EQ((*image)[3][3], 5);
+}
+

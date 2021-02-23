@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.10.0)
 project(Graphessor VERSION 0.1.0)
+
 if(MSVC)
 add_compile_options( /W4 /WX)
 else()

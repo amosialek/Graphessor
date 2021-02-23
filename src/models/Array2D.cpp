@@ -1,7 +1,6 @@
 #include "Array2D.hpp"
 #include "stdlib.h"
 #include <cassert>
-
 int sign2 (int x1, int y1, int x2, int y2, int x3, int y3)
 {
     return (x1 - x3) * (y2 - y3) - (x2 - x3) * (y1 - y3);
@@ -121,6 +120,24 @@ bool PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int x3, in
         for(int y=y1;y<=y2;y++)
             for(int x=x1;x<=x2;x++)
                 a[x][y]-=func(x+xOffset,y+yOffset);
+    }
+
+    void Array2D::Subtract(std::function<double (double, double)>func, int x1, int x2, int y1, int y2, int funcOffsetX, int funcOffsetY)
+    {
+        for(int y=y1;y<=y2;y++)
+            for(int x=x1;x<=x2;x++)
+                a[x][y]-=func(x+xOffset-funcOffsetX,y+yOffset-funcOffsetY);
+    }
+
+
+    double Array2D::MultiplyElementWiseAndSum(Array2D other, int x1, int x2, int y1, int y2)
+    {
+        double sum = 0;
+
+        for(int y=y1;y<=y2;y++)
+            for(int x=x1;x<=x2;x++)
+                sum+=a[x][y]*other[x+xOffset][y+yOffset];
+        return sum;
     }
 
     double Array2D::MultiplyElementWiseAndSum(double (*func)(double, double))
@@ -265,4 +282,16 @@ Array2D Array2D::GetCopy()
 Array2D Array2D::GetCopy(int x1, int x2, int y1, int y2)
 {
     return Array2D(a,x1,x2,y1,y2);
+}
+
+void Array2D::Dump(std::ostream& s)
+{
+    for(int y=0;y<height;y++)
+    {
+        for(int x=0;x<width;x++)    
+        {
+            s<<a[x][y]<<';';
+        }
+        s<<'\n';
+    }
 }
