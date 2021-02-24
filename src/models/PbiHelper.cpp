@@ -1,5 +1,6 @@
 #include "PbiHelper.hpp"
 #include <cassert>
+#include <lapacke.h>
 
 std::function<double(double, double)> Multiply(std::function<double(double, double)> f, std::function<double(double, double)> g)
 {
@@ -81,6 +82,7 @@ double GetNthOrderInterpolationOfEdge(Array2D& array, int x1, int x2, int y, int
     int offset = x1;
     Array2D array2 = array.GetCopy(x1,x2,y,y);
     array2.xOffset = 0;
+    array2.yOffset = 0;
     x1-=offset;
     x2-=offset;
     double sum = 0;
@@ -96,6 +98,35 @@ double GetNthOrderInterpolationOfEdge(Array2D& array, int x1, int x2, int y, int
             return 0.0;
     }
     return sum/denominator;
+}
+
+double* GetInterpolationsOfEdgeOfDifferentOrders(Array2D& array, int x1, int x2, int y)
+{
+    const int MAX_ORDERS = 10;
+    int offset = x1;
+    Array2D array2 = array.GetCopy(x1,x2,y,y);
+    array2.xOffset = 0;
+    array2.yOffset = 0;
+    x1-=offset;
+    x2-=offset;
+    double* RHS = new double[MAX_ORDERS];
+    double* A = new double[MAX_ORDERS*MAX_ORDERS];
+    for(int order=0;order<MAX_ORDERS;order++)
+    {
+        RHS[order] = 0;
+        Array2D functionArray = GetFunctionSplitToNElements(integralOfTestFunction[order], 0, 1, x2-x1+1);
+        for(int i = functionArray.width - 1; i >= 1; i--)
+            functionArray[i][0] -= functionArray[i-1][0];
+        RHS[order] = array2.MultiplyElementWiseAndSum(functionArray,x1,x2,0,0);
+    }
+    for(int order = 0; order<MAX_ORDERS;order++)
+        for(int order2 = 0; order2<MAX_ORDERS;order2++)
+            A[order * MAX_ORDERS + order2] = integralOfTestFunctionsMultipliedOnZeroOneRange[order+2][order2+2];
+    lapack_int *ipiv = new lapack_int[MAX_ORDERS];
+    LAPACKE_dgesv( LAPACK_ROW_MAJOR, MAX_ORDERS, 1, A, MAX_ORDERS, ipiv, RHS, 1 );
+
+    delete [] A;
+    return RHS;
 }
 
 double GetSquareInterpolationOfYEdge(Array2D& array, int x, int y1, int y2)

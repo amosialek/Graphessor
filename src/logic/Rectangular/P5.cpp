@@ -63,9 +63,14 @@ std::unique_ptr<std::vector<P5>> P5::FindAllMatches(std::shared_ptr<CachedGraph>
             int xDiff = maxx-minx;
             int yDiff = maxy-miny;
             auto minyFuncoefficient = GetSquareInterpolationOfEdge(imageCopy, 0, xDiff, 0);
+
+            auto coefficients = GetInterpolationsOfEdgeOfDifferentOrders(imageCopy, 0, xDiff, yDiff/2);
+            
+
             auto maxyFuncoefficient = GetSquareInterpolationOfEdge(imageCopy, 0, xDiff, yDiff);
             auto minxFuncoefficient = GetSquareInterpolationOfYEdge(imageCopy, 0, 0, yDiff);
             auto maxxFuncoefficient = GetSquareInterpolationOfYEdge(imageCopy, xDiff, 0, yDiff);
+            delete [] coefficients;
             interpolation->Subtract([xDiff, maxy, yDiff, minyFuncoefficient](double x, double y){return minyFuncoefficient*(xDiff-x)*(x)*(maxy-y)/(yDiff);},minx, maxx, miny, maxy, minx, 0);
             interpolation->Subtract([xDiff, yDiff, miny, maxyFuncoefficient](double x, double y){return maxyFuncoefficient*(xDiff-x)*(x)*(y-miny)/(yDiff);},minx, maxx, miny, maxy, minx, 0);
             interpolation->Subtract([xDiff, maxx, yDiff, minxFuncoefficient](double x, double y){return minxFuncoefficient*(yDiff-y)*(y)*(maxx-x)/(xDiff);},minx, maxx, miny, maxy, 0, miny);
