@@ -223,7 +223,7 @@ TEST(ImageTest, CreateArrays)
     {
         test_img[i] = new uint8_t*[5];
         for(int j=0;j<5;j++)
-            test_img[i][j] = new uint8_t[1];
+            test_img[i][j] = new uint8_t[3];
     }
 
     uint8_t array [3][5][5] =

@@ -91,8 +91,8 @@ TEST(PbiHelperTests, GetSquareInterpolationOfRectangle2)
 
 TEST(PbiHelperTests, integralOfTestFunction_checkCorrectness)
 {
-    double correctAnswers[]{1/6.0, 0, 1/30.0, 0, 1/70.0, 0 , 1/126.0, 0, 1/198.0, 0, 1/286.0}; //values from wolfram alpha
-    for(int n=0;n<=10;n++)
+    double correctAnswers[]{1/2.0, 1/2.0, 1/6.0, 0, 1/30.0, 0, 1/70.0, 0 , 1/126.0, 0, 1/198.0, 0, 1/286.0}; //values from wolfram alpha
+    for(int n=0;n<=12;n++)
     {
         ASSERT_TRUE(abs(correctAnswers[n]-integralOfTestFunction[n](1.0, 0.0))<0.01);
     }
@@ -104,12 +104,40 @@ TEST(PbiHelperTests, GetNthOrderInterpolationOfEdge)
     Array2D a = Array2D(sampling, 1);
     std::function<double(double, double)> f = [sampling](double x, double y){return (x/sampling)*(1.0-x/sampling)/2.0;};
     auto fDelta = [sampling](double x, double y){return (2*x/sampling-1.0);};
-    for(int n=0;n<=10;n++)
+    for(int n=2;n<=12;n++)
     {
         for(int x=0;x<sampling;x++)
             a[x][0] = f(x,0);
         auto coefficient = GetNthOrderInterpolationOfEdge(a, 0, sampling - 1, 0, n);
         f = Multiply(f, fDelta);
         ASSERT_TRUE(abs(coefficient-0.5)<0.01);
+    }
+}
+
+TEST(PbiHelperTests, GetMultipleOrderCoefs)
+{
+    int sampling = 100;
+    Array2D a = Array2D(sampling, sampling);
+    std::function<double(double, double)> fx = [sampling](double x, double y){return (x/sampling)*(1.0-x/sampling)/2.0;};
+    std::function<double(double, double)> fxOriginal = [sampling](double x, double y){return (x/sampling)*(1.0-x/sampling)/2.0;};
+    std::function<double(double, double)> fy = [sampling](double x, double y){return (y/sampling)*(1.0-y/sampling)/2.0;};
+    std::function<double(double, double)> fyOriginal = [sampling](double x, double y){return (y/sampling)*(1.0-y/sampling)/2.0;};
+    auto fXDelta = [sampling](double x, double y){return (2*x/sampling-1.0);};
+    auto fYDelta = [sampling](double x, double y){return (2*y/sampling-1.0);};
+    for(int n1=1;n1<=10;n1++)
+    {
+        fy=fyOriginal;
+        for(int n2=1;n2<=10;n2++)
+        {
+            auto multiplied = Multiply(fx,fy);
+            for(int x=0;x<sampling;x++)
+                for(int y=0;y<sampling;y++)
+                    a[x][y] = multiplied(x,y);
+            auto coefficient = GetInterpolationsOfRectangleOfDifferentOrders(a, 0, sampling - 1, 0, sampling - 1, std::max(n1,n2));
+            fy = Multiply(fy, fYDelta);
+            ASSERT_TRUE(abs(coefficient[n1*10+n2]-0.25)<0.01);
+            delete [] coefficient;
+        }
+        fx=Multiply(fx,fXDelta);
     }
 }
