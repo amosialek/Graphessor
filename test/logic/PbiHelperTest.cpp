@@ -135,7 +135,7 @@ TEST(PbiHelperTests, GetMultipleOrderCoefs)
                     a[x][y] = multiplied(x,y);
             auto coefficient = GetInterpolationsOfRectangleOfDifferentOrders(a, 0, sampling - 1, 0, sampling - 1, std::max(n1,n2));
             fy = Multiply(fy, fYDelta);
-            ASSERT_TRUE(abs(coefficient[n1*10+n2]-0.25)<0.01);
+            ASSERT_TRUE(abs(coefficient[(n1-1)*10+(n2-1)]-0.25)<0.01);
             delete [] coefficient;
         }
         fx=Multiply(fx,fXDelta);
