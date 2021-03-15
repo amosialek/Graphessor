@@ -64,6 +64,8 @@ double countL2Error(std::shared_ptr<Array2D> interpolationArray, std::vector<std
     interpolationImage = Image(vectorsForImage);
     interpolationImage.save((outputDirectoryPath/(outputFileName+"_L2_interpolation.bmp")).c_str());
     GraphImageWriter::DrawPixels(g, (outputDirectoryPath/(outputFileName+"_L2_graph.bmp")).c_str());
+
+    return L2;
 }
 
 
@@ -94,7 +96,7 @@ void PerformQuadTree(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
         std::cerr<<"iteration: "<<i<<std::endl;
         std::chrono::steady_clock::time_point end;
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-        auto p5s = P5::FindAllMatches(graph, imageArrays[channel], interpolationArray, channel, i < 2 ? 0 : epsilon);
+        auto p5s = P5::FindAllMatches(graph, imageArrays[channel], interpolationArray, channel, i < 2 ? 0 : epsilon, 1);
         for(auto p5 : *p5s)
             p5.Perform();
         end = std::chrono::steady_clock::now();
@@ -227,7 +229,7 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
 
                 begin = std::chrono::steady_clock::now();
                 //debugWriter->WriteItOut(std::to_string(i++), *graph);
-                auto p5s = RivaraP4::FindAllMatches(graph);
+                auto p5s = RivaraP5::FindAllMatches(graph,image);
                 for(auto p5: *p5s)
                     p5.Perform();
                 end = std::chrono::steady_clock::now();
@@ -236,7 +238,7 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
 
                 begin = std::chrono::steady_clock::now();
                 //debugWriter->WriteItOut(std::to_string(i++), *graph);
-                auto p6s = RivaraP4::FindAllMatches(graph);
+                auto p6s = RivaraP6::FindAllMatches(graph);
                 for(auto p6: *p6s)
                     p6.Perform();
                 end = std::chrono::steady_clock::now();

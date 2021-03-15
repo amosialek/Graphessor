@@ -1,6 +1,7 @@
 #include "Array2D.hpp"
 #include "stdlib.h"
 #include <cassert>
+
 int sign2 (int x1, int y1, int x2, int y2, int x3, int y3)
 {
     return (x1 - x3) * (y2 - y3) - (x2 - x3) * (y1 - y3);
@@ -15,10 +16,10 @@ bool PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int x3, in
     d2 = sign2(px, py, x2, y2, x3, y3);
     d3 = sign2(px, py, x3, y3, x1, y1);
 
-    has_neg = (d1 < 0) && (d2 < 0) && (d3 < 0);
-    has_pos = (d1 > 0) && (d2 > 0) && (d3 > 0);
+    has_neg = (d1 <= 0) && (d2 <= 0) && (d3 <= 0);
+    has_pos = (d1 >= 0) && (d2 >= 0) && (d3 >= 0);
 
-    return !(has_neg && has_pos);
+    return has_neg || has_pos;
 }
 
     Array2D::Array2D(std::vector<std::vector<double>> array)
@@ -102,8 +103,11 @@ bool PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int x3, in
 
     void Array2D::Subtract(const Array2D& other)
     {
-        for(int y=0;y<height;y++)
-            for(int x=0;x<width;x++)
+        assert(other.width==width && other.height==height && "width and height must be equal in Subtract method");
+        int minHeight = std::min(height, other.height);
+        int minWidth = std::min(width, other.width);
+        for(int y=0;y<minHeight;y++)
+            for(int x=0;x<minWidth;x++)
                 a[x][y]-=other.a[x][y];
     }
 
@@ -120,6 +124,13 @@ bool PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int x3, in
         for(int y=y1;y<=y2;y++)
             for(int x=x1;x<=x2;x++)
                 a[x][y]-=func(x+xOffset,y+yOffset);
+    }
+
+    void Array2D::Subtract(Array2D& other, int x1, int x2, int y1, int y2)
+    {
+        for(int y=y1;y<=y2;y++)
+            for(int x=x1;x<=x2;x++)
+                a[x][y]-=other[x+xOffset-other.xOffset][y+yOffset-other.yOffset];
     }
 
     void Array2D::Subtract(std::function<double (double, double)>func, int x1, int x2, int y1, int y2, int funcOffsetX, int funcOffsetY)
@@ -294,4 +305,25 @@ void Array2D::Dump(std::ostream& s)
         }
         s<<'\n';
     }
+}
+
+void Array2D::Multiply(const int c)
+{
+    for(int y=0;y<height;y++)
+        for(int x=0;x<width;x++)
+            a[x][y] *= c;
+}
+
+void Array2D::Transpose()
+{
+    int newWidth = height;
+    int newheight = width; 
+    std::vector<std::vector<double>> newArray;
+    newArray.resize(newWidth);
+    for(int i=0;i<newWidth;i++)
+        newArray[i].resize(newheight);
+    for(int x=0;x<width;x++)
+        for(int y=0;y<height;y++)
+            newArray[y][x] = a[x][y];
+    a = newArray;
 }

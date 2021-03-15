@@ -17,7 +17,8 @@ class P5 : public Production{
             std::shared_ptr<Array2D> image,
             std::shared_ptr<Array2D> interpolation,
             int channel,
-            double epsilon);
+            double epsilon,
+            int orders);
 }; 
 
 #endif /* P5_HPP */

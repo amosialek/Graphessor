@@ -14,7 +14,6 @@ class Image
         int getPixelInternal(int x, int y, int channel);
         void FillMissingSpacesBasedOnLargerBlocks(std::shared_ptr<IGraph> graph, std::set<vertex_descriptor>& pixels, int channel, int width);
         // void FillMissingSpacesBasedOnBaricentricInterpolation(std::vector<Pixel> setOfPixels, int channel, int width);
-        int sign2 (int x1, int y1, int x2, int y2, int x3, int y3);
         bool PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int x3, int y3);
         double GetInterpolatedPixel(int x1, int x2, int x3, int y1, int y2, int y3, int x, int y, double wDenominator, int channel);
 

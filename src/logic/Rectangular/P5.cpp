@@ -26,7 +26,8 @@ std::unique_ptr<std::vector<P5>> P5::FindAllMatches(std::shared_ptr<CachedGraph>
     std::shared_ptr<Array2D> image,
     std::shared_ptr<Array2D> interpolation,
     int channel,
-    double epsilon)
+    double epsilon,
+    int orders)
 {
     auto result = std::make_unique<std::vector<P5>>();
     double sumError = 0;
@@ -57,27 +58,45 @@ std::unique_ptr<std::vector<P5>> P5::FindAllMatches(std::shared_ptr<CachedGraph>
             auto imageCopy = image->GetCopy(minx, maxx, miny, maxy);
             auto interpolationCopy = interpolation->GetCopy(minx, maxx, miny, maxy);
 
-            //auto tmperror = image->CompareWith(*interpolation, minx, maxx, miny, maxy);
-
             imageCopy.Subtract(interpolationCopy);
             int xDiff = maxx-minx;
             int yDiff = maxy-miny;
-            auto minyFuncoefficient = GetSquareInterpolationOfEdge(imageCopy, 0, xDiff, 0);
-
-            auto coefficients = GetInterpolationsOfEdgeOfDifferentOrders(imageCopy, 0, xDiff, yDiff/2);
-            auto coefficients2 = GetInterpolationsOfRectangleOfDifferentOrders(imageCopy, 0, xDiff, 0, yDiff);
-
-            auto maxyFuncoefficient = GetSquareInterpolationOfEdge(imageCopy, 0, xDiff, yDiff);
-            auto minxFuncoefficient = GetSquareInterpolationOfYEdge(imageCopy, 0, 0, yDiff);
-            auto maxxFuncoefficient = GetSquareInterpolationOfYEdge(imageCopy, xDiff, 0, yDiff);
-            delete [] coefficients;
-            delete [] coefficients2;
-            interpolation->Subtract([xDiff, maxy, yDiff, minyFuncoefficient](double x, double y){return minyFuncoefficient*(xDiff-x)*(x)*(maxy-y)/(yDiff);},minx, maxx, miny, maxy, minx, 0);
-            interpolation->Subtract([xDiff, yDiff, miny, maxyFuncoefficient](double x, double y){return maxyFuncoefficient*(xDiff-x)*(x)*(y-miny)/(yDiff);},minx, maxx, miny, maxy, minx, 0);
-            interpolation->Subtract([xDiff, maxx, yDiff, minxFuncoefficient](double x, double y){return minxFuncoefficient*(yDiff-y)*(y)*(maxx-x)/(xDiff);},minx, maxx, miny, maxy, 0, miny);
-            interpolation->Subtract([minx, xDiff, yDiff, maxxFuncoefficient](double x, double y){return maxxFuncoefficient*(yDiff-y)*(y)*(x-minx)/(xDiff);},minx, maxx, miny, maxy, 0, miny);
+            interpolationCopy.FillWith(0);
+            auto minyFuncoefficients = GetInterpolationsOfEdgeOfDifferentOrders(imageCopy, 0, xDiff, 0, 0, orders);
+            auto maxyFuncoefficients = GetInterpolationsOfEdgeOfDifferentOrders(imageCopy, 0, xDiff, yDiff, yDiff, orders);
+            auto minxFuncoefficients = GetInterpolationsOfEdgeOfDifferentOrders(imageCopy, 0, 0, 0, yDiff, orders);
+            auto maxxFuncoefficients = GetInterpolationsOfEdgeOfDifferentOrders(imageCopy, xDiff, xDiff, 0, yDiff, orders);
+            for(int i=0;i<orders;i++)
+            {
+                double minyFuncoefficient = minyFuncoefficients[i];
+                double maxyFuncoefficient = maxyFuncoefficients[i];
+                double minxFuncoefficient = minxFuncoefficients[i];
+                double maxxFuncoefficient = maxxFuncoefficients[i];
+                auto splitXFunction = GetFunctionSplitToNElements(testFunctions[i+2],0,1,xDiff+1);
+                auto splitYFunction = GetFunctionSplitToNElements(testFunctions[i+2],0,1,yDiff+1);
+                interpolationCopy.Subtract([xDiff, maxy, yDiff, minyFuncoefficient, i, &splitXFunction](double x, double y){return -splitXFunction[x][0]*minyFuncoefficient*(maxy-y)/(yDiff);},0, xDiff, 0, 0, minx, 0);
+                interpolationCopy.Subtract([xDiff, yDiff, miny, maxyFuncoefficient, i, &splitXFunction](double x, double y){return -splitXFunction[x][0]*maxyFuncoefficient*(y-miny)/(yDiff);},0, xDiff, yDiff, yDiff, minx, 0);
+                interpolationCopy.Subtract([xDiff, maxx, yDiff, minxFuncoefficient, i, &splitYFunction](double x, double y){return -splitYFunction[y][0]*minxFuncoefficient*(maxx-x)/(xDiff);},0, 0, 0, yDiff, 0, miny);
+                interpolationCopy.Subtract([minx, xDiff, yDiff, maxxFuncoefficient, i, &splitYFunction](double x, double y){return -splitYFunction[y][0]*maxxFuncoefficient*(x-minx)/(xDiff);},xDiff, xDiff, 0, yDiff, 0, miny);
+            }
+            imageCopy.Subtract(interpolationCopy);
+            interpolationCopy.Multiply(-1);
+            interpolation->Subtract(interpolationCopy, minx, maxx, miny, maxy);
+            auto coefficients2D = GetInterpolationsOfRectangleOfDifferentOrders(imageCopy, 0, xDiff, 0, yDiff, orders);
+            for(int i=0;i<orders;i++)
+                for(int j=0;j<orders;j++)
+                {
+                    auto splitXFunction = GetFunctionSplitToNElements(testFunctions[i+2],0,1,xDiff+1);
+                    auto splitYFunction = GetFunctionSplitToNElements(testFunctions[j+2],0,1,yDiff+1);
+                    double coefficient = coefficients2D[i*orders+j];
+                    interpolation->Subtract([coefficient, i, j, &splitXFunction, &splitYFunction](double x, double y){return -coefficient*splitXFunction[x][0]*splitYFunction[y][0];},minx, maxx, miny, maxy, minx, miny);
+                }
+            // delete [] coefficients;
+            // delete [] coefficients2D;
+            
 
             (*graph)[IEdge].error = image->CompareWith(*interpolation, minx, maxx, miny, maxy);
+            int debugVariable = 2;
         }
         IEdgeToError[IEdge] = (*graph)[IEdge].error;
         sumError += (*graph)[IEdge].error;

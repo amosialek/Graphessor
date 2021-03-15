@@ -4,6 +4,7 @@
 #include<functional>
 #include"Array2D.hpp"
 #include <math.h>
+#include <memory>
 
 const double integralOfTestFunctionSquaredOnZeroOneRange[]{
     1.0/3,
@@ -69,6 +70,8 @@ const std::function<double(double, double)> testFunctions[]{
 };  //for testFunction = (1-x)x(2x-1)^i
 
 std::function<double(double, double)> Multiply(std::function<double(double, double)> f, std::function<double(double, double)> g);
+std::function<double(double, double)> Multiply(std::function<double(double, double)> f, double c);
+std::function<double(double, double)> Add(std::function<double(double, double)> f, std::function<double(double, double)> g);
 
 ///
 /// integral of (x-x1)(x-x2)
@@ -98,8 +101,12 @@ double GetSquareInterpolationOfRectangle(Array2D& array, int x1, int x2, int y1,
 
 double GetNthOrderInterpolationOfEdge(Array2D& array, int x1, int x2, int y, int n);
 
-double* GetInterpolationsOfEdgeOfDifferentOrders(Array2D& array, int x1, int x2, int y, int orders = 10);
+std::unique_ptr<double[]> GetInterpolationsOfEdgeOfDifferentOrders(Array2D& array, int x1, int x2, int y1, int y2, int orders = 10);
 
-double* GetInterpolationsOfRectangleOfDifferentOrders(Array2D& array, int x1, int x2, int y1, int y2, int orders = 10);
+std::unique_ptr<double[]> GetInterpolationsOfRectangleOfDifferentOrders(Array2D& array, int x1, int x2, int y1, int y2, int orders = 10);
+
+Array2D GetFunctionSplitToNElements(std::function<double(double, double)> f, int x1, int x2, int elements);
+
+Array2D GetFunctionSplitToNElements2D(std::function<double(double, double)> f, int x1, int x2, int elements);
 
 #endif // __PBIHELPER_HPP__

@@ -924,3 +924,5 @@ hello_world
 googletest-build/
 googletest-download/
 googletest-src/
+valgrind-out.txt
+valgrindRun.sh

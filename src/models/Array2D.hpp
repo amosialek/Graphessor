@@ -24,8 +24,10 @@ class Array2D
         void FillWith(double value);
         void Subtract(const Array2D& other);
         void Subtract(std::function<double(double, double)>func);
+        void Subtract(Array2D& other, int x1, int x2, int y1, int y2);
         void Subtract(std::function<double(double, double)>func, int x1, int x2, int y1, int y2);
         void Subtract(std::function<double(double, double)>func, int x1, int x2, int y1, int y2, int funcOffsetX, int funcOffsetY);
+        void Multiply(const int c);
         double MultiplyElementWiseAndSum(Array2D other, int x1, int x2, int y1, int y2);
         double MultiplyElementWiseAndSum(double (*func)(double, double));
         double MultiplyElementWiseAndSum(double (*func)(double, double), int x1, int x2, int y1, int y2);
@@ -38,7 +40,10 @@ class Array2D
         void BaricentricInterpolation(Array2D& base, int x1, int x2, int x3, int y1, int y2, int y3);
         void Dump(std::ostream& s);
         std::vector<double>& operator[](int x);
+        void Transpose();
 };
 
+int sign2 (int x1, int y1, int x2, int y2, int x3, int y3);
+bool PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int x3, int y3);
 
 #endif // __ARRAY2D_HPP__

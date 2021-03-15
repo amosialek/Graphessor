@@ -242,3 +242,7 @@ TEST(Array2DTest, OffsettedSubtract)
     EXPECT_EQ((*image)[3][3], 5);
 }
 
+TEST(Array2DTest, PointInTriangleTest)
+{
+    EXPECT_EQ(false, PointInTriangle(0,2,0,0,4,0,4,4));
+}

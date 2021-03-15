@@ -118,12 +118,12 @@ TEST(PbiHelperTests, GetMultipleOrderCoefs)
 {
     int sampling = 100;
     Array2D a = Array2D(sampling, sampling);
-    std::function<double(double, double)> fx = [sampling](double x, double y){return (x/sampling)*(1.0-x/sampling)/2.0;};
-    std::function<double(double, double)> fxOriginal = [sampling](double x, double y){return (x/sampling)*(1.0-x/sampling)/2.0;};
-    std::function<double(double, double)> fy = [sampling](double x, double y){return (y/sampling)*(1.0-y/sampling)/2.0;};
-    std::function<double(double, double)> fyOriginal = [sampling](double x, double y){return (y/sampling)*(1.0-y/sampling)/2.0;};
-    auto fXDelta = [sampling](double x, double y){return (2*x/sampling-1.0);};
-    auto fYDelta = [sampling](double x, double y){return (2*y/sampling-1.0);};
+    std::function<double(double, double)> fx = [sampling](double x, double y){return (x/(sampling-1))*(1.0-x/(sampling-1))/2.0;};
+    std::function<double(double, double)> fxOriginal = [sampling](double x, double y){return (x/(sampling-1))*(1.0-x/(sampling-1))/2.0;};
+    std::function<double(double, double)> fy = [sampling](double x, double y){return (y/(sampling-1))*(1.0-y/(sampling-1))/2.0;};
+    std::function<double(double, double)> fyOriginal = [sampling](double x, double y){return (y/(sampling-1))*(1.0-y/(sampling-1))/2.0;};
+    auto fXDelta = [sampling](double x, double y){return (2*x/(sampling-1)-1.0);};
+    auto fYDelta = [sampling](double x, double y){return (2*y/(sampling-1)-1.0);};
     for(int n1=1;n1<=10;n1++)
     {
         fy=fyOriginal;
@@ -135,8 +135,7 @@ TEST(PbiHelperTests, GetMultipleOrderCoefs)
                     a[x][y] = multiplied(x,y);
             auto coefficient = GetInterpolationsOfRectangleOfDifferentOrders(a, 0, sampling - 1, 0, sampling - 1, std::max(n1,n2));
             fy = Multiply(fy, fYDelta);
-            ASSERT_TRUE(abs(coefficient[(n1-1)*10+(n2-1)]-0.25)<0.01);
-            delete [] coefficient;
+            ASSERT_TRUE(abs(coefficient[(n1-1)*10+(n2-1)]-0.25)<0.1);
         }
         fx=Multiply(fx,fXDelta);
     }

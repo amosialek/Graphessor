@@ -200,94 +200,89 @@ void DoLinearInterpolation2(std::shared_ptr<Array2D> image, std::shared_ptr<Arra
 
 }
 
-void EdgeInterpolation(std::shared_ptr<Array2D> image, std::shared_ptr<Array2D> interpolation, std::shared_ptr<CachedGraph> graph)
+void InterpolateEdge(
+    std::shared_ptr<Array2D> image, 
+    Array2D& imageCopy, 
+    std::shared_ptr<Array2D> interpolation, 
+    std::shared_ptr<CachedGraph> graph,
+    vertex_descriptor edge,
+    int orders)
 {
-    auto imageCopy = image->GetCopy(0, image->width-1, 0, image->height-1);
-    imageCopy.Subtract(*interpolation);
-
-    auto fedges = graph->GetCacheIterator(NODELABEL_F);
-    auto bedges = graph->GetCacheIterator(NODELABEL_B);
-    auto filteredFedges = where(fedges,[graph](vertex_descriptor v){return graph->GetAdjacentVertices(v).size()==2;});
-    filteredFedges.insert(bedges.begin(), bedges.end());//merge bedges and fedges
-    for(auto edge : filteredFedges)
+    bool isVertivcal=false;
+    auto vertices = graph->GetAdjacentVertices(edge);
+    if((*graph)[vertices[0]].x == (*graph)[vertices[1]].x)
+        isVertivcal=true;
+    double coefficient;
+    int x1 = (*graph)[vertices[0]].x;
+    int x2 = (*graph)[vertices[1]].x;
+    int y1 = (*graph)[vertices[0]].y;
+    int y2 = (*graph)[vertices[1]].y;
+    int minX = x1;
+    int maxX = x1;
+    int minY = y1;
+    int maxY = y1;
+    auto neighbourIEdges = graph -> GetAdjacentVertices(vertices[0], NODELABEL_I);
+    auto neighbourIEdges2 = graph -> GetAdjacentVertices(vertices[1], NODELABEL_I);
+    std::set<vertex_descriptor> distinctIEdges(neighbourIEdges.begin(), neighbourIEdges.end());
+    distinctIEdges.insert(neighbourIEdges2.begin(), neighbourIEdges2.end());
+    int yOffset = std::min(y1,y2);
+    int xOffset = std::min(x1,x2);
+    std::function<double(double, double)> interpolationFunctionOnLine = [](double x, double y){return 0;};
+    std::unique_ptr<double[]>coefficients;
+    if(isVertivcal)
     {
-        bool isVertivcal=false;
-        auto vertices = graph->GetAdjacentVertices(edge);
-        if((*graph)[vertices[0]].x == (*graph)[vertices[1]].x)
-            isVertivcal=true;
-        double coefficient;
-        int x1 = (*graph)[vertices[0]].x;
-        int x2 = (*graph)[vertices[1]].x;
-        int y1 = (*graph)[vertices[0]].y;
-        int y2 = (*graph)[vertices[1]].y;
-        int minX = x1;
-        int maxX = x1;
-        int minY = y1;
-        int maxY = y1;
-        auto neighbourIEdges = graph -> GetAdjacentVertices(vertices[0],NODELABEL_I);
-        auto neighbourIEdges2 = graph -> GetAdjacentVertices(vertices[1],NODELABEL_I);
-        std::set<vertex_descriptor> distinctIEdges(neighbourIEdges.begin(), neighbourIEdges.end());
-        distinctIEdges.insert(neighbourIEdges2.begin(), neighbourIEdges2.end());
-        if(isVertivcal)
+        int yDiff = std::abs(y1-y2);
+        coefficient = GetSquareInterpolationOfYEdge(imageCopy, (*graph)[vertices[0]].x,std::min(y1,y2), std::max(y1,y2));
+        coefficients = GetInterpolationsOfEdgeOfDifferentOrders(*interpolation, (*graph)[vertices[0]].x, (*graph)[vertices[0]].x, std::min(y1,y2), std::max(y1,y2), orders);
+        //interpolationFunctionOnLine = [yDiff,coefficient](double x, double y){return -coefficient*(y)*(y-yDiff);};
+        distinctIEdges = where(distinctIEdges,[graph, y1, y2](vertex_descriptor v){return (*graph)[v].y>=std::min(y1,y2) && (*graph)[v].y<=std::max(y1,y2);});
+    }
+    else
+    {
+        int xDiff = std::abs(x1-x2);
+        coefficient = GetSquareInterpolationOfEdge(imageCopy, std::min(x1,x2), std::max(x1,x2), (*graph)[vertices[1]].y);
+        coefficients = GetInterpolationsOfEdgeOfDifferentOrders(*interpolation, std::min(x1,x2), std::max(x1,x2), (*graph)[vertices[1]].y, (*graph)[vertices[1]].y, orders);
+        //interpolationFunctionOnLine = [xDiff, coefficient](double x, double y){return -coefficient*(x)*(x-xDiff);};
+        distinctIEdges = where(distinctIEdges,[graph, x1, x2](vertex_descriptor v){return (*graph)[v].x>=std::min(x1,x2) && (*graph)[v].x<=std::max(x1,x2);});
+    }
+    for(int order=0; order<orders; order++)
+    Add(interpolationFunctionOnLine, Multiply(testFunctions[order], coefficients[order]));
+    for(auto IEdge : distinctIEdges)
+    {
+        auto pixels = graph->GetAdjacentVertices(IEdge, NODELABEL_P);
+        for(auto pixel : pixels)
         {
-            int yDiff = std::abs(y1-y2);
-            int yOffset = std::min(y1,y2);
-            coefficient = GetSquareInterpolationOfYEdge(imageCopy, (*graph)[vertices[0]].x,std::min(y1,y2), std::max(y1,y2));
-            auto interpolationFunctionOnLine = [yDiff,coefficient](double x, double y){return -coefficient*(y)*(y-yDiff);};
-            
-            distinctIEdges = where(distinctIEdges,[graph, y1, y2](vertex_descriptor v){return (*graph)[v].y>=std::min(y1,y2) && (*graph)[v].y<=std::max(y1,y2);});
-            for(auto IEdge : distinctIEdges)
-            {
-                auto pixels = graph->GetAdjacentVertices(IEdge, NODELABEL_P);
-                for(auto pixel : pixels)
-                {
-                    minX = std::min((*graph)[pixel].x, minX);
-                    maxX = std::max((*graph)[pixel].x, maxX);
-                    minY = std::min((*graph)[pixel].y, minY);
-                    maxY = std::max((*graph)[pixel].y, maxY);
-                }
-            }
-
-            std::function<double(double, double)> interpolationFunctionLowerX =
-                x2==minX
-                ? [](double x, double y){return 0.0;}
-                : Multiply(interpolationFunctionOnLine,[minX, x2](double x, double y){return (x-minX)/(x2-minX);});
-            std::function<double(double, double)> interpolationFunctionHigherX =
-                x2==maxX
-                ? [](double x, double y){return 0.0;}
-                : Multiply(interpolationFunctionOnLine,[x2, maxX](double x, double y){return (maxX-x)/(maxX-x2);});
-            interpolation->Subtract(interpolationFunctionLowerX, minX, x2, minY, maxY, 0, yOffset);
-            interpolation->Subtract(interpolationFunctionHigherX, x2+1, maxX, minY, maxY, 0 , yOffset);
+            minX = std::min((*graph)[pixel].x, minX);
+            maxX = std::max((*graph)[pixel].x, maxX);
+            minY = std::min((*graph)[pixel].y, minY);
+            maxY = std::max((*graph)[pixel].y, maxY);
         }
-        else
+    }
+    if(isVertivcal)
         {
-            int xDiff = std::abs(x1-x2);
-            int xOffset = std::min(x1,x2);
-            coefficient = GetSquareInterpolationOfEdge(imageCopy, std::min(x1,x2), std::max(x1,x2), (*graph)[vertices[1]].y);
-            auto interpolationFunctionOnLine = [xDiff, coefficient](double x, double y){return -coefficient*(x)*(x-xDiff);};
-            distinctIEdges = where(distinctIEdges,[graph, x1, x2](vertex_descriptor v){return (*graph)[v].x>=std::min(x1,x2) && (*graph)[v].x<=std::max(x1,x2);});
-            for(auto IEdge : distinctIEdges)
-            {
-                auto pixels = graph->GetAdjacentVertices(IEdge, NODELABEL_P);
-                for(auto pixel : pixels)
-                {
-                    minX = std::min((*graph)[pixel].x, minX);
-                    maxX = std::max((*graph)[pixel].x, maxX);
-                    minY = std::min((*graph)[pixel].y, minY);
-                    maxY = std::max((*graph)[pixel].y, maxY);
-                }
-            }
-            std::function<double(double, double)> interpolationFunctionLowerY = 
-                y2==minY
-                ? [](double x, double y){return 0.0;}
-                : Multiply(interpolationFunctionOnLine,[minY, y2](double x, double y){return (y-minY)/(y2-minY);});
-            std::function<double(double, double)> interpolationFunctionHigherY = 
-                y2==maxY
-                ? [](double x, double y){return 0.0;}
-                : Multiply(interpolationFunctionOnLine,[y2, maxY](double x, double y){return (maxY-y)/(maxY-y2);});
-            interpolation->Subtract(interpolationFunctionLowerY, minX, maxX, minY, y2, xOffset, 0);
-            interpolation->Subtract(interpolationFunctionHigherY, minX, maxX, y2+1, maxY, xOffset, 0);
-        }
+        std::function<double(double, double)> interpolationFunctionLowerX =
+            x2==minX
+            ? [](double x, double y){return 0.0;}
+            : Multiply(interpolationFunctionOnLine,[minX, x2](double x, double y){return (x-minX)/(x2-minX);});
+        std::function<double(double, double)> interpolationFunctionHigherX =
+            x2==maxX
+            ? [](double x, double y){return 0.0;}
+            : Multiply(interpolationFunctionOnLine,[x2, maxX](double x, double y){return (maxX-x)/(maxX-x2);});
+        interpolation->Subtract(interpolationFunctionLowerX, minX, x2, minY, maxY, 0, yOffset);
+        interpolation->Subtract(interpolationFunctionHigherX, x2+1, maxX, minY, maxY, 0 , yOffset);
+    }
+    else
+    {
+        std::function<double(double, double)> interpolationFunctionLowerY = 
+            y2==minY
+            ? [](double x, double y){return 0.0;}
+            : Multiply(interpolationFunctionOnLine,[minY, y2](double x, double y){return (y-minY)/(y2-minY);});
+        std::function<double(double, double)> interpolationFunctionHigherY = 
+            y2==maxY
+            ? [](double x, double y){return 0.0;}
+            : Multiply(interpolationFunctionOnLine,[y2, maxY](double x, double y){return (maxY-y)/(maxY-y2);});
+        interpolation->Subtract(interpolationFunctionLowerY, minX, maxX, minY, y2, xOffset, 0);
+        interpolation->Subtract(interpolationFunctionHigherY, minX, maxX, y2+1, maxY, xOffset, 0);
     }
 }
 
@@ -316,6 +311,21 @@ void InteriorInterpolation(std::shared_ptr<Array2D> image, std::shared_ptr<Array
         int yDiff = maxY-minY;
         auto interpolationFunction = [xDiff, yDiff, coefficient](double x, double y){return coefficient * (x) * (x - xDiff) * (y) * (y - yDiff);};
         interpolation->Subtract(interpolationFunction, minX, maxX, minY, maxY, minX, minY);
+    }
+}
+
+void EdgeInterpolation(std::shared_ptr<Array2D> image, std::shared_ptr<Array2D> interpolation, std::shared_ptr<CachedGraph> graph)
+{
+    auto imageCopy = image->GetCopy(0, image->width-1, 0, image->height-1);
+    imageCopy.Subtract(*interpolation);
+
+    auto fedges = graph->GetCacheIterator(NODELABEL_F);
+    auto bedges = graph->GetCacheIterator(NODELABEL_B);
+    auto filteredFedges = where(fedges,[graph](vertex_descriptor v){return graph->GetAdjacentVertices(v).size()==2;});
+    filteredFedges.insert(bedges.begin(), bedges.end());//merge bedges and fedges
+    for(auto edge : filteredFedges)
+    {
+        InterpolateEdge(image, imageCopy, interpolation, graph, edge, 1);
     }
 }
 
