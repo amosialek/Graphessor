@@ -347,7 +347,9 @@ int main(int argc, char** argv) {
         {
             std::shared_ptr<Array2D> interpolationArray = std::make_shared<Array2D>(image->width(), image->height());
             PerformQuadTree(channel_graphs, image, debugWriter, epsilon, interpolationArray, channel, imageArrays, file_logger);
+            interpolationArray->Apply([](double value){return value<0 ? 0 : value;});
             vectorsForImage.push_back(interpolationArray);
+
         }
 
         Image interpolationImage = Image(vectorsForImage);
@@ -357,7 +359,11 @@ int main(int argc, char** argv) {
     
     for(auto g : channel_graphs)
         g->DecreaseXAndYByRatio(4);
-
+    for(int channel=0;channel<3;channel++)
+        for(auto IEdge : channel_graphs[channel]->GetCacheIterator(NODELABEL_I))
+        {
+            spdlog::debug("channel={} IEdge={} x={} y={}",channel, IEdge, (*channel_graphs[channel])[IEdge].x, (*channel_graphs[channel])[IEdge].y);
+        }
     std::ofstream graphOutput("/home/albert/Albert/agh/doktorat/outputs/MPaszynski1/2020_12_20/1/serializedGraph");
     channel_graphs[0]->Serialize(graphOutput);
     graphOutput.close();

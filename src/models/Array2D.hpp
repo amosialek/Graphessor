@@ -41,6 +41,7 @@ class Array2D
         void Dump(std::ostream& s);
         std::vector<double>& operator[](int x);
         void Transpose();
+        void Apply(std::function<double(double)>func);
 };
 
 int sign2 (int x1, int y1, int x2, int y2, int x3, int y3);

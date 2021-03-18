@@ -74,10 +74,10 @@ std::unique_ptr<std::vector<P5>> P5::FindAllMatches(std::shared_ptr<CachedGraph>
                 double maxxFuncoefficient = maxxFuncoefficients[i];
                 auto splitXFunction = GetFunctionSplitToNElements(testFunctions[i+2],0,1,xDiff+1);
                 auto splitYFunction = GetFunctionSplitToNElements(testFunctions[i+2],0,1,yDiff+1);
-                interpolationCopy.Subtract([xDiff, maxy, yDiff, minyFuncoefficient, i, &splitXFunction](double x, double y){return -splitXFunction[x][0]*minyFuncoefficient*(maxy-y)/(yDiff);},0, xDiff, 0, 0, minx, 0);
-                interpolationCopy.Subtract([xDiff, yDiff, miny, maxyFuncoefficient, i, &splitXFunction](double x, double y){return -splitXFunction[x][0]*maxyFuncoefficient*(y-miny)/(yDiff);},0, xDiff, yDiff, yDiff, minx, 0);
-                interpolationCopy.Subtract([xDiff, maxx, yDiff, minxFuncoefficient, i, &splitYFunction](double x, double y){return -splitYFunction[y][0]*minxFuncoefficient*(maxx-x)/(xDiff);},0, 0, 0, yDiff, 0, miny);
-                interpolationCopy.Subtract([minx, xDiff, yDiff, maxxFuncoefficient, i, &splitYFunction](double x, double y){return -splitYFunction[y][0]*maxxFuncoefficient*(x-minx)/(xDiff);},xDiff, xDiff, 0, yDiff, 0, miny);
+                interpolationCopy.Subtract([xDiff, maxy, yDiff, minyFuncoefficient, i, &splitXFunction](double x, double y){return -splitXFunction[x][0]*minyFuncoefficient*(maxy-y)/(yDiff);},0, xDiff, 0, yDiff, minx, 0);
+                interpolationCopy.Subtract([xDiff, yDiff, miny, maxyFuncoefficient, i, &splitXFunction](double x, double y){return -splitXFunction[x][0]*maxyFuncoefficient*(y-miny)/(yDiff);},0, xDiff, 0, yDiff, minx, 0);
+                interpolationCopy.Subtract([xDiff, maxx, yDiff, minxFuncoefficient, i, &splitYFunction](double x, double y){return -splitYFunction[y][0]*minxFuncoefficient*(maxx-x)/(xDiff);},0, xDiff, 0, yDiff, 0, miny);
+                interpolationCopy.Subtract([minx, xDiff, yDiff, maxxFuncoefficient, i, &splitYFunction](double x, double y){return -splitYFunction[y][0]*maxxFuncoefficient*(x-minx)/(xDiff);},0, xDiff, 0, yDiff, 0, miny);
             }
             imageCopy.Subtract(interpolationCopy);
             interpolationCopy.Multiply(-1);

@@ -63,7 +63,7 @@ void P2::Perform()
             }
             x /= 4;
             y /= 4;
-            std::tie(x,y) = image->GetNearestPixelCoords(x,y);
+            //std::tie(x,y) = image->GetNearestPixelCoords(x,y);
             spdlog::debug("P2 {} x={} y={}", IEdge,x,y);    
             graph->operator[](e).x = x;
             graph->operator[](e).y = y;

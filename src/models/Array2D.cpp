@@ -327,3 +327,10 @@ void Array2D::Transpose()
             newArray[y][x] = a[x][y];
     a = newArray;
 }
+
+void Array2D::Apply(std::function<double(double)> f)
+{
+    for(int x=0;x<width;x++)
+        for(int y=0;y<height;y++)
+            a[x][y] = f(a[x][y]);
+}
