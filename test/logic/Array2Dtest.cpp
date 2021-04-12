@@ -26,19 +26,19 @@ TEST(Array2DTest, SquaredError)
     auto image = new Array2D(array); 
     auto interpolation = new Array2D(array); 
     interpolation->FillWith(0);
-    interpolation->BilinearInterpolation(*image, 0,1,0,1);
+    interpolation->TrivialBilinearInterpolation(*image, 0,1,0,1);
     double a = image->SquaredError(*interpolation, 0,1,0,1);
     EXPECT_DOUBLE_EQ(0,a);
     interpolation->FillWith(0);
-    interpolation->BilinearInterpolation(*image, 2,4,0,1);
+    interpolation->TrivialBilinearInterpolation(*image, 2,4,0,1);
     a = image->SquaredError(*interpolation, 2,4,0,1);
     EXPECT_DOUBLE_EQ(0.25,a);
     interpolation->FillWith(0);
-    interpolation->BilinearInterpolation(*image, 0,1,2,4);
+    interpolation->TrivialBilinearInterpolation(*image, 0,1,2,4);
     a = image->SquaredError(*interpolation, 0,1,2,4);
     EXPECT_DOUBLE_EQ(1,a);
     interpolation->FillWith(0);
-    interpolation->BilinearInterpolation(*image, 2,4,2,4);
+    interpolation->TrivialBilinearInterpolation(*image, 2,4,2,4);
     a = image->SquaredError(*interpolation, 2,4,2,4);
     EXPECT_DOUBLE_EQ(4,a);
 }
@@ -67,19 +67,19 @@ TEST(Array2DTest, CompareWithInterpolation)
     auto interpolation = new Array2D(array); 
     
     interpolation->FillWith(0);
-    interpolation->BilinearInterpolation(*image,0,1,0,1);
+    interpolation->TrivialBilinearInterpolation(*image,0,1,0,1);
     double a = image->CompareWith(*interpolation, 0,1,0,1);
     EXPECT_DOUBLE_EQ(0,a);
     interpolation->FillWith(0);
-    interpolation->BilinearInterpolation(*image,2,4,0,1);
+    interpolation->TrivialBilinearInterpolation(*image,2,4,0,1);
     a = image->CompareWith(*interpolation, 2,4,0,1);
     EXPECT_DOUBLE_EQ(2500.0/(255*255*6),a);
     interpolation->FillWith(0);
-    interpolation->BilinearInterpolation(*image,0,1,2,4);
+    interpolation->TrivialBilinearInterpolation(*image,0,1,2,4);
     a = image->CompareWith(*interpolation, 0,1,2,4);
     EXPECT_DOUBLE_EQ(10000.0/(255*255*6),a);
     interpolation->FillWith(0);
-    interpolation->BilinearInterpolation(*image,2,4,2,4);
+    interpolation->TrivialBilinearInterpolation(*image,2,4,2,4);
     a = image->CompareWith(*interpolation, 2,4,2,4);
     EXPECT_DOUBLE_EQ(40000.0/(255*255*9),a);
     

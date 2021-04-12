@@ -45,6 +45,22 @@ Image::Image(std::vector<std::shared_ptr<Array2D>> arrays)
     view = boost::gil::view(img);
 }
 
+Image::Image(Array2D& array)
+{
+    int width = array.width;
+    int height = array.height;
+    img = boost::gil::rgb8_image_t(width+1, height+1);
+    boost::gil::fill_pixels(img._view, boost::gil::rgb8_pixel_t(0,0,0));
+    for(int channel=0;channel<3;channel++)
+    {
+        view = boost::gil::view(img);
+        for(int x=0;x<width;x++)
+            for(int y=0;y<height;y++)
+                SetPixel(x,y,channel, array.operator[](x)[y]);
+    }
+    view = boost::gil::view(img);
+}
+
 
 Image::Image(std::vector<std::shared_ptr<CachedGraph>> graphs)
 {

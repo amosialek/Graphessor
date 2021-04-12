@@ -30,6 +30,16 @@ std::string outputFileName;
 std::shared_ptr<Image> image3;
 std::vector<std::shared_ptr<Array2D>> imageArrays3;
 
+double countL2Error(Array2D& interpolationArray, Array2D& original)
+{
+     auto interpolationCopy = interpolationArray.GetCopy();
+     interpolationCopy.Subtract(original);
+     
+     double numerator = interpolationCopy.MultiplyElementWiseAndSum(interpolationCopy, 0, interpolationCopy.width-1, 0, interpolationCopy.height-1);
+     double denumerator = original.MultiplyElementWiseAndSum(original, 0, original.width-1, 0, original.height-1);
+     spdlog::debug("L2 error = {}", sqrt(numerator/denumerator));
+}
+
 double countL2Error(std::shared_ptr<Array2D> interpolationArray, std::vector<std::shared_ptr<Array2D>> imageArrays, std::vector<std::shared_ptr<CachedGraph>>& channel_graphs)
 {
     std::shared_ptr<CachedGraph> g = std::make_shared<CachedGraph>(*channel_graphs[0]);
@@ -76,7 +86,8 @@ void PerformQuadTree(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
     std::shared_ptr<Array2D> interpolationArray,
     int channel,
     std::vector<std::shared_ptr<Array2D>> imageArrays,
-    std::shared_ptr<spdlog::logger> logger)
+    std::shared_ptr<spdlog::logger> logger,
+    int order)
 {
     
     auto graph = std::make_shared<CachedGraph>();
@@ -96,11 +107,12 @@ void PerformQuadTree(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
         std::cerr<<"iteration: "<<i<<std::endl;
         std::chrono::steady_clock::time_point end;
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-        auto p5s = P5::FindAllMatches(graph, imageArrays[channel], interpolationArray, channel, i < 2 ? 0 : epsilon, 1);
+        auto p5s = P5::FindAllMatches(graph, imageArrays[channel], interpolationArray, channel, i < 2 ? 0 : epsilon, order);
         for(auto p5 : *p5s)
             p5.Perform();
         end = std::chrono::steady_clock::now();
         functionTime["P5"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+        countL2Error(*interpolationArray, *(imageArrays[channel]));
         begin = std::chrono::steady_clock::now();
         //debugWriter->WriteItOut(std::to_string(i++), *graph);
         P6::PerformAllMatches(graph);
@@ -281,7 +293,8 @@ int main(int argc, char** argv) {
     ("output-directory", opt::value<std::string>(), "directory for output, debug output and log file")
     ("output-file-template", opt::value<std::string>()->default_value("output"), "output file template")
     ("log-file", opt::value<std::string>()->default_value("log.txt"), "log file name")
-    ("rivara", opt::bool_switch(&isRivara), "use rivara productions instead of quadtrees");
+    ("rivara", opt::bool_switch(&isRivara), "use rivara productions instead of quadtrees")
+    ("order", opt::value<int>(), "test function max order");
 
     opt::variables_map vm;
     opt::store(opt::parse_command_line(argc, argv, description), vm);
@@ -309,6 +322,11 @@ int main(int argc, char** argv) {
     std::string logFileName;
     if (vm.count("log-file"))
         logFileName = vm["log-file"].as<std::string>();
+
+    int order;
+    if (vm.count("order"))
+        order = vm["order"].as<int>();
+
 
     std::string outputDirectory;
     if (vm.count("output-directory"))
@@ -346,7 +364,7 @@ int main(int argc, char** argv) {
         for(int channel=0;channel<3;channel++)
         {
             std::shared_ptr<Array2D> interpolationArray = std::make_shared<Array2D>(image->width(), image->height());
-            PerformQuadTree(channel_graphs, image, debugWriter, epsilon, interpolationArray, channel, imageArrays, file_logger);
+            PerformQuadTree(channel_graphs, image, debugWriter, epsilon, interpolationArray, channel, imageArrays, file_logger, order);
             interpolationArray->Apply([](double value){return value<0 ? 0 : value;});
             vectorsForImage.push_back(interpolationArray);
 

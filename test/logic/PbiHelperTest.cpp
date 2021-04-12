@@ -114,7 +114,7 @@ TEST(PbiHelperTests, GetNthOrderInterpolationOfEdge)
     }
 }
 
-TEST(PbiHelperTests, GetMultipleOrderCoefs)
+TEST(PbiHelperTests, GetMultipleOrderCoefs2D)
 {
     int sampling = 100;
     Array2D a = Array2D(sampling, sampling);
@@ -139,4 +139,72 @@ TEST(PbiHelperTests, GetMultipleOrderCoefs)
         }
         fx=Multiply(fx,fXDelta);
     }
+}
+
+TEST(PbiHelperTests, GetMultipleOrderCoefsForHorizontalEdge)
+{
+    int sampling = 100;
+    Array2D a = Array2D(sampling, 1);
+    std::function<double(double, double)> fx = [sampling](double x, double y){return (x/(sampling-1))*(1.0-x/(sampling-1))/2.0;};
+    std::function<double(double, double)> fxOriginal = [sampling](double x, double y){return (x/(sampling-1))*(1.0-x/(sampling-1))/2.0;};
+    auto fXDelta = [sampling](double x, double y){return (2*x/(sampling-1)-1.0);};
+    for(int n1=1;n1<=3;n1++)
+    {
+        
+        for(int x=0;x<sampling;x++)
+            for(int y=0;y<1;y++)
+                a[x][y] = fx(x,y);
+        auto coefficient = GetInterpolationsOfEdgeOfDifferentOrders(a, 0, sampling - 1, 0, 0, n1);
+        ASSERT_TRUE(abs(coefficient[n1-1]-0.5)<0.1);
+        fx=Multiply(fx,fXDelta);
+    }
+}
+
+TEST(PbiHelperTests, GetMultipleOrderCoefsForVerticalEdge)
+{
+    int sampling = 100;
+    Array2D a = Array2D(1, sampling);
+    std::function<double(double, double)> fy = [sampling](double x, double y){return (y/(sampling-1))*(1.0-y/(sampling-1))/2.0;};
+    std::function<double(double, double)> fyOriginal = [sampling](double x, double y){return (y/(sampling-1))*(1.0-y/(sampling-1))/2.0;};
+    auto fYDelta = [sampling](double x, double y){return (2*y/(sampling-1)-1.0);};
+    for(int n1=1;n1<=3;n1++)
+    {
+        
+        for(int x=0;x<1;x++)
+            for(int y=0;y<sampling;y++)
+                a[x][y] = fy(x,y);
+        auto coefficient = GetInterpolationsOfEdgeOfDifferentOrders(a, 0, 0, 0, sampling-1, n1);
+        ASSERT_TRUE(abs(coefficient[n1-1]-0.5)<0.1);
+        fy=Multiply(fy,fYDelta);
+    }
+}
+
+TEST(PbiHelperTests, GetBilinearInterpolationFunctionFromOneCornerTest1)
+{
+    auto f = GetBilinearInterpolationFunctionFromOneCorner(0,10,0,10,0,0,10);
+    ASSERT_DOUBLE_EQ(f(0,0),10);
+    ASSERT_DOUBLE_EQ(f(10,0),0);
+    ASSERT_DOUBLE_EQ(f(0,10),0);
+    ASSERT_DOUBLE_EQ(f(10,10),0);
+}
+
+TEST(PbiHelperTests, GetBilinearInterpolationFunctionFromOneCornerTest2)
+{
+    auto f = GetBilinearInterpolationFunctionFromOneCorner(0,1000,0,2000,0,0,10);
+    auto f2 = GetBilinearInterpolationFunctionFromOneCorner(0,1000,0,2000,0,2000,10);
+    auto f3 = GetBilinearInterpolationFunctionFromOneCorner(0,1000,0,2000,1000,0,10);
+    auto f4 = GetBilinearInterpolationFunctionFromOneCorner(0,1000,0,2000,1000,2000,10);
+    ASSERT_DOUBLE_EQ(f(0,0),10);
+    ASSERT_DOUBLE_EQ(f(500,1000),2.5);
+    ASSERT_DOUBLE_EQ(f2(500,1000),2.5);
+    ASSERT_DOUBLE_EQ(f3(500,1000),2.5);
+    ASSERT_DOUBLE_EQ(f4(500,1000),2.5);
+    ASSERT_DOUBLE_EQ(f(0,500),7.5);
+    ASSERT_DOUBLE_EQ(f2(0,500),2.5);
+    ASSERT_DOUBLE_EQ(f3(0,500),0);
+    ASSERT_DOUBLE_EQ(f4(0,500),0);
+    ASSERT_DOUBLE_EQ(f(250,0),7.5);
+    ASSERT_DOUBLE_EQ(f2(250,0),0);
+    ASSERT_DOUBLE_EQ(f3(250,0),2.5);
+    ASSERT_DOUBLE_EQ(f4(250,0),0);
 }

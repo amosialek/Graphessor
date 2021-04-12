@@ -27,6 +27,7 @@ class Array2D
         void Subtract(Array2D& other, int x1, int x2, int y1, int y2);
         void Subtract(std::function<double(double, double)>func, int x1, int x2, int y1, int y2);
         void Subtract(std::function<double(double, double)>func, int x1, int x2, int y1, int y2, int funcOffsetX, int funcOffsetY);
+        void Add(std::function<double(double, double)>func, int x1, int x2, int y1, int y2);
         void Multiply(const int c);
         double MultiplyElementWiseAndSum(Array2D other, int x1, int x2, int y1, int y2);
         double MultiplyElementWiseAndSum(double (*func)(double, double));
@@ -36,7 +37,8 @@ class Array2D
         double SquaredError(Array2D& other, int x1, int x2, int x3, int y1, int y2, int y3);
         double CompareWith(Array2D& other, int xx1, int xx2, int yy1, int yy2);
         double CompareWith(Array2D& other, int x1, int x2, int x3, int y1, int y2, int y3);
-        void BilinearInterpolation(Array2D& base, int x1, int x2, int y1, int y2);
+        void TrivialBilinearInterpolation(int x1, int x2, int y1, int y2, double value11, double value12, double value21, double value22);
+        void TrivialBilinearInterpolation(Array2D& base, int x1, int x2, int y1, int y2);
         void BaricentricInterpolation(Array2D& base, int x1, int x2, int x3, int y1, int y2, int y3);
         void Dump(std::ostream& s);
         std::vector<double>& operator[](int x);

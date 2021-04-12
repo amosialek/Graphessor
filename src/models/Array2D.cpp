@@ -126,6 +126,13 @@ bool PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int x3, in
                 a[x][y]-=func(x+xOffset,y+yOffset);
     }
 
+    void Array2D::Add(std::function<double (double, double)>func, int x1, int x2, int y1, int y2)
+    {
+        for(int y=y1;y<=y2;y++)
+            for(int x=x1;x<=x2;x++)
+                a[x][y]+=func(x+xOffset,y+yOffset);
+    }
+
     void Array2D::Subtract(Array2D& other, int x1, int x2, int y1, int y2)
     {
         for(int y=y1;y<=y2;y++)
@@ -228,7 +235,22 @@ double Array2D::CompareWith(Array2D& other, int x1, int x2, int x3, int y1, int 
     return result;
 }
 
-void Array2D::BilinearInterpolation(Array2D& base, int x1, int x2, int y1, int y2)
+void Array2D::TrivialBilinearInterpolation(int x1, int x2, int y1, int y2, double value11, double value12, double value21, double value22)
+{
+    double denominator = 1.0*(x2-x1)*(y2-y1);
+    for(int x=x1;x<=x2;x++)
+        for(int y=y1;y<=y2;y++)
+        {
+            double coef22 = (x-x1)*(y-y1)/denominator;
+            double coef12 = (x2-x)*(y-y1)/denominator;
+            double coef21 = (x-x1)*(y2-y)/denominator;
+            double coef11 = (x2-x)*(y2-y)/denominator;
+            a[x][y] = value11 * coef11 + value21 * coef21 + value12 * coef12 + value22 * coef22;
+        }
+}
+
+
+void Array2D::TrivialBilinearInterpolation(Array2D& base, int x1, int x2, int y1, int y2)
 {
 
         int r11,r21,r12,r22;
@@ -240,7 +262,7 @@ void Array2D::BilinearInterpolation(Array2D& base, int x1, int x2, int y1, int y
         for(int x=x1;x<=x2;x++)
             for(int y=y1;y<=y2;y++)
             {
-                double coef22 = (x-x1)*(y-y1)/denominator;//r11==0 || r22==0 || r21==0 || r12==0
+                double coef22 = (x-x1)*(y-y1)/denominator;
                 double coef12 = (x2-x)*(y-y1)/denominator;
                 double coef21 = (x-x1)*(y2-y)/denominator;
                 double coef11 = (x2-x)*(y2-y)/denominator;

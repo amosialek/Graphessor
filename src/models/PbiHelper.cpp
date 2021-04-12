@@ -163,7 +163,7 @@ std::unique_ptr<double[]> GetInterpolationsOfEdgeOfDifferentOrders(Array2D& arra
     for(int order=0;order<orders;order++)
     {
         RHS[order] = 0;
-        Array2D functionArray = GetFunctionSplitToNElements(integralOfTestFunction[order], 0, 1, x2-x1+1+y2-y1);
+        Array2D functionArray = GetFunctionSplitToNElements(integralOfTestFunction[order+2], 0, 1, x2-x1+1+y2-y1);
         if(x2==x1)
         {
             for(int j = y2; j >= 1; j--)
@@ -267,4 +267,17 @@ double GetSquareInterpolationOfRectangle(Array2D& array, int x1, int x2, int y1,
             return 0.0;
     }
     return sum/denominator;
+}
+
+std::function<double(double, double)> GetBilinearInterpolationFunctionFromOneCorner(int x1, int x2, int y1, int y2, int cornerX, int cornerY, int value)
+{
+    if(x1==cornerX and y1==cornerY)
+        return [x1, x2, y1, y2, value](double x, double y){return value*(x2-x)/(x2-x1)*(y2-y)/(y2-y1);};
+    if(x2==cornerX and y1==cornerY)
+        return [x1, x2, y1, y2, value](double x, double y){return value*(x-x1)/(x2-x1)*(y2-y)/(y2-y1);};
+    if(x1==cornerX and y2==cornerY)
+        return [x1, x2, y1, y2, value](double x, double y){return value*(x2-x)/(x2-x1)*(y-y1)/(y2-y1);};
+    if(x2==cornerX and y2==cornerY)
+        return [x1, x2, y1, y2, value](double x, double y){return value*(x-x1)/(x2-x1)*(y-y1)/(y2-y1);};
+    assert(false and "GetBilinearInterpolationFunctionFromOneCorner: (cornerX, cornerY) is not a corner of the rectangle");
 }

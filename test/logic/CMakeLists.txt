@@ -8,5 +8,6 @@ target_include_directories(LogicTest PUBLIC "${PROJECT_SOURCE_DIR}/googletest-sr
 target_include_directories(LogicTest PUBLIC "${PROJECT_SOURCE_DIR}/src/logic")
 target_include_directories(LogicTest PUBLIC "${PROJECT_SOURCE_DIR}/src/logic/Rectangular")
 target_include_directories(LogicTest PUBLIC "${PROJECT_SOURCE_DIR}/src/logic/Rivara")
+target_include_directories(LogicTest PUBLIC "${PROJECT_SOURCE_DIR}/src/logic/Interpolations")
 target_include_directories(LogicTest PUBLIC "${PROJECT_SOURCE_DIR}/src/models")
 file(COPY "test_files" DESTINATION "${PROJECT_SOURCE_DIR}/${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")

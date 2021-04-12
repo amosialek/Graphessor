@@ -173,7 +173,7 @@ void DoLinearInterpolation1(std::shared_ptr<Array2D> image, std::shared_ptr<Arra
             minY = std::min((*graph)[pixel].y, minY);
             maxY = std::max((*graph)[pixel].y, maxY);
         }
-        interpolation -> BilinearInterpolation(*image, minX, maxX, minY, maxY);        
+        interpolation -> TrivialBilinearInterpolation(*image, minX, maxX, minY, maxY);        
     }
 }
 

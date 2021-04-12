@@ -109,4 +109,17 @@ Array2D GetFunctionSplitToNElements(std::function<double(double, double)> f, int
 
 Array2D GetFunctionSplitToNElements2D(std::function<double(double, double)> f, int x1, int x2, int elements);
 
+/**
+ * Returns function which is bilinear interpolation on rectangle (x1, y1), (x2, y2). 
+ * Values in corners are 0 except values in cornerX and cornerY
+ * @param x1 left x coordinate of rectangle (x1<x2)
+ * @param x2 right x coordinate of rectangle (x1<x2)
+ * @param y1 top y coordinate of rectangle (y1<y2)
+ * @param y2 bottom y coordinate of rectangle (y1<y2)
+ * @param cornerX x coordinate of corner if non-zero value. must be equal to x1 or x2
+ * @param cornerY y coordinate of corner if non-zero value. must be equal to y1 or y2
+ * @param value value of function in (cornerX, cornerY)
+ */
+std::function<double(double, double)> GetBilinearInterpolationFunctionFromOneCorner(int x1, int x2, int y1, int y2, int cornerX, int cornerY, int value);
+
 #endif // __PBIHELPER_HPP__

@@ -8,6 +8,7 @@
 #include "RivaraProduction4test.cpp"
 #include "RivaraProduction5test.cpp"
 #include "RivaraProduction6test.cpp"
+#include "InterpolationTests.cpp"
 #include "Array2Dtest.cpp"
 #include "PbiHelperTest.cpp"
 using namespace std;
