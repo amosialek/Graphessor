@@ -347,6 +347,8 @@ void Array2D::Transpose()
     for(int x=0;x<width;x++)
         for(int y=0;y<height;y++)
             newArray[y][x] = a[x][y];
+    width = newWidth;
+    height = newheight;
     a = newArray;
 }
 
