@@ -23,21 +23,14 @@ void P5::Perform()
     (*graph)[IEdge]._break = 1;
 }
 
-std::set<vertex_descriptor> GetEdges(IGraph& graph, vertex_descriptor iEdge, int minx, int maxx, int miny, int maxy)
+template<typename Key1, typename Key2, typename Value>
+void JoinNestedMaps(std::map<Key1,std::map<Key2, Value>>& target, std::map<Key1,std::map<Key2, Value>>& from)
 {
-    auto vertices = graph.GetAdjacentVertices(iEdge);
-    std::set<vertex_descriptor> edges;
-    for(auto v: vertices)
+    for(auto outerKeyValue: from)
     {
-        auto fedges = graph.GetAdjacentVertices(v, NODELABEL_F);
-        auto bedges = graph.GetAdjacentVertices(v, NODELABEL_B);
-        edges.insert(fedges.begin(), fedges.end());
-        edges.insert(bedges.begin(), bedges.end());
+        target[outerKeyValue.first].insert(outerKeyValue.second.begin(), outerKeyValue.second.end());
     }
-    return where(edges, [minx, maxx, miny, maxy, &graph](vertex_descriptor v){return graph[v].x==minx or graph[v].x==maxx or graph[v].y==miny or graph[v].y==maxy;});
 }
-
-
 
 std::tuple<std::map<int, std::map<int, double>>,std::map<std::string, std::vector<double>>> GetCornerValues(Array2D& image, IGraph& graph, std::set<vertex_descriptor>& edges, int minx, int maxx, int miny, int maxy, int orders)
 {
@@ -45,6 +38,7 @@ std::tuple<std::map<int, std::map<int, double>>,std::map<std::string, std::vecto
     std::map<std::string, std::vector<double>> resultCoefficients;    
     std::vector<vertex_descriptor> sortedEdges;
     sortedEdges.insert(sortedEdges.begin(), edges.begin(),edges.end());
+
     std::sort(sortedEdges.begin(), sortedEdges.end(), [&graph](const auto &a, const auto & b){return graph.GetAdjacentVertices(a).size()>graph.GetAdjacentVertices(b).size();});
     std::unique_ptr<double[]> coefficientsForFullEdge;
     for(auto edge: sortedEdges)
@@ -55,7 +49,7 @@ std::tuple<std::map<int, std::map<int, double>>,std::map<std::string, std::vecto
             std::map<int, std::map<int, double>> partialResultCorners;
             std::map<std::string, std::vector<double>>partialResultCoefficients;
             std::tie(partialResultCorners, partialResultCoefficients)  = GetFEdgeWithTwoVerticesCoefficients(image, graph[vertices[0]], graph[vertices[1]], minx, maxx, miny, maxy, orders);
-            resultCorners.insert(partialResultCorners.begin(), partialResultCorners.end());
+            JoinNestedMaps(resultCorners, partialResultCorners);
             resultCoefficients.insert(partialResultCoefficients.begin(), partialResultCoefficients.end());
         }
         else if(vertices.size()==1)
@@ -96,6 +90,7 @@ std::tuple<std::map<int, std::map<int, double>>,std::map<std::string, std::vecto
 void InterpolateRectangle(IGraph& graph, vertex_descriptor iEdge,  Array2D& image, Array2D& interpolation, int minx, int maxx, int miny, int maxy, int orders)
 {
     auto properEdges = GetEdges(graph, iEdge, minx, maxx, miny, maxy);
+    assert(properEdges.size()==4 && "GetEdges() didn't return 4 values");
     std::map<int, std::map<int, double>> cornerValues;
     std::map<std::string, std::vector<double>> edgeCoefficients;
     std::tie(cornerValues, edgeCoefficients) = GetCornerValues(image, graph, properEdges, minx, maxx, miny, maxy, orders);

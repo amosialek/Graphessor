@@ -3,7 +3,7 @@
 
 #include<functional>
 #include"Array2D.hpp"
-#include <math.h>
+#include <cmath>
 #include <memory>
 
 const double integralOfTestFunctionSquaredOnZeroOneRange[]{

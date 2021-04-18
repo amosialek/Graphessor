@@ -244,3 +244,123 @@ TEST(GetFEdgeWithTwoVerticesCoefficientsTests, verticalCoefficientTestWithParabo
 
     ASSERT_TRUE(abs(values["right"][0]-7)<0.1);
 }
+
+TEST(GetEdgesTests, GetEdgesSunnyDay)
+{
+    CachedGraph graph;
+    auto P0 = graph.AddVertex(*(make_unique<Pixel>(0, 0, NODELABEL_P)));
+    auto P1 = graph.AddVertex(*(make_unique<Pixel>(100, 0, NODELABEL_P)));
+    auto P2 = graph.AddVertex(*(make_unique<Pixel>(0, 100, NODELABEL_P)));
+    auto P3 = graph.AddVertex(*(make_unique<Pixel>(100, 100, NODELABEL_P)));
+    auto F0 = graph.AddVertex(*(make_unique<Pixel>(50, 0, NODELABEL_F)));
+    auto F1 = graph.AddVertex(*(make_unique<Pixel>(0, 50, NODELABEL_F)));
+    auto F2 = graph.AddVertex(*(make_unique<Pixel>(50, 100, NODELABEL_F)));
+    auto F3 = graph.AddVertex(*(make_unique<Pixel>(100, 50, NODELABEL_F)));
+    auto I = graph.AddVertex(*(make_unique<Pixel>(50, 50, NODELABEL_I)));
+    graph.AddEdge(P0,I);
+    graph.AddEdge(P1,I);
+    graph.AddEdge(P2,I);
+    graph.AddEdge(P3,I);
+    
+    graph.AddEdge(P0,F0);
+    graph.AddEdge(P0,F1);
+
+    graph.AddEdge(P1,F0);
+    graph.AddEdge(P1,F3);
+
+    graph.AddEdge(P2,F1);
+    graph.AddEdge(P2,F2);
+
+    graph.AddEdge(P3,F2);
+    graph.AddEdge(P3,F3);
+
+    auto edges = GetEdges(graph,I,0,100,0,100);
+    ASSERT_EQ(4, edges.size());
+    ASSERT_EQ(F0,*edges.find(F0));
+    ASSERT_EQ(F1,*edges.find(F1));
+    ASSERT_EQ(F2,*edges.find(F2));
+    ASSERT_EQ(F3,*edges.find(F3));
+}
+
+TEST(GetEdgesTests, GetEdgesWithTwoLongEdges)
+{
+    CachedGraph graph;
+    auto P0 = graph.AddVertex(*(make_unique<Pixel>(0, 0, NODELABEL_P)));
+    auto P3 = graph.AddVertex(*(make_unique<Pixel>(100, 100, NODELABEL_P)));
+    auto F0 = graph.AddVertex(*(make_unique<Pixel>(50, 0, NODELABEL_F)));
+    auto F1 = graph.AddVertex(*(make_unique<Pixel>(0, 50, NODELABEL_F)));
+    auto F2 = graph.AddVertex(*(make_unique<Pixel>(0, 100, NODELABEL_F)));
+    auto F3 = graph.AddVertex(*(make_unique<Pixel>(100, 0, NODELABEL_F)));
+    auto I = graph.AddVertex(*(make_unique<Pixel>(50, 50, NODELABEL_I)));
+    graph.AddEdge(P0,I);
+    graph.AddEdge(P3,I);
+    
+    graph.AddEdge(P0,F0);
+    graph.AddEdge(P0,F1);
+    graph.AddEdge(P3,F2);
+    graph.AddEdge(P3,F3);
+
+    auto edges = GetEdges(graph,I,0,100,0,100);
+    ASSERT_EQ(4, edges.size());
+    ASSERT_EQ(F0,*edges.find(F0));
+    ASSERT_EQ(F1,*edges.find(F1));
+    ASSERT_EQ(F2,*edges.find(F2));
+    ASSERT_EQ(F3,*edges.find(F3));
+}
+
+TEST(GetEdgesTests, GetEdgesWithAdditionalEdges)
+{
+        CachedGraph graph;
+    auto P0 = graph.AddVertex(*(make_unique<Pixel>(0, 0, NODELABEL_P)));
+    auto P1 = graph.AddVertex(*(make_unique<Pixel>(100, 0, NODELABEL_P)));
+    auto P2 = graph.AddVertex(*(make_unique<Pixel>(0, 100, NODELABEL_P)));
+    auto P3 = graph.AddVertex(*(make_unique<Pixel>(100, 100, NODELABEL_P)));
+    auto F0 = graph.AddVertex(*(make_unique<Pixel>(50, 0, NODELABEL_F)));
+    auto F1 = graph.AddVertex(*(make_unique<Pixel>(0, 50, NODELABEL_F)));
+    auto F2 = graph.AddVertex(*(make_unique<Pixel>(50, 100, NODELABEL_F)));
+    auto F3 = graph.AddVertex(*(make_unique<Pixel>(100, 50, NODELABEL_F)));
+
+    auto F4 = graph.AddVertex(*(make_unique<Pixel>(-50, 0, NODELABEL_F)));
+    auto F5 = graph.AddVertex(*(make_unique<Pixel>(0, -50, NODELABEL_F)));
+    auto F6 = graph.AddVertex(*(make_unique<Pixel>(150, 100, NODELABEL_F)));
+    auto F7 = graph.AddVertex(*(make_unique<Pixel>(100, 150, NODELABEL_F)));
+    auto F8 = graph.AddVertex(*(make_unique<Pixel>(150, 0, NODELABEL_F)));
+    auto F9 = graph.AddVertex(*(make_unique<Pixel>(0, 150, NODELABEL_F)));
+    auto F10 = graph.AddVertex(*(make_unique<Pixel>(-50, 100, NODELABEL_F)));
+    auto F11 = graph.AddVertex(*(make_unique<Pixel>(100, -50, NODELABEL_F)));
+    auto I = graph.AddVertex(*(make_unique<Pixel>(50, 50, NODELABEL_I)));
+    graph.AddEdge(P0,I);
+    graph.AddEdge(P1,I);
+    graph.AddEdge(P2,I);
+    graph.AddEdge(P3,I);
+    
+    graph.AddEdge(P0,F0);
+    graph.AddEdge(P0,F1);
+
+    graph.AddEdge(P1,F0);
+    graph.AddEdge(P1,F3);
+
+    graph.AddEdge(P2,F1);
+    graph.AddEdge(P2,F2);
+
+    graph.AddEdge(P3,F2);
+    graph.AddEdge(P3,F3);
+
+    //edges which are adjacent but are not edges of IEdge rectangle
+
+    graph.AddEdge(P0,F4);
+    graph.AddEdge(P0,F5);
+    graph.AddEdge(P3,F6);
+    graph.AddEdge(P3,F7);
+    graph.AddEdge(P1,F8);
+    graph.AddEdge(P1,F11);
+    graph.AddEdge(P2,F9);
+    graph.AddEdge(P3,F10);
+
+    auto edges = GetEdges(graph,I,0,100,0,100);
+    ASSERT_EQ(4, edges.size());
+    ASSERT_EQ(F0,*edges.find(F0));
+    ASSERT_EQ(F1,*edges.find(F1));
+    ASSERT_EQ(F2,*edges.find(F2));
+    ASSERT_EQ(F3,*edges.find(F3));
+}

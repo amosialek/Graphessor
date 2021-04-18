@@ -365,31 +365,60 @@ void Image::DrawLine(int x1, int y1, int x2, int y2, int channel, int color)
 void Image::DrawBlackLine(int x1, int y1, int x2, int y2)
 {
     int pixelCoord;
-    if(x1==x2)
+    int minx;
+    int miny;
+    int maxx;
+    int maxy;
+    if(x1<=x2)
     {
-        for(int y=y1;y<y2;y++)
+        minx=x1;
+        miny=y1;
+        maxx=x2;
+        maxy=y2;
+    }
+    else
+    {
+        minx=x2;
+        miny=y2;
+        maxx=x1;
+        maxy=y1;
+    }
+    
+    if(minx==maxx)
+    {
+        for(int y=miny;y<=maxy;y++)
         {
-            pixelCoord = y * width() + x1;
+            pixelCoord = y * width() + minx;
+            view[pixelCoord][0] = view[pixelCoord][1] = view[pixelCoord][2] = 0;
+        }
+        for(int y=miny;y>=maxy;y--)
+        {
+            pixelCoord = y * width() + minx;
             view[pixelCoord][0] = view[pixelCoord][1] = view[pixelCoord][2] = 0;
         }
         return;
     }
-    if(y1==y2)
+    if(miny==maxy)
     {
-        for(int x=x1;x<x2;x++)
+        for(int x=minx;x<=maxx;x++)
         {
-            pixelCoord = y1 * width() + x;
+            pixelCoord = miny * width() + x;
+            view[pixelCoord][0] = view[pixelCoord][1] = view[pixelCoord][2] = 0;
+        }
+        for(int x=minx;x>=maxx;x--)
+        {
+            pixelCoord = miny * width() + x;
             view[pixelCoord][0] = view[pixelCoord][1] = view[pixelCoord][2] = 0;
         }
         return;
     }
-    double deltax = x2 - x1;
-    double deltay = y2 - y1;
-    double deltaerr = abs(1.0 * deltay / deltax);    // Assume deltax != 0 (line is not vertical),
+    double deltax = maxx - minx;
+    double deltay = maxy - miny;
+    double deltaerr = fabs(1.0 * deltay / deltax);    // Assume deltax != 0 (line is not vertical),
           // note that this division needs to be done in a way that preserves the fractional part
     double error = 0.0; // No error at start
-    int y = y1;
-    for (int x = x1;x< x2;x++)
+    int y = miny;
+    for (int x = minx;x< maxx;x++)
     {
         pixelCoord = y * width() + x;
         view[pixelCoord][0] = view[pixelCoord][1] = view[pixelCoord][2] = 0;

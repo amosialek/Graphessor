@@ -54,12 +54,20 @@ void P2::Perform()
         if((*graph)[e].label==NODELABEL_I and (*graph)[e]._break==1)
         {
             neighbours = graph -> GetAdjacentVertices(e);
+            int minx = graph->operator[](neighbours[0]).x;
+            int maxx = graph->operator[](neighbours[0]).x;
+            int miny = graph->operator[](neighbours[0]).y;
+            int maxy = graph->operator[](neighbours[0]).y;
             int x = 0;
             int y = 0;
             for(auto p : neighbours)
             {
                 x+=graph->operator[](p).x;
                 y+=graph->operator[](p).y;
+                minx = std::min(graph->operator[](p).x, minx);
+                maxx = std::max(graph->operator[](p).x, maxx);
+                miny = std::min(graph->operator[](p).y, miny);
+                maxy = std::max(graph->operator[](p).y, maxy);
             }
             x /= 4;
             y /= 4;
@@ -69,8 +77,6 @@ void P2::Perform()
             graph->operator[](e).y = y;
             int r,g,b;
             std::tie(r,g,b) = image->getPixel(x,y);
-            int dx = abs(x - (*graph)[neighbours[0]].x);
-            int dy = abs(y - (*graph)[neighbours[0]].y);
             auto newPixel = e;
             (*graph)[e].r = r;
             (*graph)[e].g = g;
@@ -85,13 +91,13 @@ void P2::Perform()
                 graph->AddEdge(newPixel, newIEdge);
                 graph->RemoveEdge(neighbours[i],e);
             }
-            auto F11 = graph -> AddVertex(*(new Pixel(x, y - dy/2, NODELABEL_F)));
+            auto F11 = graph -> AddVertex(*(new Pixel(x, (y + miny)/2, NODELABEL_F)));
             graph -> AddEdge(newPixel, F11);
-            auto F12 = graph -> AddVertex(*(new Pixel(x, y + dy/2, NODELABEL_F)));
+            auto F12 = graph -> AddVertex(*(new Pixel(x, (y + maxy)/2, NODELABEL_F)));
             graph -> AddEdge(newPixel, F12);
-            auto F21 = graph -> AddVertex(*(new Pixel(x - dx/2, y, NODELABEL_F)));
+            auto F21 = graph -> AddVertex(*(new Pixel((x + minx)/2, y, NODELABEL_F)));
             graph -> AddEdge(newPixel, F21);
-            auto F22 = graph -> AddVertex(*(new Pixel(x + dx/2, y, NODELABEL_F)));              
+            auto F22 = graph -> AddVertex(*(new Pixel((x + maxx)/2, y, NODELABEL_F)));              
             graph -> AddEdge(newPixel, F22);
         }
     }

@@ -63,7 +63,7 @@ double countL2Error(std::shared_ptr<Array2D> interpolationArray, std::vector<std
     RectangularInterpolation2(imageArrays3[0], interpolationArray2, g);
 
     L2 = imageArrays3[0] -> SquaredError(*interpolationArray2,0,imageArrays3[0]->width-1, 0, imageArrays3[0]->height-1);
-    L2=L2/(imageArrays3[0]->width* imageArrays3[0]->height*255.0*255.0);
+    L2=L2 / (imageArrays3[0] -> width * imageArrays3[0] -> height * 255.0 * 255.0);
     double L2original = imageArrays[0] -> SquaredError(*interpolationArray,0,imageArrays[0]->width-1,0,imageArrays[0]->height-1)/255.0/255.0/imageArrays[0]->height/imageArrays[0]->width;
     vectorsForImage.clear();
     spdlog::debug("interpolated L2 error = {}",  L2); 
@@ -98,7 +98,7 @@ void PerformQuadTree(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
     unsigned long long lastICount = 0;
     int i=1;
     //debugWriter->WriteItOut(std::to_string(i++), *graph);
-    while(lastICount < graph -> GetCacheIterator(NODELABEL_I).size())
+    while(lastICount < graph -> GetCacheIterator(NODELABEL_I).size() and i<5)
     {
 
         spdlog::debug("Starting production loop, channel={}, i={}",channel,i);  
@@ -108,6 +108,7 @@ void PerformQuadTree(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
         std::chrono::steady_clock::time_point end;
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         auto p5s = P5::FindAllMatches(graph, imageArrays[channel], interpolationArray, channel, i < 2 ? 0 : epsilon, order);
+        if(channel==0 and i==4)debugWriter->WriteItOut("p5_failing", *graph);
         for(auto p5 : *p5s)
             p5.Perform();
         end = std::chrono::steady_clock::now();
@@ -388,6 +389,7 @@ int main(int argc, char** argv) {
 
     auto restoredImage = std::make_unique<Image>(channel_graphs);
     GraphImageWriter::DrawPixels(channel_graphs[0],(outputDirectoryPath/(outputFileName+"_red_graph.bmp")).c_str());
+    GraphImageWriter::DrawFullGraph(channel_graphs[0],(outputDirectoryPath/(outputFileName+"_red_full_graph.bmp")).c_str());
     // GraphImageWriter::DrawPixels(channel_graphs[1],(outputDirectoryPath/(outputFileName+"_green_graph.bmp")).c_str());
     // GraphImageWriter::DrawPixels(channel_graphs[2],(outputDirectoryPath/(outputFileName+"_blue_graph.bmp")).c_str());
     auto image2 = std::make_shared<Image>(inputFileName);
