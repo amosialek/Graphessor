@@ -37,6 +37,8 @@ double countL2Error(Array2D& interpolationArray, Array2D& original)
      
      double numerator = interpolationCopy.MultiplyElementWiseAndSum(interpolationCopy, 0, interpolationCopy.width-1, 0, interpolationCopy.height-1);
      double denumerator = original.MultiplyElementWiseAndSum(original, 0, original.width-1, 0, original.height-1);
+     if(numerator==0 and denumerator==0)
+        denumerator = 1;
      spdlog::debug("L2 error = {}", sqrt(numerator/denumerator));
 }
 
@@ -98,7 +100,7 @@ void PerformQuadTree(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
     unsigned long long lastICount = 0;
     int i=1;
     //debugWriter->WriteItOut(std::to_string(i++), *graph);
-    while(lastICount < graph -> GetCacheIterator(NODELABEL_I).size() and i<5)
+    while(lastICount < graph -> GetCacheIterator(NODELABEL_I).size() and i<11)
     {
 
         spdlog::debug("Starting production loop, channel={}, i={}",channel,i);  

@@ -84,6 +84,7 @@ std::tuple<std::map<int, std::map<int, double>>,std::map<std::string, std::vecto
         else
             assert(false and "GetCornerValues Wrong number of vertices adjacent to the edge");
     }
+    assert(resultCorners[minx].size() + resultCorners[maxx].size() == 4 and "GetCornerValues Wrong number of calculated corners");
     return std::make_tuple(resultCorners, resultCoefficients);
 }
 

@@ -53,12 +53,11 @@ std::tuple<std::map<int, std::map<int, double>>,std::map<std::string, std::vecto
         imageCopy.yOffset=0;
         imageCopy.Subtract([val1, val2, yDiff](double x, double y){return val2*y/yDiff + val1*(yDiff-y)/yDiff;});
         coefficientsForFullEdge = GetInterpolationsOfEdgeOfDifferentOrders(imageCopy, 0, 0, 0, yDiff, orders);
-        if((v0.y==miny and v1.y==maxy) or (v1.y==miny and v0.y==maxy))
-        {
+        if(v0.y==miny or v0.y==maxy)
             resultCorners[v0.x][v0.y] = image[v0.x][v0.y];
+        if(v1.y==maxy or v1.y==miny)
             resultCorners[v1.x][v1.y] = image[v1.x][v1.y];
-        }
-        else if((v1.y!=miny and v1.y!=maxy) or (v0.y!=miny and v0.y!=maxy))
+        if((v1.y!=miny and v1.y!=maxy) or (v0.y!=miny and v0.y!=maxy))
         {
             double midValue = (val1+val2)/2;
             for(int order=0;order<orders;order++)
@@ -106,12 +105,11 @@ std::tuple<std::map<int, std::map<int, double>>,std::map<std::string, std::vecto
         imageCopy.yOffset=0;
         imageCopy.Subtract([val1, val2, xDiff](double x, double y){return val2*x/xDiff + val1*(xDiff-x)/xDiff;});
         coefficientsForFullEdge = GetInterpolationsOfEdgeOfDifferentOrders(imageCopy, 0, xDiff, 0, 0, orders);
-        if((v0.x==minx and v1.x==maxx) or (v1.x==minx and v0.x==maxx))
-        {
+        if(v0.x==minx or v0.x==maxx)
             resultCorners[v0.x][v0.y] = image[v0.x][v0.y];
+        if(v1.x==maxx or v1.x==minx)
             resultCorners[v1.x][v1.y] = image[v1.x][v1.y];
-        }
-        else if((v1.x!=minx and v1.x!=maxx) or (v0.x!=minx and v0.x!=maxx))
+        if((v1.x!=minx and v1.x!=maxx) or (v0.x!=minx and v0.x!=maxx))
         {
             double midValue = (val1+val2)/2;
             for(int order=0;order<orders;order++)
@@ -148,6 +146,7 @@ std::tuple<std::map<int, std::map<int, double>>,std::map<std::string, std::vecto
         else
             resultCoefficients["bottom"] = resultCoefficientsVector;
     }
+    assert(resultCorners[minx].size() + resultCorners[maxx].size() == 2 and "GetFEdgeWithTwoVerticesCoefficients Wrong number of calculated corners");
     return std::make_tuple(resultCorners, resultCoefficients);
 }
 
