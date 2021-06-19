@@ -1,11 +1,12 @@
 #ifndef __RIVARAUTILS_HPP__
 #define __RIVARAUTILS_HPP__
-#include <math.h>
+#include <cmath>
 #include "Pixel.hpp"
 #include "RivaraAttributes.hpp"
 #include "RivaraCachedGraph.hpp"
 #include "mygraph.hpp"
 #include "Image.hpp"
+#include "Array2D.hpp"
 
 namespace Rivara
 {

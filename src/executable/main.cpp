@@ -19,77 +19,138 @@
 #include "RivaraProductions.hpp"
 #include "RivaraCachedGraph.hpp"
 #include "ImageMagnifier.hpp"
+#include "RectangularInterpolation.hpp"
 
 std::map<std::string, int> functionTime;
 
 namespace opt=boost::program_options;
 using namespace Rivara;
+std::experimental::filesystem::path outputDirectoryPath;
+std::string outputFileName;
+std::shared_ptr<Image> image3;
+std::vector<std::shared_ptr<Array2D>> imageArrays3;
+
+double countL2Error(Array2D& interpolationArray, Array2D& original)
+{
+     auto interpolationCopy = interpolationArray.GetCopy();
+     interpolationCopy.Subtract(original);
+     
+     double numerator = interpolationCopy.MultiplyElementWiseAndSum(interpolationCopy, 0, interpolationCopy.width-1, 0, interpolationCopy.height-1);
+     double denumerator = original.MultiplyElementWiseAndSum(original, 0, original.width-1, 0, original.height-1);
+     if(numerator==0 and denumerator==0)
+        denumerator = 1;
+     spdlog::debug("L2 error = {}", sqrt(numerator/denumerator));
+}
+
+double countL2Error(std::shared_ptr<Array2D> interpolationArray, std::vector<std::shared_ptr<Array2D>> imageArrays, std::vector<std::shared_ptr<CachedGraph>>& channel_graphs)
+{
+    std::shared_ptr<CachedGraph> g = std::make_shared<CachedGraph>(*channel_graphs[0]);
+
+    g->DecreaseXAndYByRatio(4);
+    std::shared_ptr<Array2D> interpolationArray2 = std::make_shared<Array2D>(interpolationArray->width/4, interpolationArray->height/4);
+    
+    RectangularInterpolation2(imageArrays3[0], interpolationArray2, g);
+
+    double L2 = imageArrays3[0] -> SquaredError(*interpolationArray2,0,imageArrays3[0]->width-1, 0, imageArrays3[0]->height-1);
+    L2=L2/(imageArrays3[0]->width* imageArrays3[0]->height*255.0*255.0);    
+    std::vector<std::shared_ptr<Array2D>> vectorsForImage;
+    interpolationArray2 = std::make_shared<Array2D>(interpolationArray->width/4, interpolationArray->height/4);
+    vectorsForImage.push_back(interpolationArray2);
+    vectorsForImage.push_back(std::make_shared<Array2D>(interpolationArray2 -> width, interpolationArray2 -> height));
+    vectorsForImage.push_back(std::make_shared<Array2D>(interpolationArray2 -> width, interpolationArray2 -> height));
+    Image interpolationImage = Image(vectorsForImage);
+    g = std::make_shared<CachedGraph>(*channel_graphs[0]);
+    g->DecreaseXAndYByRatio(4);
+    
+    RectangularInterpolation2(imageArrays3[0], interpolationArray2, g);
+
+    L2 = imageArrays3[0] -> SquaredError(*interpolationArray2,0,imageArrays3[0]->width-1, 0, imageArrays3[0]->height-1);
+    L2=L2 / (imageArrays3[0] -> width * imageArrays3[0] -> height * 255.0 * 255.0);
+    double L2original = imageArrays[0] -> SquaredError(*interpolationArray,0,imageArrays[0]->width-1,0,imageArrays[0]->height-1)/255.0/255.0/imageArrays[0]->height/imageArrays[0]->width;
+    vectorsForImage.clear();
+    spdlog::debug("interpolated L2 error = {}",  L2); 
+    spdlog::debug("original L2 error = {}",  L2original);  
+    vectorsForImage.push_back(interpolationArray2);
+    vectorsForImage.push_back(std::make_shared<Array2D>(interpolationArray2 -> width, interpolationArray2 -> height));
+    vectorsForImage.push_back(std::make_shared<Array2D>(interpolationArray2 -> width, interpolationArray2 -> height));
+    interpolationImage = Image(vectorsForImage);
+    interpolationImage.save((outputDirectoryPath/(outputFileName+"_L2_interpolation.bmp")).c_str());
+    GraphImageWriter::DrawPixels(g, (outputDirectoryPath/(outputFileName+"_L2_graph.bmp")).c_str());
+
+    return L2;
+}
+
 
 void PerformQuadTree(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
     std::shared_ptr<Image> image,
     AbstractOutputWriter* debugWriter,
     double epsilon,
-    std::shared_ptr<spdlog::logger> logger)
+    std::shared_ptr<Array2D> interpolationArray,
+    int channel,
+    std::vector<std::shared_ptr<Array2D>> imageArrays,
+    std::shared_ptr<spdlog::logger> logger,
+    int order)
 {
-    for(int channel=0;channel<3;channel++)
-    {
-        auto graph = std::make_shared<CachedGraph>();
-        channel_graphs.emplace_back(graph);
-        auto S = graph -> AddVertex(*(new Pixel(0,0, NODELABEL_S)));
-        P1(graph, S, image).Perform();
-        
-        unsigned long long lastICount = 0;
-        int i=1;
-        //debugWriter->WriteItOut(std::to_string(i++), *graph);
-        while(lastICount < graph -> GetCacheIterator(NODELABEL_I).size())
-        {
+    
+    auto graph = std::make_shared<CachedGraph>();
+    channel_graphs.emplace_back(graph);
+    auto S = graph -> AddVertex(*(new Pixel(0,0, NODELABEL_S)));
+    P1(graph, S, image).Perform();
 
-            spdlog::debug("Starting production loop, channel={}, i={}",channel,i);  
-            lastICount = graph -> GetCacheIterator(NODELABEL_I).size();
-            if(i%50==0)
-            std::cerr<<"iteration: "<<i<<std::endl;
-            std::chrono::steady_clock::time_point end;
-            std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-            auto p5s = P5::FindAllMatches(graph, image, channel, i < 2 ? 0 : epsilon);
-            for(auto p5 : *p5s)
-                p5.Perform();
-            end = std::chrono::steady_clock::now();
-            functionTime["P5"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-            begin = std::chrono::steady_clock::now();
-            //debugWriter->WriteItOut(std::to_string(i++), *graph);
-            P6::PerformAllMatches(graph);
-            end = std::chrono::steady_clock::now();
-            functionTime["P6"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-            begin = std::chrono::steady_clock::now();
-            //debugWriter->WriteItOut(std::to_string(i++), *graph);
-            auto p2s = P2::FindAllMatches(graph, image);
-            for(auto p2 : *p2s)
-                p2.Perform();
-            end = std::chrono::steady_clock::now();
-            functionTime["P2"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-            begin = std::chrono::steady_clock::now();
-            //debugWriter->WriteItOut(std::to_string(i++), *graph);
-            auto p3s = P3::FindAllMatches(graph, image);
-            for(auto p3 : *p3s)
-                p3.Perform();
-            end = std::chrono::steady_clock::now();
-            functionTime["P3"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-            begin = std::chrono::steady_clock::now();
-            //debugWriter->WriteItOut(std::to_string(i++), *graph);
-            auto p4s = P4::FindAllMatches(graph, image);
-            for(auto p4: *p4s)
-                p4.Perform();
-            end = std::chrono::steady_clock::now();
-            functionTime["P4"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-            //debugWriter->WriteItOut(std::to_string(i++), *graph);
-            i++;
-        }
-        std::cerr<<"P2 "<<functionTime["P2"]<<std::endl;
-        std::cerr<<"P3 "<<functionTime["P3"]<<std::endl;
-        std::cerr<<"P4 "<<functionTime["P4"]<<std::endl;
-        std::cerr<<"P5 "<<functionTime["P5"]<<std::endl;
-        std::cerr<<"P6 "<<functionTime["P6"]<<std::endl;
+    unsigned long long lastICount = 0;
+    int i=1;
+    //debugWriter->WriteItOut(std::to_string(i++), *graph);
+    while(lastICount < graph -> GetCacheIterator(NODELABEL_I).size() and i<11)
+    {
+
+        spdlog::debug("Starting production loop, channel={}, i={}",channel,i);  
+        lastICount = graph -> GetCacheIterator(NODELABEL_I).size();
+        if(i%50==0)
+        std::cerr<<"iteration: "<<i<<std::endl;
+        std::chrono::steady_clock::time_point end;
+        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+        auto p5s = P5::FindAllMatches(graph, imageArrays[channel], interpolationArray, channel, i < 2 ? 0 : epsilon, order);
+        if(channel==0 and i==4)debugWriter->WriteItOut("p5_failing", *graph);
+        for(auto p5 : *p5s)
+            p5.Perform();
+        end = std::chrono::steady_clock::now();
+        functionTime["P5"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+        countL2Error(*interpolationArray, *(imageArrays[channel]));
+        begin = std::chrono::steady_clock::now();
+        //debugWriter->WriteItOut(std::to_string(i++), *graph);
+        P6::PerformAllMatches(graph);
+        end = std::chrono::steady_clock::now();
+        functionTime["P6"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+        begin = std::chrono::steady_clock::now();
+        //debugWriter->WriteItOut(std::to_string(i++), *graph);
+        auto p2s = P2::FindAllMatches(graph, image);
+        for(auto p2 : *p2s)
+            p2.Perform();
+        end = std::chrono::steady_clock::now();
+        functionTime["P2"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+        begin = std::chrono::steady_clock::now();
+        //debugWriter->WriteItOut(std::to_string(i++), *graph);
+        auto p3s = P3::FindAllMatches(graph, image);
+        for(auto p3 : *p3s)
+            p3.Perform();
+        end = std::chrono::steady_clock::now();
+        functionTime["P3"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+        begin = std::chrono::steady_clock::now();
+        //debugWriter->WriteItOut(std::to_string(i++), *graph);
+        auto p4s = P4::FindAllMatches(graph, image);
+        for(auto p4: *p4s)
+            p4.Perform();
+        end = std::chrono::steady_clock::now();
+        functionTime["P4"] += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+        //debugWriter->WriteItOut(std::to_string(i++), *graph);
+
+        i++;
     }
+    std::cerr<<"P2 "<<functionTime["P2"]<<std::endl;
+    std::cerr<<"P3 "<<functionTime["P3"]<<std::endl;
+    std::cerr<<"P4 "<<functionTime["P4"]<<std::endl;
+    std::cerr<<"P5 "<<functionTime["P5"]<<std::endl;
+    std::cerr<<"P6 "<<functionTime["P6"]<<std::endl;
 }
 
 void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
@@ -98,7 +159,7 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
     double epsilon,
     std::shared_ptr<spdlog::logger> logger)
 {
-    for(int channel=0;channel<3;channel++)
+    for(int channel=0;channel<1;channel++)
     {
         int i=0;
         auto graph = std::make_shared<RivaraCachedGraph>();
@@ -113,15 +174,18 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
         i=1;
         unsigned long long lastICount = 0;
         //debugWriter->WriteItOut(std::to_string(i++), *graph);
+        std::vector<std::shared_ptr<Array2D>> imageArrays = image->GetChannelsAsArrays();
         while(lastICount < graph -> GetCacheIterator(NODELABEL_T).size())
         {
+            std::shared_ptr<Array2D> interpolationArray = std::make_shared<Array2D>(imageArrays[0]->width, imageArrays[0]->height);
+
             spdlog::debug("Starting production loop, channel={}, i={}",channel,i);  
             lastICount = graph -> GetCacheIterator(NODELABEL_T).size();
             if(i%50==0)
                 std::cerr<<"iteration: "<<i<<std::endl;
             std::chrono::steady_clock::time_point end;
             std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-            auto p7s = RivaraP7::FindAllMatches(graph, image, channel, i < 10 ? 0 : epsilon);
+            auto p7s = RivaraP7::FindAllMatches(graph, imageArrays[channel], interpolationArray, channel, i < 10 ? 0 : epsilon);
             for(auto p7 : *p7s)
             {
                 p7.Perform();
@@ -180,7 +244,7 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
 
                 begin = std::chrono::steady_clock::now();
                 //debugWriter->WriteItOut(std::to_string(i++), *graph);
-                auto p5s = RivaraP4::FindAllMatches(graph);
+                auto p5s = RivaraP5::FindAllMatches(graph,image);
                 for(auto p5: *p5s)
                     p5.Perform();
                 end = std::chrono::steady_clock::now();
@@ -189,7 +253,7 @@ void PerformRivara(std::vector<std::shared_ptr<CachedGraph>>& channel_graphs,
 
                 begin = std::chrono::steady_clock::now();
                 //debugWriter->WriteItOut(std::to_string(i++), *graph);
-                auto p6s = RivaraP4::FindAllMatches(graph);
+                auto p6s = RivaraP6::FindAllMatches(graph);
                 for(auto p6: *p6s)
                     p6.Perform();
                 end = std::chrono::steady_clock::now();
@@ -232,7 +296,8 @@ int main(int argc, char** argv) {
     ("output-directory", opt::value<std::string>(), "directory for output, debug output and log file")
     ("output-file-template", opt::value<std::string>()->default_value("output"), "output file template")
     ("log-file", opt::value<std::string>()->default_value("log.txt"), "log file name")
-    ("rivara", opt::bool_switch(&isRivara), "use rivara productions instead of quadtrees");
+    ("rivara", opt::bool_switch(&isRivara), "use rivara productions instead of quadtrees")
+    ("order", opt::value<int>(), "test function max order");
 
     opt::variables_map vm;
     opt::store(opt::parse_command_line(argc, argv, description), vm);
@@ -244,12 +309,16 @@ int main(int argc, char** argv) {
     std::string inputFileName;
     if (vm.count("input"))
         inputFileName = vm["input"].as<std::string>();
-
+    if(!std::experimental::filesystem::exists(inputFileName))
+    {    
+        std::cerr<<"Input file '"<<inputFileName<<"' doesn't exist"<<std::endl;
+        return 1;
+    }
     std::string graphOutputFileName;
     if (vm.count("graph-output"))
         graphOutputFileName = vm["graph-output"].as<std::string>();
 
-    std::string outputFileName;
+    
     if (vm.count("output-file-template"))
         outputFileName = vm["output-file-template"].as<std::string>();
 
@@ -257,44 +326,78 @@ int main(int argc, char** argv) {
     if (vm.count("log-file"))
         logFileName = vm["log-file"].as<std::string>();
 
+    int order;
+    if (vm.count("order"))
+        order = vm["order"].as<int>();
+
+
     std::string outputDirectory;
     if (vm.count("output-directory"))
         outputDirectory = vm["output-directory"].as<std::string>();
 
     if(outputDirectory!="")
         std::experimental::filesystem::create_directories(outputDirectory);
-    std::experimental::filesystem::path outputDirectoryPath = outputDirectory;
+    outputDirectoryPath = outputDirectory;
 
     auto file_logger = spdlog::basic_logger_mt("basic_logger", (outputDirectoryPath/logFileName).c_str());
     spdlog::set_default_logger(file_logger); 
 
     for(int i=0;i<argc;i++)
     {
-        spdlog::debug("P1 {}",argv[i]);    
+        spdlog::debug("args: {}",argv[i]);    
     }
+
+    // CachedGraph g;
+    // std::ifstream s("/media/albert/Nowy/Albert/agh/doktorat/outputs/MPaszynski1/2020_12_17/2/serializedGraph");
+    // g.Deserialize(s);
+    // s.close();
+    
 
     AbstractOutputWriter* debugWriter = WriterFactory::GetDebugWriter(graphOutputFileName);
     std::vector<std::shared_ptr<CachedGraph>> channel_graphs;
     auto image = std::make_shared<ImageMagnifier>(inputFileName);
-    //image -> Save3Colors("/media/albert/Nowy/poligon/bunny_orig");
+    image3 = std::make_shared<Image>(inputFileName);
+    imageArrays3 = image3->GetChannelsAsArrays();
     if(isRivara)
         PerformRivara(channel_graphs, image, debugWriter, epsilon, file_logger);
     else
-        PerformQuadTree(channel_graphs, image, debugWriter, epsilon, file_logger);
-    //Deserialize(debugWriter);
+    {
+        std::vector<std::shared_ptr<Array2D>> vectorsForImage;
+        std::vector<std::shared_ptr<Array2D>> imageArrays = image->GetChannelsAsArrays();
+        for(int channel=0;channel<3;channel++)
+        {
+            std::shared_ptr<Array2D> interpolationArray = std::make_shared<Array2D>(image->width(), image->height());
+            PerformQuadTree(channel_graphs, image, debugWriter, epsilon, interpolationArray, channel, imageArrays, file_logger, order);
+            interpolationArray->Apply([](double value){return value<0 ? 0 : value;});
+            vectorsForImage.push_back(interpolationArray);
+
+        }
+
+        Image interpolationImage = Image(vectorsForImage);
+        interpolationImage.save((outputDirectoryPath/(outputFileName+"_interpolation.bmp")).c_str());
+        
+    }
     
     for(auto g : channel_graphs)
         g->DecreaseXAndYByRatio(4);
+    for(int channel=0;channel<3;channel++)
+        for(auto IEdge : channel_graphs[channel]->GetCacheIterator(NODELABEL_I))
+        {
+            spdlog::debug("channel={} IEdge={} x={} y={}",channel, IEdge, (*channel_graphs[channel])[IEdge].x, (*channel_graphs[channel])[IEdge].y);
+        }
+    std::ofstream graphOutput("/home/albert/Albert/agh/doktorat/outputs/MPaszynski1/2020_12_20/1/serializedGraph");
+    channel_graphs[0]->Serialize(graphOutput);
+    graphOutput.close();
 
     auto restoredImage = std::make_unique<Image>(channel_graphs);
-    // GraphImageWriter::DrawPixels(channel_graphs[0],(outputDirectoryPath/(outputFileName+"_red_graph.bmp")).c_str());
+    GraphImageWriter::DrawPixels(channel_graphs[0],(outputDirectoryPath/(outputFileName+"_red_graph.bmp")).c_str());
+    GraphImageWriter::DrawFullGraph(channel_graphs[0],(outputDirectoryPath/(outputFileName+"_red_full_graph.bmp")).c_str());
     // GraphImageWriter::DrawPixels(channel_graphs[1],(outputDirectoryPath/(outputFileName+"_green_graph.bmp")).c_str());
     // GraphImageWriter::DrawPixels(channel_graphs[2],(outputDirectoryPath/(outputFileName+"_blue_graph.bmp")).c_str());
     auto image2 = std::make_shared<Image>(inputFileName);
     restoredImage -> save((outputDirectoryPath/(outputFileName+".bmp")).c_str());
-    //restoredImage -> Save3Colors((outputDirectoryPath/outputFileName).c_str());
+    restoredImage -> Save3Colors((outputDirectoryPath/outputFileName).c_str());
     double PSNR = restoredImage -> PSNR(image2.get());
     std::cout<<"PSNR: "<<PSNR<<std::endl; 
     spdlog::debug("PSNR = {}",PSNR);  
 }
-

@@ -15,7 +15,7 @@ void P1::Perform()
     int y = image->height()-1,
         x = image->width()-1,
         r,g,b;
-    std::tie(x,y) = image -> GetNearestPixelCoords(x,y);
+    //std::tie(x,y) = image -> GetNearestPixelCoords(x,y);
     auto I = S;
     (*graph)[I].x=x/2;
     (*graph)[I].y=y/2;

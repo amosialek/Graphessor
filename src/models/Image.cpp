@@ -29,6 +29,62 @@ Image::Image(int width, int height)
     view = boost::gil::view(img);
 }
 
+Image::Image(std::vector<std::shared_ptr<Array2D>> arrays)
+{
+    int width = arrays[0]->width;
+    int height = arrays[0]->height;
+    img = boost::gil::rgb8_image_t(width+1, height+1);
+    boost::gil::fill_pixels(img._view, boost::gil::rgb8_pixel_t(0,0,0));
+    for(int channel=0;channel<3;channel++)
+    {
+        view = boost::gil::view(img);
+        for(int x=0;x<width;x++)
+            for(int y=0;y<height;y++)
+                SetPixel(x,y,channel,arrays[channel]->operator[](x)[y]);
+    }
+    view = boost::gil::view(img);
+}
+
+Image::Image(Array2D& array)
+{
+    int width = array.width;
+    int height = array.height;
+    img = boost::gil::rgb8_image_t(width+1, height+1);
+    boost::gil::fill_pixels(img._view, boost::gil::rgb8_pixel_t(0,0,0));
+    for(int channel=0;channel<3;channel++)
+    {
+        view = boost::gil::view(img);
+        for(int x=0;x<width;x++)
+            for(int y=0;y<height;y++)
+                SetPixel(x,y,channel, array.operator[](x)[y]);
+    }
+    view = boost::gil::view(img);
+}
+
+
+Image::Image(std::vector<std::shared_ptr<CachedGraph>> graphs)
+{
+    int width = 0;
+    int height = 0;
+    auto pixels = graphs[0] -> GetPixels();
+    for(auto pixel : pixels)
+    {
+        width = std::max(width ,graphs[0] -> operator[](pixel).x);
+        height = std::max(height ,graphs[0] -> operator[](pixel).y);
+    }
+    img = boost::gil::rgb8_image_t(width+1, height+1);
+    boost::gil::fill_pixels(img._view, boost::gil::rgb8_pixel_t(0,0,0));
+    for(int channel=0;channel<3;channel++)
+    {
+        view = boost::gil::view(img);
+        //graphs[channel]->GetImage(this);
+        graphs[channel] -> GetPixels();
+        Interpolate(channel, width, graphs[channel]);
+    }
+    view = boost::gil::view(img);
+}
+
+
 int Image::GetRGBChannelValue(Pixel p, int channel)
 {
     if (channel==0)
@@ -52,7 +108,7 @@ void Image::BilinearInterpolation(int channel, std::vector<Pixel> pixels)
     }
     for(int y=miny;y<=maxy;y++)
         for(int x=minx;x<=maxx;x++)
-            SetPixel(x, y, channel, GetInterpolatedPixel(minx,maxx,miny, maxy,x,y,channel));
+            SetPixel(x, y, channel, GetInterpolatedPixel(minx, maxx, miny, maxy, x, y, channel));
 }
 
 void Image::Interpolate(int channel, int width, std::shared_ptr<CachedGraph> graph)
@@ -65,9 +121,9 @@ void Image::Interpolate(int channel, int width, std::shared_ptr<CachedGraph> gra
          //img._view[graph->operator[](pixel).y * (width+1) + graph -> operator[](pixel).x][channel] = this -> GetRGBChannelValue(graph->operator[](pixel), channel);
         spdlog::debug("Setting x={} y={} in channel {} to {}", graph ->operator[](pixel).x,graph ->operator[](pixel).y, channel, this -> GetRGBChannelValue(graph->operator[](pixel), channel));    
     }
-    auto PixelsForBilinearInterpolation = graph ->  GetPixelsForBilinearInterpolation();
-    auto PixelsForBaricentricInterpolation = graph ->  GetPixelsForBaricentricInterpolation();
-    auto PixelsForSVDInterpolation = graph ->  GetPixelsForSVDInterpolation();
+    auto PixelsForBilinearInterpolation = graph -> GetPixelsForBilinearInterpolation();
+    auto PixelsForBaricentricInterpolation = graph -> GetPixelsForBaricentricInterpolation();
+    auto PixelsForSVDInterpolation = graph -> GetPixelsForSVDInterpolation();
     for(auto v : PixelsForBilinearInterpolation)
     {
         BilinearInterpolation(channel, v);
@@ -81,28 +137,6 @@ void Image::Interpolate(int channel, int width, std::shared_ptr<CachedGraph> gra
         // SVDInterpolation(channel, v);
     }
         
-}
-
-Image::Image(std::vector<std::shared_ptr<CachedGraph>> graphs)
-{
-    int width = 0;
-    int height = 0;
-    auto pixels = graphs[0] -> GetPixels();
-    for(auto pixel : pixels)
-    {
-        width = std::max(width ,graphs[0] -> operator[](pixel).x);
-        height = std::max(height ,graphs[0] -> operator[](pixel).y);
-    }
-    img = boost::gil::rgb8_image_t(width+1, height+1);
-    boost::gil::fill_pixels(img._view, boost::gil::rgb8_pixel_t(0,0,0));
-    for(int channel=0;channel<3;channel++)
-    {
-        view = boost::gil::view(img);
-        //graphs[channel]->GetImage(this);
-        graphs[channel] -> GetPixels();
-        Interpolate(channel, width, graphs[channel]);
-    }
-    view = boost::gil::view(img);
 }
 
 void Image::FillMissingSpacesBasedOnLargerBlocks(std::shared_ptr<IGraph> graph, std::set<vertex_descriptor>& pixels, int channel, int width)
@@ -199,25 +233,6 @@ void Image::Save3Colors(std::string filename)
     boost::gil::write_view(filename+"_blue.bmp", blueView, boost::gil::bmp_tag());
 }
 
-long long Image::CompareWith(Image& other, int x0, int y0, int width, int height)
-{
-    long long sum = 0;
-    for(int y = y0; y < height; y++)
-    {
-        for(int x = x0; x < width; x++)
-        {
-            for(int channel=0; channel<3; channel++)
-                sum += abs(view[y * width + x][channel] - other.view[y * width + x][channel]);
-        }
-    }
-    return sum;
-}
-
-long long Image::CompareWith(Image& other)
-{
-    return CompareWith(other, 0, 0, width(), height());
-}
-
 int Image::width()
 {
     return img.width();
@@ -277,64 +292,6 @@ double Image::GetInterpolatedPixel(int x1, int x2, int x3, int y1, int y2, int y
     w3 = 1 - w1 - w2;
     double rInterpolated = r1 * w1 + r2 * w2 + r3 * w3;
     return rInterpolated;
-}
-
-double Image::SquaredErrorOfInterpolation(int x1, int x2, int y1, int y2, int channel)
-{
-    double sum = 0;
-    //std::cout<<"x2 -x1, y2-y1: "<<x2-x1<<" "<<y2-y1<<std::endl;
-    if (x2-x1==0 or y2-y1==0) return 0;
-
-    for(int x=x1;x<=x2;x++)
-        for(int y=y1;y<=y2;y++)
-        {
-            int rOriginal;
-            rOriginal = getPixelInternal(x, y, channel);
-            double rInterpolated = GetInterpolatedPixel(x1,x2,y1,y2,x,y,channel);
-            sum+=(rInterpolated - rOriginal)*(rInterpolated - rOriginal);
-      //      std::cout<<x<<" "<<y<<" "<<rOriginal<<" "<<rInterpolated<<" "<<sum<<std::endl;
-            ;
-        }
-    return sum;
-}
-
-double Image::SquaredErrorOfInterpolation(int x1, int x2, int x3, int y1, int y2, int y3, int channel)
-{
-    double sum = 0;
-    //std::cout<<"x2 -x1, y2-y1: "<<x2-x1<<" "<<y2-y1<<std::endl;
-
-    int minx = std::min(x1, std::min(x2,x3));
-    int miny = std::min(y1, std::min(y2,y3));
-    int maxx = std::max(x1, std::max(x2,x3));
-    int maxy = std::max(y1, std::max(y2,y3));
-
-    if (maxx-minx==0 or maxy-miny==0) 
-        return 0;
-    double wDenominator = 1.0/((y2-y3) * (x1-x3) + (x3-x2) * (y1-y3));
-    for(int x=minx;x<=maxx;x++)
-        for(int y=miny;y<=maxy;y++)
-            if(PointInTriangle(x,y,x1,y1,x2,y2,x3,y3))
-            {
-                int rOriginal;
-                rOriginal = getPixelInternal(x, y, channel);
-                double rInterpolated = GetInterpolatedPixel(x1,x2,x3,y1,y2,y3,x,y,wDenominator,channel);
-                sum+=(rInterpolated - rOriginal)*(rInterpolated - rOriginal);
-        //      std::cout<<x<<" "<<y<<" "<<rOriginal<<" "<<rInterpolated<<" "<<sum<<std::endl;
-            }
-    return sum;
-}
-
-double Image::CompareWithInterpolation(int x1, int x2, int y1, int y2, int channel)
-{
-    double maxSum = 255.0*255*(x2-x1+1)*(y2-y1+1);
-    return SquaredErrorOfInterpolation(x1, x2, y1, y2, channel)/maxSum;
-}
-
-double Image::CompareWithInterpolation(int x1, int x2, int x3, int y1, int y2, int y3, int channel)
-{
-    double maxSum = 255.0*255*abs(x1*y2+x2*y3+x3*y1-x1*y3-x2*y1-x3*y2) / 2;
-    double result =  SquaredErrorOfInterpolation(x1, x2, x3, y1, y2, y3, channel)/maxSum;
-    return result;
 }
 
 void Image::save(std::string filename)
@@ -408,31 +365,60 @@ void Image::DrawLine(int x1, int y1, int x2, int y2, int channel, int color)
 void Image::DrawBlackLine(int x1, int y1, int x2, int y2)
 {
     int pixelCoord;
-    if(x1==x2)
+    int minx;
+    int miny;
+    int maxx;
+    int maxy;
+    if(x1<=x2)
     {
-        for(int y=y1;y<y2;y++)
+        minx=x1;
+        miny=y1;
+        maxx=x2;
+        maxy=y2;
+    }
+    else
+    {
+        minx=x2;
+        miny=y2;
+        maxx=x1;
+        maxy=y1;
+    }
+    
+    if(minx==maxx)
+    {
+        for(int y=miny;y<=maxy;y++)
         {
-            pixelCoord = y * width() + x1;
+            pixelCoord = y * width() + minx;
+            view[pixelCoord][0] = view[pixelCoord][1] = view[pixelCoord][2] = 0;
+        }
+        for(int y=miny;y>=maxy;y--)
+        {
+            pixelCoord = y * width() + minx;
             view[pixelCoord][0] = view[pixelCoord][1] = view[pixelCoord][2] = 0;
         }
         return;
     }
-    if(y1==y2)
+    if(miny==maxy)
     {
-        for(int x=x1;x<x2;x++)
+        for(int x=minx;x<=maxx;x++)
         {
-            pixelCoord = y1 * width() + x;
+            pixelCoord = miny * width() + x;
+            view[pixelCoord][0] = view[pixelCoord][1] = view[pixelCoord][2] = 0;
+        }
+        for(int x=minx;x>=maxx;x--)
+        {
+            pixelCoord = miny * width() + x;
             view[pixelCoord][0] = view[pixelCoord][1] = view[pixelCoord][2] = 0;
         }
         return;
     }
-    double deltax = x2 - x1;
-    double deltay = y2 - y1;
-    double deltaerr = abs(1.0 * deltay / deltax);    // Assume deltax != 0 (line is not vertical),
+    double deltax = maxx - minx;
+    double deltay = maxy - miny;
+    double deltaerr = fabs(1.0 * deltay / deltax);    // Assume deltax != 0 (line is not vertical),
           // note that this division needs to be done in a way that preserves the fractional part
     double error = 0.0; // No error at start
-    int y = y1;
-    for (int x = x1;x< x2;x++)
+    int y = miny;
+    for (int x = minx;x< maxx;x++)
     {
         pixelCoord = y * width() + x;
         view[pixelCoord][0] = view[pixelCoord][1] = view[pixelCoord][2] = 0;
@@ -443,26 +429,6 @@ void Image::DrawBlackLine(int x1, int y1, int x2, int y2)
             error -= 1.0;
         }
     }
-}
-
-int Image::sign2 (int x1, int y1, int x2, int y2, int x3, int y3)
-{
-    return (x1 - x3) * (y2 - y3) - (x2 - x3) * (y1 - y3);
-}
-
-bool Image::PointInTriangle (int px, int py, int x1, int y1, int x2, int y2, int x3, int y3)
-{
-    int d1, d2, d3;
-    bool has_neg, has_pos;
-
-    d1 = sign2(px, py, x1, y1, x2, y2);
-    d2 = sign2(px, py, x2, y2, x3, y3);
-    d3 = sign2(px, py, x3, y3, x1, y1);
-
-    has_neg = (d1 < 0) && (d2 < 0) && (d3 < 0);
-    has_pos = (d1 > 0) && (d2 > 0) && (d3 > 0);
-
-    return !(has_neg && has_pos);
 }
 
 double Image::PSNR(Image* other)
@@ -488,4 +454,18 @@ double Image::PSNR(Image* other)
 Image* Image::GetImageInternal()
 {
     return this;
+}
+
+std::vector<std::shared_ptr<Array2D>> Image::GetChannelsAsArrays()
+{
+    std::vector<std::shared_ptr<Array2D>> result;
+
+    for(int channel=0;channel<3;channel++)
+    {
+        result.push_back(std::make_shared<Array2D>(width(), height()));
+        for(int x=0;x<width();x++)
+            for(int y=0;y<height();y++)
+                (*(result[channel]))[x][y] = view[y*width()+x][channel];
+    }
+    return result;
 }

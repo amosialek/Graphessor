@@ -96,7 +96,7 @@ void P4::Perform()
                 });
         int x = isVertical ? ((*graph)[adjacentPixels[0]].x +(*graph)[adjacentPixels[1]].x)/2 : (firstCommonPixel.x + lastCommonPixel.x)/2;
         int y = isVertical ? (firstCommonPixel.y + lastCommonPixel.y)/2 : ((*graph)[adjacentPixels[0]].y +(*graph)[adjacentPixels[1]].y)/2;
-        std::tie(x,y) = image -> GetNearestPixelCoords(x,y);
+        //std::tie(x,y) = image -> GetNearestPixelCoords(x,y);
         spdlog::debug("P4 {} x={} y={} y1={} y2={}", FEdge,x,y,firstCommonPixel.y, lastCommonPixel.y);    
         int r,g,b;
         std::tie(r,g,b) = image->getPixel(x,y);

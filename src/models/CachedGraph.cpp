@@ -8,10 +8,10 @@
 
 void CachedGraph::EnsureCacheExists(std::string type)
 {
-    std::map<std::string, std::unique_ptr<std::set<vertex_descriptor>>>::iterator it = typeToVerticesCache.find(type);
+    std::map<std::string, std::shared_ptr<std::set<vertex_descriptor>>>::iterator it = typeToVerticesCache.find(type);
     if(it==typeToVerticesCache.end())
     {
-        typeToVerticesCache[type] = std::make_unique<std::set<vertex_descriptor>>();
+        typeToVerticesCache[type] = std::make_shared<std::set<vertex_descriptor>>();
     }
 }
 void CachedGraph::InsertCacheElement(std::string type, vertex_descriptor v)
@@ -34,6 +34,13 @@ CachedGraph::CachedGraph()
 {
     graph = std::make_unique<PixelGraph>();
 }
+
+CachedGraph::CachedGraph(const CachedGraph& other)
+{
+    this->graph = std::make_unique<PixelGraph>((*(other.graph)));
+    this->typeToVerticesCache = other.typeToVerticesCache;
+}
+
 void CachedGraph::AddEdge(vertex_descriptor v1,vertex_descriptor v2) 
 {
     add_edge(v1,v2,*graph);
