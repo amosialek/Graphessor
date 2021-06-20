@@ -253,7 +253,6 @@ std::tuple<int, int, int> Image::getPixelInternal(int x, int y)
     int r = view[y * img.width() + x][0];
     int g = view[y * img.width() + x][1];
     int b = view[y * img.width() + x][2];
-    //std::cerr<<x<<" "<<y<<" "<<r<<" "<<g<<" "<<b<<std::endl;
     return std::make_tuple(r,g,b);   
 }
 
@@ -433,8 +432,6 @@ void Image::DrawBlackLine(int x1, int y1, int x2, int y2)
 
 double Image::PSNR(Image* other)
 {
-    //assert(this -> width() == other -> width() && "Cannot compare images of different width");
-    //assert(this -> height() == other -> height() && "Cannot compare images of different height");
     int r,g,b;
     int otherR, otherG, otherB;
     double sum=0;
@@ -446,7 +443,6 @@ double Image::PSNR(Image* other)
 
             sum+=(r-otherR)*(r-otherR)+(b-otherB)*(b-otherB)+(g-otherG)*(g-otherG);
         }
-    std::cout<<"sum for PSNR "<<sum<<std::endl;
     sum = sum / (255.0*255.0*3.0*width()*height());
     return 10*log10(1/sum);
 }

@@ -174,7 +174,6 @@ std::unique_ptr<std::vector<P5>> P5::FindAllMatches(std::shared_ptr<CachedGraph>
         IEdgeToError[IEdge] = (*graph)[IEdge].error;
         sumError += (*graph)[IEdge].error;
         maxError = std::max(maxError, (*graph)[IEdge].error);
-    //std::cout<<"error: "<<error<<" "<<minx<<" "<<maxx<<" "<<miny<<" "<<maxy<<std::endl;
     }
     spdlog::debug("MaxErrorFound: {}", maxError);  
     if(maxError > epsilon)

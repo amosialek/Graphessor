@@ -1,4 +1,5 @@
 #include "P3.hpp"
+#include "cassert"
 
 std::vector<uint8_t> P3::Serialize()
 {
@@ -30,11 +31,7 @@ std::unique_ptr<std::vector<P3>> P3::FindAllMatches(std::shared_ptr<CachedGraph>
             rightPixels.clear();
             neighbours.clear();
             neighbours = graph->GetAdjacentVertices(BEdge);
-            if(neighbours.size()!=2)
-            {
-                std::cerr<<"incorrect B-edge containing "<<neighbours.size()<<" neighbours"<<std::endl;
-                continue;
-            }
+            assert(neighbours.size()==2 and "P3::FindAllMatches: incorrect B-edge containing wrong number of neighbours");
             auto leftAdjacent = graph -> GetAdjacentVertices(neighbours[0]);
             auto rightAdjacent = graph -> GetAdjacentVertices(neighbours[1]);
             auto leftIEdges = where(leftAdjacent,[graph](const vertex_descriptor& v){return (*graph)[v].label==NODELABEL_I;});

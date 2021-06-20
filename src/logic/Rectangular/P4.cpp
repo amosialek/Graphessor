@@ -45,7 +45,6 @@ std::unique_ptr<std::vector<P4>> P4::FindAllMatches(std::shared_ptr<CachedGraph>
         {
             if(commonPixels.size()!=2)
             {
-                //std::cout<<"Wrong Number common pixels ("<<count<<")"<<std::endl;
                 continue;
             }
         }
