@@ -212,7 +212,6 @@ void InterpolateEdge(
     auto vertices = graph->GetAdjacentVertices(edge);
     if((*graph)[vertices[0]].x == (*graph)[vertices[1]].x)
         isVertivcal=true;
-    double coefficient;
     int x1 = (*graph)[vertices[0]].x;
     int x2 = (*graph)[vertices[1]].x;
     int y1 = (*graph)[vertices[0]].y;
@@ -231,18 +230,12 @@ void InterpolateEdge(
     std::unique_ptr<double[]>coefficients;
     if(isVertivcal)
     {
-        int yDiff = std::abs(y1-y2);
-        coefficient = GetSquareInterpolationOfYEdge(imageCopy, (*graph)[vertices[0]].x,std::min(y1,y2), std::max(y1,y2));
         coefficients = GetInterpolationsOfEdgeOfDifferentOrders(*interpolation, (*graph)[vertices[0]].x, (*graph)[vertices[0]].x, std::min(y1,y2), std::max(y1,y2), orders);
-        //interpolationFunctionOnLine = [yDiff,coefficient](double x, double y){return -coefficient*(y)*(y-yDiff);};
         distinctIEdges = where(distinctIEdges,[graph, y1, y2](vertex_descriptor v){return (*graph)[v].y>=std::min(y1,y2) && (*graph)[v].y<=std::max(y1,y2);});
     }
     else
     {
-        int xDiff = std::abs(x1-x2);
-        coefficient = GetSquareInterpolationOfEdge(imageCopy, std::min(x1,x2), std::max(x1,x2), (*graph)[vertices[1]].y);
         coefficients = GetInterpolationsOfEdgeOfDifferentOrders(*interpolation, std::min(x1,x2), std::max(x1,x2), (*graph)[vertices[1]].y, (*graph)[vertices[1]].y, orders);
-        //interpolationFunctionOnLine = [xDiff, coefficient](double x, double y){return -coefficient*(x)*(x-xDiff);};
         distinctIEdges = where(distinctIEdges,[graph, x1, x2](vertex_descriptor v){return (*graph)[v].x>=std::min(x1,x2) && (*graph)[v].x<=std::max(x1,x2);});
     }
     for(int order=0; order<orders; order++)

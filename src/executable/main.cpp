@@ -40,6 +40,7 @@ double countL2Error(Array2D& interpolationArray, Array2D& original)
      if(numerator==0 and denumerator==0)
         denumerator = 1;
      spdlog::debug("L2 error = {}", sqrt(numerator/denumerator));
+     return numerator/denumerator;
 }
 
 double countL2Error(std::shared_ptr<Array2D> interpolationArray, std::vector<std::shared_ptr<Array2D>> imageArrays, std::vector<std::shared_ptr<CachedGraph>>& channel_graphs)

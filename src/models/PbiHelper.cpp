@@ -241,8 +241,6 @@ double GetSquareInterpolationOfRectangle(Array2D& array, int x1, int x2, int y1,
     int yDiff = y2-y1;
     if(xDiff<=1 or yDiff<=1) //no sense of interpolating flat rectangles
         return 0;
-    int xOffset = x1;
-    int yOffset = y1;
     std::function<double(double, double)> testingFunction = [xDiff, yDiff](double x, double y){return (x)*(x-xDiff)*(y)*(y-yDiff);};
     std::function<double(double, double)> testingFunctionSquared = Multiply(testingFunction, testingFunction);
     auto yIntegral = TransposeFunction(GetXSquareIntegral(0,yDiff));
@@ -259,7 +257,6 @@ double GetSquareInterpolationOfRectangle(Array2D& array, int x1, int x2, int y1,
     for(int i=0;i<xDiff;i++)
         for(int j=0;j<yDiff;j++)
             denominator += testingFunctionSquared(i,j);
-    double denominator2 = Get2DIntegralValue(squaredIntegral, 0, xDiff, 0, yDiff);
     if(denominator==0)
     {
         assert(sum==0 && "GetSquareInterpolationOfRectangle: denominator = 0");
