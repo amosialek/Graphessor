@@ -155,8 +155,6 @@ std::vector<double> GetSingleVertexFEdgeCoefficients(Array2D & image, IGraph& gr
     std::vector<double> result;
     result.reserve(orders);
     std::function<double(double, double)> linearInterpolation;
-    int secondXCoord;
-    int secondYCoord;
     double firstValue;
     double secondValue;
     if(graph[vertex].x == graph[edge].x)
@@ -164,13 +162,11 @@ std::vector<double> GetSingleVertexFEdgeCoefficients(Array2D & image, IGraph& gr
         int yDiff = maxy-miny;
         if(graph[vertex].y == miny)
         {
-            secondYCoord = maxy;
             firstValue = image[graph[vertex].x][graph[vertex].y];
             secondValue = secondVertexValue;
         }
         else
         {
-            secondYCoord = miny;
             secondValue = image[graph[vertex].x][graph[vertex].y];
             firstValue = secondVertexValue;
         }
@@ -188,13 +184,11 @@ std::vector<double> GetSingleVertexFEdgeCoefficients(Array2D & image, IGraph& gr
         int xDiff = maxx-minx;
         if(graph[vertex].x == minx)
         {
-            secondXCoord = maxx;
             firstValue = image[graph[vertex].x][graph[vertex].y];
             secondValue = secondVertexValue;
         }
         else
         {
-            secondXCoord = minx;
             secondValue = image[graph[vertex].x][graph[vertex].y];
             firstValue = secondVertexValue;
         }

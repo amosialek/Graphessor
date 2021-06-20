@@ -156,28 +156,7 @@ void BaricentricInterpolation(std::vector<Pixel> pixels, std::shared_ptr<Array2D
         }
 }
 
-void DoLinearInterpolation1(std::shared_ptr<Array2D> image, std::shared_ptr<Array2D> interpolation, std::shared_ptr<CachedGraph> graph)
-{
-    auto IEdges = graph->GetCacheIterator(NODELABEL_I);
-    for(auto IEdge : IEdges)
-    {
-        auto pixels = graph->GetAdjacentVertices(IEdge,NODELABEL_P);
-        int minX = (*graph)[pixels[0]].x;
-        int maxX = (*graph)[pixels[0]].x;
-        int minY = (*graph)[pixels[0]].y;
-        int maxY = (*graph)[pixels[0]].y;
-        for(auto pixel : pixels)
-        {
-            minX = std::min((*graph)[pixel].x, minX);
-            maxX = std::max((*graph)[pixel].x, maxX);
-            minY = std::min((*graph)[pixel].y, minY);
-            maxY = std::max((*graph)[pixel].y, maxY);
-        }
-        interpolation -> TrivialBilinearInterpolation(*image, minX, maxX, minY, maxY);        
-    }
-}
-
-void DoLinearInterpolation2(std::shared_ptr<Array2D> image, std::shared_ptr<Array2D> interpolation, std::shared_ptr<CachedGraph> graph)
+void VertexInterpolation(std::shared_ptr<Array2D> image, std::shared_ptr<Array2D> interpolation, std::shared_ptr<CachedGraph> graph)
 {
     std::set<vertex_descriptor> pixels;
     pixels = graph -> GetPixels();
@@ -212,7 +191,6 @@ void InterpolateEdge(
     auto vertices = graph->GetAdjacentVertices(edge);
     if((*graph)[vertices[0]].x == (*graph)[vertices[1]].x)
         isVertivcal=true;
-    double coefficient;
     int x1 = (*graph)[vertices[0]].x;
     int x2 = (*graph)[vertices[1]].x;
     int y1 = (*graph)[vertices[0]].y;
@@ -231,18 +209,12 @@ void InterpolateEdge(
     std::unique_ptr<double[]>coefficients;
     if(isVertivcal)
     {
-        int yDiff = std::abs(y1-y2);
-        coefficient = GetSquareInterpolationOfYEdge(imageCopy, (*graph)[vertices[0]].x,std::min(y1,y2), std::max(y1,y2));
         coefficients = GetInterpolationsOfEdgeOfDifferentOrders(*interpolation, (*graph)[vertices[0]].x, (*graph)[vertices[0]].x, std::min(y1,y2), std::max(y1,y2), orders);
-        //interpolationFunctionOnLine = [yDiff,coefficient](double x, double y){return -coefficient*(y)*(y-yDiff);};
         distinctIEdges = where(distinctIEdges,[graph, y1, y2](vertex_descriptor v){return (*graph)[v].y>=std::min(y1,y2) && (*graph)[v].y<=std::max(y1,y2);});
     }
     else
     {
-        int xDiff = std::abs(x1-x2);
-        coefficient = GetSquareInterpolationOfEdge(imageCopy, std::min(x1,x2), std::max(x1,x2), (*graph)[vertices[1]].y);
         coefficients = GetInterpolationsOfEdgeOfDifferentOrders(*interpolation, std::min(x1,x2), std::max(x1,x2), (*graph)[vertices[1]].y, (*graph)[vertices[1]].y, orders);
-        //interpolationFunctionOnLine = [xDiff, coefficient](double x, double y){return -coefficient*(x)*(x-xDiff);};
         distinctIEdges = where(distinctIEdges,[graph, x1, x2](vertex_descriptor v){return (*graph)[v].x>=std::min(x1,x2) && (*graph)[v].x<=std::max(x1,x2);});
     }
     for(int order=0; order<orders; order++)
@@ -329,9 +301,9 @@ void EdgeInterpolation(std::shared_ptr<Array2D> image, std::shared_ptr<Array2D> 
     }
 }
 
-void RectangularInterpolation2(std::shared_ptr<Array2D> image, std::shared_ptr<Array2D> interpolation, std::shared_ptr<CachedGraph> graph)
+void RectangularInterpolation(std::shared_ptr<Array2D> image, std::shared_ptr<Array2D> interpolation, std::shared_ptr<CachedGraph> graph)
 {
-    DoLinearInterpolation2(image, interpolation, graph);
+    VertexInterpolation(image, interpolation, graph);
     EdgeInterpolation(image, interpolation, graph);
     InteriorInterpolation(image, interpolation, graph);
 }

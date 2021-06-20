@@ -5,7 +5,7 @@ DebugWriter::DebugWriter(std::string fileBaseName)
 {
     this->fileBaseName = fileBaseName;
 }
-void DebugWriter::WriteItOut(std::string fileSuffix, IGraph &graph) 
+void DebugWriter::Write(std::string fileSuffix, IGraph &graph) 
 {
     {
         myEdgeWriterWithNodeId<IGraph> w(graph);

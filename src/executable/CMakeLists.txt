@@ -28,11 +28,11 @@ find_package(Boost COMPONENTS program_options REQUIRED)
 INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
 TARGET_LINK_LIBRARIES( Graphessor ${Boost_LIBRARIES} )
 
-add_executable(f2bitmap fun2bitmap.cpp)
-target_link_libraries (f2bitmap Models)
-TARGET_LINK_LIBRARIES(f2bitmap ${Boost_LIBRARIES} )
+# add_executable(f2bitmap fun2bitmap.cpp)
+# target_link_libraries (f2bitmap Models)
+# TARGET_LINK_LIBRARIES(f2bitmap ${Boost_LIBRARIES} )
 
-add_executable(lapackTests lapackTests.cpp)
+# add_executable(lapackTests lapackTests.cpp)
 
-target_link_libraries(lapackTests ${LAPACKE_LIBRARY})
-target_link_libraries(lapackTests ${lapackblas_libraries})
+# target_link_libraries(lapackTests ${LAPACKE_LIBRARY})
+# target_link_libraries(lapackTests ${lapackblas_libraries})

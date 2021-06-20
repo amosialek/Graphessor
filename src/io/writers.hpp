@@ -8,7 +8,7 @@
 class AbstractOutputWriter
 {
     public:
-        virtual void WriteItOut([[maybe_unused]] std::string fileSuffix, [[maybe_unused]] IGraph &graph)
+        virtual void Write([[maybe_unused]] std::string fileSuffix, [[maybe_unused]] IGraph &graph)
         {};
 };
 
@@ -18,7 +18,7 @@ class DebugWriter: public AbstractOutputWriter
         std::string fileBaseName;
     public:
         DebugWriter(std::string fileBaseName);
-        void WriteItOut(std::string fileSuffix, IGraph &graph) override;
+        void Write(std::string fileSuffix, IGraph &graph) override;
 };
 
 class WriterFactory
