@@ -43,7 +43,7 @@ double countL2Error(std::shared_ptr<Array2D> interpolationArray, std::vector<std
     g->DecreaseXAndYByRatio(4);
     std::shared_ptr<Array2D> interpolationArray2 = std::make_shared<Array2D>(interpolationArray->width/4, interpolationArray->height/4);
     
-    RectangularInterpolation2(imageArrays3[0], interpolationArray2, g);
+    RectangularInterpolation(imageArrays3[0], interpolationArray2, g);
 
     double L2 = imageArrays3[0] -> SquaredError(*interpolationArray2,0,imageArrays3[0]->width-1, 0, imageArrays3[0]->height-1);
     L2=L2/(imageArrays3[0]->width* imageArrays3[0]->height*255.0*255.0);    
@@ -56,7 +56,7 @@ double countL2Error(std::shared_ptr<Array2D> interpolationArray, std::vector<std
     g = std::make_shared<CachedGraph>(*channel_graphs[0]);
     g->DecreaseXAndYByRatio(4);
     
-    RectangularInterpolation2(imageArrays3[0], interpolationArray2, g);
+    RectangularInterpolation(imageArrays3[0], interpolationArray2, g);
 
     L2 = imageArrays3[0] -> SquaredError(*interpolationArray2,0,imageArrays3[0]->width-1, 0, imageArrays3[0]->height-1);
     L2=L2 / (imageArrays3[0] -> width * imageArrays3[0] -> height * 255.0 * 255.0);

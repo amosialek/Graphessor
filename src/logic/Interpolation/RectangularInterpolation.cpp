@@ -156,28 +156,7 @@ void BaricentricInterpolation(std::vector<Pixel> pixels, std::shared_ptr<Array2D
         }
 }
 
-void DoLinearInterpolation1(std::shared_ptr<Array2D> image, std::shared_ptr<Array2D> interpolation, std::shared_ptr<CachedGraph> graph)
-{
-    auto IEdges = graph->GetCacheIterator(NODELABEL_I);
-    for(auto IEdge : IEdges)
-    {
-        auto pixels = graph->GetAdjacentVertices(IEdge,NODELABEL_P);
-        int minX = (*graph)[pixels[0]].x;
-        int maxX = (*graph)[pixels[0]].x;
-        int minY = (*graph)[pixels[0]].y;
-        int maxY = (*graph)[pixels[0]].y;
-        for(auto pixel : pixels)
-        {
-            minX = std::min((*graph)[pixel].x, minX);
-            maxX = std::max((*graph)[pixel].x, maxX);
-            minY = std::min((*graph)[pixel].y, minY);
-            maxY = std::max((*graph)[pixel].y, maxY);
-        }
-        interpolation -> TrivialBilinearInterpolation(*image, minX, maxX, minY, maxY);        
-    }
-}
-
-void DoLinearInterpolation2(std::shared_ptr<Array2D> image, std::shared_ptr<Array2D> interpolation, std::shared_ptr<CachedGraph> graph)
+void VertexInterpolation(std::shared_ptr<Array2D> image, std::shared_ptr<Array2D> interpolation, std::shared_ptr<CachedGraph> graph)
 {
     std::set<vertex_descriptor> pixels;
     pixels = graph -> GetPixels();
@@ -322,9 +301,9 @@ void EdgeInterpolation(std::shared_ptr<Array2D> image, std::shared_ptr<Array2D> 
     }
 }
 
-void RectangularInterpolation2(std::shared_ptr<Array2D> image, std::shared_ptr<Array2D> interpolation, std::shared_ptr<CachedGraph> graph)
+void RectangularInterpolation(std::shared_ptr<Array2D> image, std::shared_ptr<Array2D> interpolation, std::shared_ptr<CachedGraph> graph)
 {
-    DoLinearInterpolation2(image, interpolation, graph);
+    VertexInterpolation(image, interpolation, graph);
     EdgeInterpolation(image, interpolation, graph);
     InteriorInterpolation(image, interpolation, graph);
 }
