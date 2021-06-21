@@ -6,7 +6,7 @@ Built with BOOST 1.76
 ## Installation
 the project has been built with following setup on Ubuntu 20.04:
  
- - gcc 9.3.0
+ - g++ 9.3.0
  - make 4.2.1
  - cmake 3.16.3
  - boost 1.76.0
@@ -14,7 +14,16 @@ the project has been built with following setup on Ubuntu 20.04:
  - spdlog https://github.com/gabime/spdlog/commit/12df172575bf43ed6b879dabff4ba59c72e738e3
  - liblapacke-dev 3.9.0-1build1
 
-Assuming, you have already installed git, gcc, make and cmake, here are installation commands I use, to install other dependencies on Ubuntu. The project should compile with newer versions of libs as well
+Assuming, you have already installed git, g++, make and cmake, here are installation commands I use, to install other dependencies on Ubuntu. The project should compile with newer versions of libs as well
+
+Download and unpack boost from https://www.boost.org/users/history/version_1_76_0.html
+```
+cd boost_1_76_0/
+sudo ./bootstrap.sh
+sudo ./b2 install
+cd ..
+
+```
 ```
 sudo apt install liblapacke-dev
 mkdir utils
@@ -34,14 +43,7 @@ sudo apt-get install gcc-multilib g++-multilib
 cmake .
 sudo make install
 ```
-Download and unpack boost from https://www.boost.org/users/history/version_1_76_0.html
-```
-cd boost_1_76_0/
-sudo ./bootstrap.sh
-sudo ./b2 install
-cd ..
 
-```
 now go to the project's directory and run
 ```
 cmake .
