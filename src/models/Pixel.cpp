@@ -29,7 +29,6 @@ Pixel::Pixel()
 {
     this->x=this->y=-1;
     this->r=this->g=this->b=-1;
-    //std::cout<<"created invalid Pixel"<<std::endl;
     this->label="invalid";
     this->error = -1;
 }
